@@ -9,12 +9,13 @@
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 #include "index.h"
+#include "ControlCode/Leg.h"
 
 #define LED 2
 
 // Replace with your network credentials
-const char *ssid = "CenturyLink6479";
-const char *password = "233bd47773c322";
+const char *ssid = "Whitesands";
+const char *password = "alllowercasenocaps";
 
 AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81); // WebSocket server on port 81
@@ -72,6 +73,14 @@ void setup()
   server.begin();
   Serial.print("ESP32 Web Server's IP address: ");
   Serial.println(WiFi.localIP());
+
+  Leg LegStarboardAft = Leg("StarboardAft");
+  Leg LegPortAft = Leg("PortAft");
+  Leg LegStarboardBow = Leg("StarboardBow");
+  Leg LegPortBow = Leg("PortBow");
+
+  Serial.println("Leg Position");
+  Serial.println(LegStarboardAft.getPosition().c_str());
 }
 
 void loop()
