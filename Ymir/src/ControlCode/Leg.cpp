@@ -1,6 +1,12 @@
 #include "Leg.h"
 #include <iostream>
 #include <string>
+#include <Arduino.h>
+
+int ballastFillPin = 14;
+int shockFillPin = 15;
+int ventPin = 16;
+int sensorPin = 17; // Location of the pins for the sensor and valves on Teensy 4.1
 
 /*
 
@@ -9,15 +15,17 @@ PRESSURESENSOR
 
 
 */
-PressureSensor::PressureSensor(double reading) : reading(reading)
+PressureSensor::PressureSensor(double reading, int pin) : reading(reading), pin(pin)
 {
+    pinMode(pin, INPUT);
 }
 
 PressureSensor::~PressureSensor()
 {
 }
-double PressureSensor::getReading()
+uint16_t PressureSensor::getReading()
 {
+    uint16_t reading = analogRead(pin);
     return reading;
 };
 
@@ -29,8 +37,12 @@ SOLENOID
 
 */
 
-Solenoid::Solenoid(bool open)
-    : open(open) {}
+Solenoid::Solenoid(bool open, int pin)
+    : open(open), pin(pin)
+{
+    pinMode(pin, INPUT);
+    digitalWrite(pin, LOW);
+}
 
 Solenoid::~Solenoid() {}
 
@@ -42,6 +54,8 @@ bool Solenoid::isOpen()
 void Solenoid::toggleOpen()
 {
     open = !open;
+    digitalWrite(pin, open ? HIGH : LOW);
+    Serial.print("Updates Solenoid Status");
 }
 
 /*
@@ -53,7 +67,7 @@ LEG
 */
 
 Leg::Leg(std::string position)
-    : ballastSolenoid(false), shockSolenoid(false), ventSolenoid(false), ballastPressureSensor(0), shockPressureSensor(0), position(position)
+    : ballastSolenoid(false, ballastFillPin), shockSolenoid(false, shockFillPin), ventSolenoid(false, ventPin), ballastPressureSensor(-1, sensorPin), shockPressureSensor(-1, sensorPin), position(position)
 {
     std::cout << "constructing " << position << '\n';
 }
@@ -99,7 +113,7 @@ void Leg::toggleSolenoid(Solenoid::SolenoidPosition position)
     }
 }
 
-double Leg::getPressureSensorReading(PressureSensor::PressurePosition position)
+uint16_t Leg::getPressureSensorReading(PressureSensor::PressurePosition position)
 {
     switch (position)
     {

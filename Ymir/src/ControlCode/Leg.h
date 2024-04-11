@@ -5,6 +5,7 @@ class PressureSensor
 {
 private:
     double reading;
+    int pin;
 
 public:
     enum class PressurePosition
@@ -12,15 +13,16 @@ public:
         ballast,
         shock,
     };
-    PressureSensor(double reading);
+    PressureSensor(double reading, int pin);
     ~PressureSensor();
-    double getReading();
+    uint16_t getReading();
 };
 
 class Solenoid
 {
 private:
     bool open;
+    int pin;
 
 public:
     enum class SolenoidPosition
@@ -29,7 +31,7 @@ public:
         shock,
         vent
     };
-    Solenoid(bool open);
+    Solenoid(bool open, int pin);
     ~Solenoid();
     bool isOpen();
     void toggleOpen();
@@ -54,5 +56,5 @@ public:
     std::string getPosition();
     bool isSolenoidOpen(Solenoid::SolenoidPosition position);
     void toggleSolenoid(Solenoid::SolenoidPosition position);
-    double getPressureSensorReading(PressureSensor::PressurePosition position);
+    uint16_t getPressureSensorReading(PressureSensor::PressurePosition position);
 };

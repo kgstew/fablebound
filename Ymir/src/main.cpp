@@ -10,8 +10,14 @@
 #include <WebSocketsServer.h>
 #include "index.h"
 #include "ControlCode/Leg.h"
+#include <Arduino.h>
 
 #define LED 2
+
+Leg *LegStarboardAft = NULL;
+Leg *LegPortAft = NULL;
+Leg *LegStarboardBow = NULL;
+Leg *LegPortBow = NULL;
 
 // Replace with your network credentials
 const char *ssid = "Whitesands";
@@ -38,6 +44,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     // Send a response back to the client
 
     digitalWrite(LED, !digitalRead(LED));
+    LegStarboardAft->toggleSolenoid(Solenoid::SolenoidPosition::ballast);
 
     webSocket.sendTXT(num, "Received:  " + String((char *)payload));
     break;
@@ -63,6 +70,11 @@ void setup()
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 
+  LegStarboardAft = new Leg("StarboardAft");
+  LegPortAft = new Leg("PortAft");
+  LegStarboardBow = new Leg("StarboardBow");
+  LegPortBow = new Leg("PortBow");
+
   // Serve a basic HTML page with JavaScript to create the WebSocket connection
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             {
@@ -74,13 +86,10 @@ void setup()
   Serial.print("ESP32 Web Server's IP address: ");
   Serial.println(WiFi.localIP());
 
-  Leg LegStarboardAft = Leg("StarboardAft");
-  Leg LegPortAft = Leg("PortAft");
-  Leg LegStarboardBow = Leg("StarboardBow");
-  Leg LegPortBow = Leg("PortBow");
-
   Serial.println("Leg Position");
-  Serial.println(LegStarboardAft.getPosition().c_str());
+  Serial.println(LegStarboardAft->getPosition().c_str());
+
+  Serial.println(LegStarboardAft->getPressureSensorReading(PressureSensor::PressurePosition::ballast));
 }
 
 void loop()
