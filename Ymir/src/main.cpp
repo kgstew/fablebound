@@ -10,7 +10,11 @@
 #include <WebSocketsServer.h>
 #include "index.h"
 #include "ControlCode/Leg.h"
+#ifdef ARDUINO
 #include <Arduino.h>
+#else
+#include "MockArduino/MockArduino.h"
+#endif
 
 #define LED 2
 

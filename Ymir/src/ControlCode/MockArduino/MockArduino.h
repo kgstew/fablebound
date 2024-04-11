@@ -1,4 +1,4 @@
-#ifndef MOCK_ARDUINO_H
+#ifndef ARDUINO
 #define MOCK_ARDUINO_H
 
 #include <iostream>

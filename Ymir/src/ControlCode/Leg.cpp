@@ -5,8 +5,6 @@
 #include <Arduino.h>
 #else
 #include "MockArduino/MockArduino.h"
-#define SerialBegin(baudrate) SerialBegin(baudrate)
-#define SerialPrintln(message) SerialPrintln(message)
 #endif
 
 int ballastFillPin = 14;

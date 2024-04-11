@@ -1,3 +1,4 @@
+#ifndef ARDUINO // Only compile this file for non-Arduino environments
 #include "MockArduino.h"
 
 void pinMode(int pin, int mode)
@@ -53,3 +54,5 @@ void MockSerial::print(int num)
 {
     std::cout << num;
 }
+
+#endif
