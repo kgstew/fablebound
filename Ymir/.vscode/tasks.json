@@ -9,8 +9,10 @@
         "-fansi-escape-codes",
         "-g",
         "${fileDirname}/*.cpp",
+        "-DLOCAL_DEBUG",
         "-o",
         "${fileDirname}/${fileBasenameNoExtension}",
+        "${fileDirname}/MockArduino/MockArduino.cpp",
         "-std=c++20"
       ],
       "options": {
