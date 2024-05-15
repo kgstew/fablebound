@@ -1,6 +1,7 @@
-import { PneumaticsAssembly, PressureVessel } from "."
+import { PneumaticsAssembly } from './pneumatics-assembly'
+import { PressureVessel } from './pressure-vessel'
 
-interface PneumaticsSystem {
+type PneumaticsSystem = {
     leftRear: PneumaticsAssembly[]
     rightRear: PneumaticsAssembly[]
     leftFront: PneumaticsAssembly[]

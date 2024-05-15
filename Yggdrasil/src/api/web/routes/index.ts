@@ -1,1 +1,1 @@
-export * from './pneumatics-routes';
+export * from './pneumatics-routes'

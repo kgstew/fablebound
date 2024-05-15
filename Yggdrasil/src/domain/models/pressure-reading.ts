@@ -1,7 +1,7 @@
-import { Corner } from "./corner"
+import { Corner } from './corner'
 
 type PressureReading = {
-    side: Corner
+    corner: Corner
     pressureVesselType: 'ballast' | 'piston'
     readingPsi: number
     readDate: Date

@@ -1,4 +1,4 @@
-interface PressureVessel {
+type PressureVessel = {
     pressurePsi: number
     lastReadingDate: Date
     maxReadingDateAgeMs: number

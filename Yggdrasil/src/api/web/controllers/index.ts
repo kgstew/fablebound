@@ -1,1 +1,1 @@
-export * from './pneumatics-controller';
+export * from './pneumatics-controller'

@@ -1,4 +1,6 @@
-import { Corner, PressureVessel, Valve } from "."
+import { Corner } from './corner'
+import { PressureVessel } from './pressure-vessel'
+import { Valve } from './valve'
 
 type PneumaticsAssembly = {
     ballastIntakeValve: Valve

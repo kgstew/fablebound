@@ -1,15 +1,14 @@
-import express from 'express';
-import { createPneumaticsRouter } from './routes/pneumatics-routes';
-import { PneumaticsSystemService } from '../../domain';
-
+import express from 'express'
+import { createPneumaticsRouter } from './routes/pneumatics-routes'
+import { PneumaticsSystemService } from '../../domain'
 
 const createWebApp = (pneumaticsSystemService: PneumaticsSystemService) => {
-    const app = express();
+    const app = express()
 
-    app.use(express.json());
-    app.use('/pneumatics', createPneumaticsRouter(pneumaticsSystemService));
+    app.use(express.json())
+    app.use('/pneumatics', createPneumaticsRouter(pneumaticsSystemService))
 
-    return app;
+    return app
 }
 
-export { createWebApp };
+export { createWebApp }

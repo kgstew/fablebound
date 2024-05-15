@@ -1,40 +1,51 @@
-import { PneumaticsAssembly, PneumaticsAssemblyService, PneumaticsSystemService, PressureVesselService, ValveService } from "../domain";
+import {
+    PneumaticsAssembly,
+    PneumaticsAssemblyService,
+    PneumaticsSystemService,
+    PressureVesselService,
+    ValveService,
+} from '../domain'
 
 const valveService = new ValveService()
 const pressureVesselService = new PressureVesselService()
-const pneumaticsAssemblyService = new PneumaticsAssemblyService(valveService, pressureVesselService)
+const pneumaticsAssemblyService = new PneumaticsAssemblyService(
+    valveService,
+    pressureVesselService
+)
 
 const pneumaticsAssembly: PneumaticsAssembly = {
     ballastIntakeValve: {
-        state: 'unknown'
+        state: 'unknown',
     },
     ballastToPistonValve: {
-        state: 'unknown'
+        state: 'unknown',
     },
     pistonReleaseValve: {
-        state: 'unknown'
+        state: 'unknown',
     },
     ballastTank: {
         pressurePsi: 50,
         lastReadingDate: new Date(),
         maxReadingDateAgeMs: 500,
-        maximumPressurePsi: 150
+        maximumPressurePsi: 150,
     },
     piston: {
         pressurePsi: 50,
         lastReadingDate: new Date(),
         maxReadingDateAgeMs: 500,
-        maximumPressurePsi: 150
+        maximumPressurePsi: 150,
     },
-    corner: 'frontLeft'
+    corner: 'frontLeft',
 }
 
-const pneumaticsSystemService = new PneumaticsSystemService({
-    frontLeft: pneumaticsAssembly,
-    frontRight: pneumaticsAssembly,
-    rearLeft: pneumaticsAssembly,
-    rearRight: pneumaticsAssembly
-
-}, pneumaticsAssemblyService)
+const pneumaticsSystemService = new PneumaticsSystemService(
+    {
+        frontLeft: pneumaticsAssembly,
+        frontRight: pneumaticsAssembly,
+        rearLeft: pneumaticsAssembly,
+        rearRight: pneumaticsAssembly,
+    },
+    pneumaticsAssemblyService
+)
 
 export { pneumaticsSystemService }
