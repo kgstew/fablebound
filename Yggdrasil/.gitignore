@@ -1,0 +1,5 @@
+.env
+estlintrc.js
+node_modules
+dist
+coverage

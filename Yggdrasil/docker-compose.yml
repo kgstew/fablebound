@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./src:/home/node/app/src
+      - ./nodemon.json:/home/node/app/nodemon.json
+    container_name: octopus-challenge-app
+    ports:
+      - '3000:3000'
+    command: npm run start
+  test-unit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./src:/home/node/app/src
+      - ./nodemon.json:/home/node/app/nodemon.json
+    container_name: octopus-challenge-test-unit
+    ports:
+      - '3000:3000'
+    command: npm run test
