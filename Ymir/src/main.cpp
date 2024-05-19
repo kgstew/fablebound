@@ -65,8 +65,8 @@ public:
         std::cout << "Connecting to Yggdrasil..." << std::endl;
         // Placeholder for connection logic
         //
-        //
-        // see socket_client.cpp for websocket connection logic
+        // see socket_server.cpp for websocket server connection logic
+        // see socket_client.cpp for websocket client connection logic
         //
         //
 
