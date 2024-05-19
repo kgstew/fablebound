@@ -1,3 +1,3 @@
 export * from './controllers'
-export * from './express-app'
-export * from './routes'
+export * from './rest/rest-server'
+export * from './rest/routes'

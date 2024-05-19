@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import { PneumaticsController } from '../controllers'
-import { PneumaticsSystemService } from '../../../domain'
+import { PneumaticsSystemService } from '../../../../domain'
+import { PneumaticsController } from '../../controllers'
 
 const createPneumaticsRouter = (
     pneumaticSystemService: PneumaticsSystemService

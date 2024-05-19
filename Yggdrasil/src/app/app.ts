@@ -1,14 +1,8 @@
-import { createWebApp } from '../api'
-import { pneumaticsSystemService } from './config'
+import { openAllSockets } from './websockets/server/open-all-sockets'
 
 const run = async () => {
-    const app = createWebApp(pneumaticsSystemService)
-
-    const PORT = process.env.PORT || 3000
-
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`)
-    })
+    // runRestServer(3000, pneumaticsSystemService)
+    openAllSockets()
 }
 
 export { run }

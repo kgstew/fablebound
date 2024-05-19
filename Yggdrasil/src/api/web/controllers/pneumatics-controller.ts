@@ -1,8 +1,11 @@
 import { Request, Response } from 'express'
 import { PneumaticsSystemService, PressureReading } from '../../../domain'
+import { Controller } from './controller'
 
-class PneumaticsController {
-    constructor(private pneumaticsSystemService: PneumaticsSystemService) {}
+class PneumaticsController extends Controller {
+    constructor(private pneumaticsSystemService: PneumaticsSystemService) {
+        super()
+    }
 
     async moveSide(req: Request, res: Response): Promise<void> {
         try {
