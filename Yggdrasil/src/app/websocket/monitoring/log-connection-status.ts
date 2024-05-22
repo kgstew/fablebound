@@ -1,7 +1,10 @@
+import { ConnectionStatus } from '../connection-status'
 import { calculateUptimePercentage } from './calculate-uptime'
-import { connectionStatus } from './open-socket'
 
-const logConnectionStatus = (tableConsole: Console) => {
+const logConnectionStatus = (
+    tableConsole: Console,
+    connectionStatus: ConnectionStatus
+) => {
     const timestamp = new Date().toLocaleString()
     tableConsole.log(`📊 Connection Status at ${timestamp}:`)
 

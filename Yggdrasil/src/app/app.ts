@@ -1,8 +1,9 @@
-import { openAllSockets } from './websockets/server/open-all-sockets'
+import { appConfig } from './app-config'
+import { handlers } from './handlers'
+import { startWebSocketServer } from './websocket'
 
 const run = async () => {
-    // runRestServer(3000, pneumaticsSystemService)
-    openAllSockets()
+    startWebSocketServer(appConfig, handlers)
 }
 
 export { run }

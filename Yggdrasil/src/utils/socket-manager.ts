@@ -1,7 +1,7 @@
+import { appConfig } from 'app'
 import * as blessed from 'blessed'
 import * as fs from 'fs'
 import WebSocket from 'ws'
-import { socketMap } from '../socket-map'
 
 const screen = blessed.screen({
     smartCSR: true,
@@ -10,7 +10,7 @@ const screen = blessed.screen({
 
 const connections: Record<string, WebSocket | null> = {}
 
-const items = Object.keys(socketMap).reduce((acc, key) => {
+const items = Object.keys(appConfig.sockets).reduce((acc, key) => {
     acc.push(key)
     acc.push(`  ${connections[key] ? 'Disconnect' : 'Connect'}`)
     acc.push('  Send message')
@@ -40,7 +40,6 @@ const log = blessed.log({
     alwaysScroll: true,
     scrollbar: {
         ch: ' ',
-        inverse: true,
     },
 })
 
@@ -85,34 +84,38 @@ list.on('select', (item, index) => {
     const key = item.getText().trim()
     if (key === 'Connect' || key === 'Disconnect') {
         const parentIndex = index - 1
-        const parentKey = list.getItem(parentIndex).getText()
+        const parentKey = list
+            .getItem(parentIndex)
+            .getText() as keyof typeof appConfig.sockets
         if (connections[parentKey]) {
             log.log(`Disconnecting from ${parentKey}...`)
             connections[parentKey]?.close()
             connections[parentKey] = null
-            list.setItem(index, '  Connect')
+            list.setItem(item, '  Connect')
             log.log(`Disconnected from ${parentKey}`)
         } else {
             log.log(
-                `Connecting to ${parentKey} on port ${socketMap[parentKey]}...`
+                `Connecting to ${parentKey} on port ${appConfig.sockets[parentKey]}...`
             )
-            const ws = new WebSocket(`ws://localhost:${socketMap[parentKey]}`)
+            const ws = new WebSocket(
+                `ws://localhost:${appConfig.sockets[parentKey]}`
+            )
             ws.on('open', () => {
                 log.log(`Connected to ${parentKey}`)
                 connections[parentKey] = ws
-                list.setItem(index, '  Disconnect')
+                list.setItem(item, '  Disconnect')
                 screen.render()
             })
             ws.on('close', () => {
                 log.log(`Connection to ${parentKey} closed`)
                 connections[parentKey] = null
-                list.setItem(index, '  Connect')
+                list.setItem(item, '  Connect')
                 screen.render()
             })
             ws.on('error', (error) => {
                 log.log(`Error connecting to ${parentKey}: ${error.message}`)
                 connections[parentKey] = null
-                list.setItem(index, '  Connect')
+                list.setItem(item, '  Connect')
                 screen.render()
             })
             ws.on('message', (message) => {

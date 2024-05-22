@@ -10,7 +10,7 @@
         "depcruise:validate": "depcruise src --include-only '^src' --config --output-type err-long",
         "depcruise:tree": "depcruise src --include-only '^src' --config --output-type dot | dot -T svg > dependency-graph.svg && open dependency-graph.svg",
         "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
-        "socket-manager": "etsc src/app/websockets/client/socket-manager.ts && node dist/app/websockets/client/socket-manager.js",
+        "socket-manager": "etsc src/utils/socket-manager.ts && node dist/utils/socket-manager.js",
         "logs:table": "tail -f table.log",
         "logs:full": "tail -f full.log"
     },
@@ -19,6 +19,7 @@
         "@types/express": "^4.17.21",
         "@types/jest": "^29.5.12",
         "@types/module-alias": "^2.0.4",
+        "@types/ws": "^8.5.10",
         "@typescript-eslint/eslint-plugin": "^7.9.0",
         "@typescript-eslint/parser": "^7.9.0",
         "blessed": "^0.1.81",
@@ -29,8 +30,7 @@
         "jest": "^29.7.0",
         "nodemon": "^3.1.0",
         "prettier": "^3.2.5",
-        "ts-jest": "^29.1.2",
-        "@types/ws": "^8.5.10"
+        "ts-jest": "^29.1.2"
     },
     "dependencies": {
         "dotenv": "^16.4.5",

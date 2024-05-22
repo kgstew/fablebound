@@ -1,10 +1,16 @@
-import { socketMap } from '../socket-map'
-import { fullConsole, tableConsole } from './custom-console'
-import { logConnectionStatus } from './log-connection-status'
-import { connectionStatus, openSocket } from './open-socket'
+import { appConfig } from '../../app-config'
+import { Handlers } from '../../handlers'
+import { ConnectionStatus } from '../connection-status'
+import { fullConsole, logConnectionStatus, tableConsole } from '../monitoring'
+import { openSocket } from './open-socket'
 
-const openAllSockets = async () => {
-    Object.keys(socketMap).forEach((socketName) => {
+const startWebSocketServer = async (
+    config: typeof appConfig,
+    handlers: Handlers
+) => {
+    const connectionStatus: ConnectionStatus = {}
+
+    Object.keys(config.sockets).forEach((socketName) => {
         connectionStatus[socketName] = {
             connected: false,
             lastReceived: null,
@@ -15,14 +21,20 @@ const openAllSockets = async () => {
         }
     })
 
-    setInterval(() => logConnectionStatus(tableConsole), 1000)
+    setInterval(() => logConnectionStatus(tableConsole, connectionStatus), 1000)
 
-    const socketPromises = Object.entries(socketMap).map(
+    const socketPromises = Object.entries(config.sockets).map(
         ([socketName, port]) => {
             fullConsole.log(
                 `🔌 Opening socket ${socketName} on port ${port}...`
             )
-            return openSocket(port, socketName, fullConsole)
+            return openSocket(
+                port,
+                socketName,
+                fullConsole,
+                handlers,
+                connectionStatus
+            )
                 .then(() => {
                     fullConsole.log(
                         `✅ Socket ${socketName} on port ${port} opened successfully`
@@ -39,8 +51,8 @@ const openAllSockets = async () => {
 
     await Promise.all(socketPromises)
     fullConsole.log('🎉 All sockets opened successfully!')
-    logConnectionStatus(tableConsole)
+    logConnectionStatus(tableConsole, connectionStatus)
     fullConsole.log('🚀 All WebSocket servers are up and running!')
 }
 
-export { openAllSockets }
+export { startWebSocketServer }

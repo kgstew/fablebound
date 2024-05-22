@@ -1,22 +1,20 @@
+import { Handler } from 'api'
 import { WebSocket, WebSocketServer } from 'ws'
-import { logConnectionStatus } from './log-connection-status'
+import { ConnectionStatus } from '../connection-status'
+import { logConnectionStatus } from '../monitoring'
 
-const connectionStatus: Record<
-    string,
-    {
-        connected: boolean
-        lastReceived: string | null
-        lastSent: string | null
-        lastConnected: string | null
-        firstConnected: string | null
-        uptimeLog: Array<{ timestamp: number; connected: boolean }>
-    }
-> = {}
+type Message = {
+    type: string
+    sendTime: string
+    payload: unknown
+}
 
 const openSocket = async (
     port: number,
     socketName: string,
-    fullConsole: Console
+    fullConsole: Console,
+    handlerMap: Record<string, Handler<unknown>>,
+    connectionStatus: ConnectionStatus
 ): Promise<WebSocket> => {
     return new Promise((resolve, reject) => {
         const wss = new WebSocketServer({ port })
@@ -33,7 +31,7 @@ const openSocket = async (
                 timestamp: Date.now(),
                 connected: true,
             })
-            logConnectionStatus(fullConsole)
+            logConnectionStatus(fullConsole, connectionStatus)
             resolve(ws)
 
             ws.on('message', (message) => {
@@ -43,6 +41,16 @@ const openSocket = async (
                 connectionStatus[socketName].lastReceived =
                     new Date().toLocaleString()
                 const stringMessage = message.toString()
+                const parsed: Message = JSON.parse(stringMessage)
+                const handler = handlerMap[parsed.type]
+                if (!handler) {
+                    fullConsole.error(
+                        `❌ Controller not found for message type ${parsed.type}`
+                    )
+                    return
+                }
+                handler.handle(parsed.payload)
+
                 fullConsole.log(stringMessage)
                 ws.send(`Hello, you sent -> ${message}`)
                 connectionStatus[socketName].lastSent =
@@ -58,7 +66,7 @@ const openSocket = async (
                     timestamp: Date.now(),
                     connected: false,
                 })
-                logConnectionStatus(fullConsole)
+                logConnectionStatus(fullConsole, connectionStatus)
             })
 
             ws.on('error', (error) => {
@@ -81,4 +89,4 @@ const openSocket = async (
     })
 }
 
-export { connectionStatus, openSocket }
+export { openSocket }

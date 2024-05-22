@@ -4,7 +4,7 @@ import {
     PneumaticsSystemService,
     PressureVesselService,
     ValveService,
-} from '../domain'
+} from 'domain/'
 
 const valveService = new ValveService()
 const pressureVesselService = new PressureVesselService()
@@ -48,4 +48,8 @@ const pneumaticsSystemService = new PneumaticsSystemService(
     pneumaticsAssemblyService
 )
 
-export { pneumaticsSystemService }
+const services = {
+    pneumaticsSystemService,
+}
+
+export { services }

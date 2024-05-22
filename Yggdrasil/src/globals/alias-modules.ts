@@ -1,7 +1,7 @@
 import moduleAlias from 'module-alias'
 import path from 'path'
 
-const topLevelModules = ['api', 'config', 'domain', 'spi', 'types', 'utils']
+const topLevelModules = ['api', 'app', 'domain', 'spi', 'utils']
 
 const aliases = topLevelModules.reduce<Record<string, string>>(
     (acc, alias) => ({
