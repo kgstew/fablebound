@@ -2,3 +2,13 @@
   background-color: #794d15;
   border-bottom: 2px solid #000;
 }
+
+.navbg:hover {
+  background-color: #794e15c8;
+}
+
+.label {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #000;
+}

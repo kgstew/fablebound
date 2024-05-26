@@ -1,18 +1,16 @@
-<div class="container">
-  <div class="row pt-4 navbg">
-    <div class="col text-center">
-      <img src="assets/icons/icon-light.png" alt="light">
-      <p>Lights</p>
-    </div>
-    <div class="vr p-0"></div>
-    <div class="col text-center">
-      <img src="assets/icons/icon-pressure.png" alt="pressure">
-      <p>Pressure</p>
-    </div>
-    <div class="vr p-0"></div>
-    <div class="col text-center">
-      <img src="assets/icons/icon-security.png" alt="security">
-      <p>Monitor</p>
-    </div>
+<div class="row ">
+  <div class="col text-center navbg pt-3" (click)="menuSelect('light')">
+    <img src="assets/icons/icon-light.png" alt="light">
+    <p class="label">Lights</p>
+  </div>
+  <div class="vr p-0"></div>
+  <div class="col text-center navbg pt-3"  (click)="menuSelect('pressure')">
+    <img src="assets/icons/icon-pressure.png" alt="pressure">
+    <p class="label">Pressure</p>
+  </div>
+  <div class="vr p-0"></div>
+  <div class="col text-center navbg pt-3"  (click)="menuSelect('monitor')">
+    <img src="assets/icons/icon-security.png" alt="security">
+    <p class="label">Monitor</p>
   </div>
 </div>
