@@ -1,3 +1,12 @@
 body {
   background-color: #333;
+  font-family: "Ubuntu", sans-serif;
+}
+
+#chatgpt-archive-content-view-container {
+  display: none;
+}
+
+p {
+  color: #ccc;
 }

@@ -1,3 +1,9 @@
 <div class="app">
-  <app-header></app-header>
+  <app-header (menuSelected)="menuSelected($event)"></app-header>
+  <div class="container">
+    <app-dashboard *ngIf="selectedMenuItem === ''"></app-dashboard>
+    <app-light *ngIf="selectedMenuItem === 'light'"></app-light>
+    <app-pressure *ngIf="selectedMenuItem === 'pressure'"></app-pressure>
+    <app-monitor *ngIf="selectedMenuItem === 'monitor'"></app-monitor>
+  </div>
 </div>
