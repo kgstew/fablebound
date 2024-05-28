@@ -1,1 +1,54 @@
-<p>light works!</p>
+<h3 class="text-center py-3">Light Control</h3>
+<div class="accordion" id="light-accordion">
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-deck" aria-expanded="true" aria-controls="collapse-deck">
+        <strong>Deck Lights</strong>
+      </button>
+    </h2>
+    <div id="collapse-deck" class="accordion-collapse collapse show" data-bs-parent="#light-accordion">
+      <div class="accordion-body">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+          <label class="form-check-label" for="flexSwitchCheckDefault">Deck Lights</label>
+        </div>
+        <label for="brightness" class="form-label pt-3">Brightness</label>
+        <input type="range" class="form-range" id="brightness">
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-lantern" aria-expanded="false" aria-controls="collapse-lantern">
+        <strong>Lantern</strong>
+      </button>
+    </h2>
+    <div id="collapse-lantern" class="accordion-collapse collapse" data-bs-parent="#light-accordion">
+      <div class="accordion-body">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+          <label class="form-check-label" for="flexSwitchCheckDefault">Lantern</label>
+        </div>
+        <label for="brightness" class="form-label pt-3">Brightness</label>
+        <input type="range" class="form-range" id="brightness">
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-prow" aria-expanded="false" aria-controls="collapse-prow">
+        <strong>Prow</strong>
+      </button>
+    </h2>
+    <div id="collapse-prow" class="accordion-collapse collapse" data-bs-parent="#light-accordion">
+      <div class="accordion-body">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+          <label class="form-check-label" for="flexSwitchCheckDefault">Prow</label>
+        </div>
+        <label for="brightness" class="form-label pt-3">Brightness</label>
+        <input type="range" class="form-range" id="brightness">
+      </div>
+    </div>
+  </div>
+</div>

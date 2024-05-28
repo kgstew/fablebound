@@ -1,0 +1,24 @@
+.accordion {
+  --bs-accordion-active-bg: #1c4e6d;
+  --bs-accordion-bg: #141414;
+  --bs-accordion-color: #daded0;
+  --bs-accordion-border-color: #898989;
+  --bs-accordion-btn-color: #e2e0cb;
+  --bs-accordion-active-color: #e2e0cb;
+}
+
+.accordion-button:focus {
+  box-shadow: none;
+}
+
+.accordion-button:focus {
+  background-color: none;
+}
+
+.form-check-input:focus {
+  box-shadow: none;
+}
+
+.form-check-input:checked {
+  background-color: #307319;
+}
