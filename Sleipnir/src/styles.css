@@ -3,10 +3,10 @@ body {
   font-family: "Ubuntu", sans-serif;
 }
 
-#chatgpt-archive-content-view-container {
-  display: none;
-}
-
 p {
   color: #ccc;
+}
+
+h3 {
+  color: #56B7C6;
 }
