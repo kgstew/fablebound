@@ -17,7 +17,7 @@ import { CommonModule } from '@angular/common';
 export class AppComponent {
   title = 'Sleipnir';
 
-  selectedMenuItem: string = '';
+  selectedMenuItem: string = 'pressure';
 
   public menuSelected(menuItem: string): void {
     this.selectedMenuItem = menuItem;
