@@ -1,6 +1,7 @@
 const appConfig = {
     sockets: {
         charlie: 8080,
+        frontend: 8078,
         esp32: 8079,
         pixelBlaze1: 8081,
         pixelBlaze2: 8082,

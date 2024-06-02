@@ -35,7 +35,7 @@ const openSocket = async (
             resolve(ws)
 
             ws.on('message', (message) => {
-                fullConsole.log(
+                console.log(
                     `📩 Received message on ${socketName} => ${message}`
                 )
                 connectionStatus[socketName].lastReceived =
@@ -43,16 +43,20 @@ const openSocket = async (
                 const stringMessage = message.toString()
                 const parsed: Message = JSON.parse(stringMessage)
                 const handler = handlerMap[parsed.type]
-                if (!handler) {
-                    fullConsole.error(
-                        `❌ Controller not found for message type ${parsed.type}`
-                    )
-                    return
-                }
-                handler.handle(parsed.payload)
+                console.log("got here")
+                // if (!handler) {
+                //     fullConsole.error(
+                //         `❌ Controller not found for message type ${parsed.type}`
+                //     )
+                //     return
+                // }
+                console.log("got there")
+                //handler.handle(parsed.payload)
 
                 fullConsole.log(stringMessage)
+                console.log("hey man im sending a thing")
                 ws.send(`Hello, you sent -> ${message}`)
+                console.log("hey man i sent a thing")
                 connectionStatus[socketName].lastSent =
                     new Date().toLocaleString()
             })
