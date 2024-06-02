@@ -3,11 +3,30 @@ import { WebSocket, WebSocketServer } from 'ws'
 import { ConnectionStatus } from '../connection-status'
 import { logConnectionStatus } from '../monitoring'
 
+const webSocketConnections = {};
+
 type Message = {
     type: string
     sendTime: string
     payload: unknown
 }
+
+const samplePneumaticsData = {
+    BowPortBallastPressure: 101,
+    BowPortJackPressure: 102,
+    BowStarboardBallastPressure: 103,
+    BowStarboardJackPressure: 104,
+    SternPortBallastPressure: 6,
+    SternPortJackPressure: 22,
+    SternStarboardBallastPressure: 8000,
+    SternStarboardJackPressure: -12,
+}
+
+// Serialize the object to a JSON string
+const samplePneumaticsDataString = JSON.stringify(samplePneumaticsData);
+
+// Create a buffer from the JSON string
+const samplePneumaticsBuffer = Buffer.from(samplePneumaticsDataString);
 
 const openSocket = async (
     port: number,
@@ -20,7 +39,8 @@ const openSocket = async (
         const wss = new WebSocketServer({ port })
 
         wss.on('connection', (ws) => {
-            fullConsole.log(`🔗 New client connected to ${socketName}`)
+            fullConsole.log(`🔗 New client connected to ${socketName}`)        
+            webSocketConnections[socketName] = ws;
             connectionStatus[socketName].connected = true
             connectionStatus[socketName].lastConnected = null
             if (!connectionStatus[socketName].firstConnected) {
@@ -55,8 +75,10 @@ const openSocket = async (
 
                 fullConsole.log(stringMessage)
                 console.log("hey man im sending a thing")
-                ws.send(`Hello, you sent -> ${message}`)
-                console.log("hey man i sent a thing")
+                if (stringMessage.includes("ballast")) {
+                    webSocketConnections['esp32'].send("ACTIVATE SOLENOID HOMIE")
+                }
+                    console.log("hey man i sent a thing")
                 connectionStatus[socketName].lastSent =
                     new Date().toLocaleString()
             })
