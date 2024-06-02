@@ -115,6 +115,12 @@ public:
             // The VentSolenoid is closed and will not open if the JackPressure is <= 30 PSI
             //
             // Pressure readings for each sensors are sent 4 times a second to Yggdrasil
+
+            // Yggdrasil will send either : 
+            //      1)  comands to move specific components 
+            //      2)  An object repensenting the state of the system that this control loop 
+            //          will attempt to atain subject to above constraints 
+
             std::this_thread::sleep_for(std::chrono::seconds(1)); // Run control logic every second
         }
     }
