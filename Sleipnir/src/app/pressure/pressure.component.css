@@ -1,6 +1,7 @@
 .list-group-item {
   border: none;
   background-color: transparent;
+  font-size: 10px;
 }
 
 .card {
@@ -15,4 +16,8 @@
 .pressure-right {
   color: var(--bs-tertiary-bg);
   padding-right: 20px;
+}
+
+.control-button {
+  font-size: 12px;
 }

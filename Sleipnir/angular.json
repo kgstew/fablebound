@@ -54,6 +54,10 @@
           "defaultConfiguration": "production"
         },
         "serve": {
+          "options": {
+            "host": "192.168.1.21",
+            "port": 4200
+          },
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
