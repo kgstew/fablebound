@@ -39,7 +39,7 @@ const openSocket = async (
         const wss = new WebSocketServer({ port })
 
         wss.on('connection', (ws) => {
-            fullConsole.log(`🔗 New client connected to ${socketName}`)        
+            console.log(`🔗 New client connected to ${socketName}`)        
             webSocketConnections[socketName] = ws;
             connectionStatus[socketName].connected = true
             connectionStatus[socketName].lastConnected = null
@@ -61,19 +61,20 @@ const openSocket = async (
                 connectionStatus[socketName].lastReceived =
                     new Date().toLocaleString()
                 const stringMessage = message.toString()
-                const parsed: Message = JSON.parse(stringMessage)
+                const parsed: Message = recursiveJSONParse(stringMessage).message
+                console.log(parsed)
+                console.log(parsed.type)
+                console.log(parsed.payload)
                 const handler = handlerMap[parsed.type]
-                console.log("got here")
-                // if (!handler) {
-                //     fullConsole.error(
-                //         `❌ Controller not found for message type ${parsed.type}`
-                //     )
-                //     return
-                // }
-                console.log("got there")
-                //handler.handle(parsed.payload)
+                if (!handler) {
+                    console.error(
+                        `❌ Controller not found for message type ${parsed.type}`
+                    )
+                    return
+                }
+                handler.handle(parsed.payload)
 
-                fullConsole.log(stringMessage)
+                console.log(stringMessage)
                 console.log("hey man im sending a thing")
                 if (stringMessage.includes("ballast")) {
                     webSocketConnections['esp32'].send("ACTIVATE SOLENOID HOMIE")
@@ -84,7 +85,7 @@ const openSocket = async (
             })
 
             ws.on('close', () => {
-                fullConsole.log(`🔒 Client has disconnected from ${socketName}`)
+                console.log(`🔒 Client has disconnected from ${socketName}`)
                 connectionStatus[socketName].connected = false
                 connectionStatus[socketName].lastConnected =
                     new Date().toLocaleString()
@@ -96,23 +97,42 @@ const openSocket = async (
             })
 
             ws.on('error', (error) => {
-                fullConsole.error(`⚠️ WebSocket error on ${socketName}:`, error)
+                console.error(`⚠️ WebSocket error on ${socketName}:`, error)
                 reject(error)
             })
         })
 
         wss.on('error', (error) => {
-            fullConsole.error(
+            console.error(
                 `⚠️ WebSocket server error on ${socketName}:`,
                 error
             )
             reject(error)
         })
 
-        fullConsole.log(
+        console.log(
             `🚀 WebSocket server for ${socketName} is running on ws://localhost:${port}`
         )
     })
 }
+
+function recursiveJSONParse(input: any): any {
+    try {
+        // If the input is a string, parse it to JSON
+        if (typeof input === 'string') {
+            let result = JSON.parse(input);
+            // If 'result' is an object and contains the 'message' key as a string, parse it again
+            if (typeof result === 'object' && typeof result.message === 'string') {
+                result.message = JSON.parse(result.message);
+            }
+            return result;
+        }
+        return input;
+    } catch (error) {
+        console.error('Failed to parse JSON:', error);
+        return input;
+    }
+}
+
 
 export { openSocket }

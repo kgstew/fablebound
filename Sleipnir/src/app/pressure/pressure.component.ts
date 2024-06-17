@@ -14,12 +14,17 @@ export class PressureComponent {
   constructor(@Inject(WebsocketService) private websocketService: WebsocketService) {} // Add the @Inject decorator
 
   public valveControl(unit: string, location: string, action: string): void {
-    const payload = {
-      location: location,
-      action: action,
-      unit: unit
+    const message = {
+      type: "pneumaticsCommand",
+      payload: {
+        location: location,
+        action: action,
+        unit: unit
+      },
+      sendTime: new Date().toLocaleString()
     };
-    console.log('Sending payload:', JSON.stringify(payload));
-    this.websocketService.sendMessage(JSON.stringify(payload));
+  
+    console.log('Sending message:', JSON.stringify(message));
+    this.websocketService.sendMessage(JSON.stringify(message));
   }
 }

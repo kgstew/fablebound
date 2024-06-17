@@ -25,7 +25,7 @@ const startWebSocketServer = async (
 
     const socketPromises = Object.entries(config.sockets).map(
         ([socketName, port]) => {
-            fullConsole.log(
+            console.log(
                 `🔌 Opening socket ${socketName} on port ${port}...`
             )
             return openSocket(
@@ -36,12 +36,12 @@ const startWebSocketServer = async (
                 connectionStatus
             )
                 .then(() => {
-                    fullConsole.log(
+                    console.log(
                         `✅ Socket ${socketName} on port ${port} opened successfully`
                     )
                 })
                 .catch((error) => {
-                    fullConsole.error(
+                    console.error(
                         `❌ Failed to open socket ${socketName} on port ${port}:`,
                         error
                     )
@@ -50,9 +50,9 @@ const startWebSocketServer = async (
     )
 
     await Promise.all(socketPromises)
-    fullConsole.log('🎉 All sockets opened successfully!')
+    console.log('🎉 All sockets opened successfully!')
     logConnectionStatus(tableConsole, connectionStatus)
-    fullConsole.log('🚀 All WebSocket servers are up and running!')
+    console.log('🚀 All WebSocket servers are up and running!')
 }
 
 export { startWebSocketServer }

@@ -7,7 +7,7 @@ export class WebsocketService {
   private socket: WebSocket;
 
   constructor() {
-    this.socket = new WebSocket('ws://localhost:8080');
+    this.socket = new WebSocket('ws://127.0.0.1:8078');
 
     this.socket.onopen = () => {
       console.log('WebSocket connection established');
