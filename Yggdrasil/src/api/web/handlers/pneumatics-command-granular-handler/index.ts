@@ -1,14 +1,15 @@
 import { PneumaticsSystemService } from 'domain/'
 import { Handler } from '../handler'
-import { PneumaticsCommand } from './pneumatics-command'
+import { PneumaticsCommandGranular } from './pneumatics-command-granular'
 
-class PneumaticsCommandHandler implements Handler<PneumaticsCommand> {
+class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranular> {
     constructor(private pneumaticSystemService: PneumaticsSystemService) {}
-    validate(data: unknown): PneumaticsCommand {
+    validate(data: unknown): PneumaticsCommandGranular {
         if (!data) {
             throw new Error('Data is required')
         }
-        throw new Error('Method not implemented.')
+        const pneumaticsCommandsGranular = data as PneumaticsCommandGranular
+        return pneumaticsCommandsGranular
     }
     async handle(data: unknown): Promise<void> {
         console.log("WOOOO",data)
@@ -19,4 +20,4 @@ class PneumaticsCommandHandler implements Handler<PneumaticsCommand> {
         throw new Error('Method not implemented.')
     }}
 
-export { PneumaticsCommandHandler }
+export { PneumaticsCommandGranularHandler as PneumaticsCommandHandler }

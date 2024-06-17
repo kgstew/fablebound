@@ -12,7 +12,7 @@ const appConfig = {
         pressure2: 'pressure',
         temperature1: 'temperature',
     },
-    messages: ['readings', 'pneumaticsCommand'] as const,
+    messages: ['readings', 'pneumaticsCommandGranular'] as const,
 }
 
 export { appConfig }

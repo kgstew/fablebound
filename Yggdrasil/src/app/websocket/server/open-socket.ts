@@ -75,11 +75,9 @@ const openSocket = async (
                 handler.handle(parsed.payload)
 
                 console.log(stringMessage)
-                console.log("hey man im sending a thing")
                 if (stringMessage.includes("ballast")) {
                     webSocketConnections['esp32'].send("ACTIVATE SOLENOID HOMIE")
                 }
-                    console.log("hey man i sent a thing")
                 connectionStatus[socketName].lastSent =
                     new Date().toLocaleString()
             })

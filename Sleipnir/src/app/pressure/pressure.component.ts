@@ -15,7 +15,7 @@ export class PressureComponent {
 
   public valveControl(unit: string, location: string, action: string): void {
     const message = {
-      type: "pneumaticsCommand",
+      type: "pneumaticsCommandGranular",
       payload: {
         location: location,
         action: action,
