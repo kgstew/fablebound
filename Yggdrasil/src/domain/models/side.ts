@@ -1,4 +1,4 @@
-import { Corner } from './corner'
+import { Corner } from './assembly-name'
 
 type Side = Corner | 'front' | 'rear' | 'left' | 'right'
 

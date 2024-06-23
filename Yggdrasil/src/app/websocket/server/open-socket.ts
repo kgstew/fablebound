@@ -11,22 +11,97 @@ type Message = {
     payload: unknown
 }
 
-const samplePneumaticsData = {
-    BowPortBallastPressure: 101,
-    BowPortJackPressure: 102,
-    BowStarboardBallastPressure: 103,
-    BowStarboardJackPressure: 104,
-    SternPortBallastPressure: 6,
-    SternPortJackPressure: 22,
-    SternStarboardBallastPressure: 8000,
-    SternStarboardJackPressure: -12,
-}
+// const sampleESPtoServerData = {
+//     bigAssMainTank: {
+//         pressurePsi: 12,
+//         compressorToTankValve: "closed",
+//     },
+//     bowStarboard: 
+//         {
+//             ballastPressurePsi: 101,
+//             pistonPressurePsi: 102,
+//             ballastIntakeValve: "closed",
+//             ballastToPistonValve: "closed",
+//             pistonReleaseValve: "closed",
+//         },
+//     bowPort: 
+//         {
+//             ballastPressurePsi: 103,
+//             pistonPressurePsi: 104,
+//             ballastIntakeValve: "closed",
+//             ballastToPistonValve: "closed",
+//             pistonReleaseValve: "closed",
+//         },
+//     sternPort: 
+//         {
+//             ballastPressurePsi: 6,
+//             pistonPressurePsi: 22,
+//             ballastIntakeValve: "closed",
+//             ballastToPistonValve: "closed",
+//             pistonReleaseValve: "closed",
+//         },
+//     sternStarboard: 
+//         {
+//             ballastPressurePsi: 8000,
+//             pistonPressurePsi: -12,
+//             ballastIntakeValve: "closed",
+//             ballastToPistonValve: "closed",
+//             pistonReleaseValve: "closed",
+//         },
+// }
 
-// Serialize the object to a JSON string
-const samplePneumaticsDataString = JSON.stringify(samplePneumaticsData);
+// const sampleFrontendToServerData = {
+//     type: "pneumaticsCommandGranular",
+//     command:
+//         {
+//             assembly: "bowStarboard",
+//             valve: "ballastIntakeValve",
+//             state: "open",
+//         },
+//       sendTime: new Date().toLocaleString()
+// }
 
-// Create a buffer from the JSON string
-const samplePneumaticsBuffer = Buffer.from(samplePneumaticsDataString);
+
+// const sampleFrontendtoServerData = {
+//     type: "pneumaticsCommandGranular",
+//     bigAssMainTank: {
+//         compressorToTankValve: "closed",
+//     },
+//     bowStarboard: 
+//         {
+//             ballastIntakeValve: "closed",
+//         },
+//       sendTime: new Date().toLocaleString()
+// }
+
+
+// const sampleFrontendtoServerData = {
+//     bowStarboard: 
+//         {
+//             ballastIntakeValve: "closed",
+//         },
+//       sendTime: new Date().toLocaleString()
+// }
+
+
+
+// const sampleFrontendToServerDataLegAssembly = {
+//     type: "pneumaticsCommandLegAssembly",
+//     command:
+//         {
+//             assembly: "bowStarboard",
+//             command: "LegUp", //this will be a growing enum
+//             parameters: [] // this will vary based on what command is
+//         },
+//       sendTime: new Date().toLocaleString()
+// }
+
+
+// // Serialize the object to a JSON string
+// const samplePneumaticsDataString = JSON.stringify(samplePneumaticsData);
+
+// // Create a buffer from the JSON string
+// const samplePneumaticsBuffer = Buffer.from(samplePneumaticsDataString);
 
 const openSocket = async (
     port: number,
@@ -72,12 +147,9 @@ const openSocket = async (
                     )
                     return
                 }
-                handler.handle(parsed.payload)
+                handler.handle(parsed)
 
                 console.log(stringMessage)
-                if (stringMessage.includes("ballast")) {
-                    webSocketConnections['esp32'].send("ACTIVATE SOLENOID HOMIE")
-                }
                 connectionStatus[socketName].lastSent =
                     new Date().toLocaleString()
             })
@@ -133,4 +205,4 @@ function recursiveJSONParse(input: any): any {
 }
 
 
-export { openSocket }
+export { openSocket, webSocketConnections }
