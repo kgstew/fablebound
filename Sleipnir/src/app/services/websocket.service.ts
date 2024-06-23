@@ -7,7 +7,7 @@ export class WebsocketService {
   private socket: WebSocket;
 
   constructor() {
-    this.socket = new WebSocket('ws://localhost:8080');
+    this.socket = new WebSocket('ws://192.168.0.38:8078');
 
     this.socket.onopen = () => {
       console.log('WebSocket connection established');
@@ -15,6 +15,7 @@ export class WebsocketService {
 
     this.socket.onmessage = (event) => {
       console.log('Message received:', event.data);
+      console.log(event.data['Blob']);
     };
 
     this.socket.onclose = () => {
