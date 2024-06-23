@@ -15,6 +15,7 @@ export class WebsocketService {
 
     this.socket.onmessage = (event) => {
       console.log('Message received:', event.data);
+      console.log(event.data['Blob']);
     };
 
     this.socket.onclose = () => {

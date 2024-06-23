@@ -25,9 +25,9 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "/Users/kylestewart/Code/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
+            "executable": "C:/Users/stenf/Software/FableBound/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
             "projectEnvName": "esp32dev",
-            "toolchainBinDir": "/Users/kylestewart/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
+            "toolchainBinDir": "C:/Users/stenf/.platformio/packages/toolchain-xtensa-esp32/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": {
                 "type": "PlatformIO",
@@ -38,18 +38,18 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "/Users/kylestewart/Code/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
+            "executable": "C:/Users/stenf/Software/FableBound/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
             "projectEnvName": "esp32dev",
-            "toolchainBinDir": "/Users/kylestewart/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
+            "toolchainBinDir": "C:/Users/stenf/.platformio/packages/toolchain-xtensa-esp32/bin",
             "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "/Users/kylestewart/Code/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
+            "executable": "C:/Users/stenf/Software/FableBound/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
             "projectEnvName": "esp32dev",
-            "toolchainBinDir": "/Users/kylestewart/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
+            "toolchainBinDir": "C:/Users/stenf/.platformio/packages/toolchain-xtensa-esp32/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "loadMode": "manual"
         }
