@@ -1,10 +1,10 @@
 import { sideToCorners } from '../../mappers'
-import { AssemblyName, PneumaticsAssembly, PressureReading, Side } from '../../models'
+import { Corner, PneumaticsAssembly, PressureReading, Side } from '../../models'
 import { PneumaticsAssemblyService } from '../pneumatics-assembly-service'
 
 class PneumaticsSystemService {
     constructor(
-        private pneumaticsAssemblies: Record<AssemblyName, PneumaticsAssembly>,
+        private pneumaticsAssemblies: Record<Corner, PneumaticsAssembly>,
         private pneumaticsAssemblyService: PneumaticsAssemblyService
     ) {}
 

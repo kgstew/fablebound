@@ -1,4 +1,4 @@
-import { AssemblyName } from './assembly-name'
+import { Corner } from './corner'
 import { PressureVessel } from './pressure-vessel'
 import { Valve } from './valve'
 
@@ -8,7 +8,7 @@ type PneumaticsAssembly = {
     pistonReleaseValve: Valve
     ballastTank: PressureVessel
     piston: PressureVessel
-    assemblyName: AssemblyName
+    corner: Corner
 }
 
 export { PneumaticsAssembly }

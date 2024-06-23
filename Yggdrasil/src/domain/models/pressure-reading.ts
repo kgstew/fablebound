@@ -1,4 +1,4 @@
-import { Corner } from './assembly-name'
+import { Corner } from './corner'
 
 type PressureReading = {
     corner: Corner

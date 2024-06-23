@@ -1,4 +1,4 @@
-export * from './assembly-name'
+export * from './corner'
 export * from './pneumatics-assembly'
 export * from './pneumatics-system'
 export * from './pressure-reading'
