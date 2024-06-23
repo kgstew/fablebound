@@ -25,7 +25,8 @@ export class PressureComponent {
         assembly: location,
         valve: unit,
         state: action
-      }
+      },
+      sendTime: new Date().toString()
     };
     console.log('Sending payload:', JSON.stringify(payload));
     this.websocketService.sendMessage(JSON.stringify(payload));
