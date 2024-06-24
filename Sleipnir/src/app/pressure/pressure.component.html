@@ -6,22 +6,22 @@
           <div class="btn btn-secondary control-button" 
             (mousedown)="valveControl('ballastIntakeValve', 'bowPort', 'open')"
             (touchstart)="valveControl('ballastIntakeValve', 'bowPort', 'open')"
-            (mouseup)="valveControl('ballastIntakeValve', 'bowPort', 'close')"
-            (touchend)="valveControl('ballastIntakeValve', 'bowPort', 'close')">Ballast
+            (mouseup)="valveControl('ballastIntakeValve', 'bowPort', 'closed')"
+            (touchend)="valveControl('ballastIntakeValve', 'bowPort', 'closed')">Ballast
           </div><span class="pressure-left">{{ bowPortBallastValue }}</span></li>
         <li class="list-group-item">
           <div class="btn btn-secondary control-button"
             (mousedown)="valveControl('ballastToPistonValve', 'bowPort', 'open')"
             (touchstart)="valveControl('ballastToPistonValve', 'bowPort', 'open')"
-            (mouseup)="valveControl('ballastToPistonValve', 'bowPort', 'close')"
-            (touchend)="valveControl('ballastToPistonValve', 'bowPort', 'close')">Jack
+            (mouseup)="valveControl('ballastToPistonValve', 'bowPort', 'closed')"
+            (touchend)="valveControl('ballastToPistonValve', 'bowPort', 'closed')">Jack
           </div><span class="pressure-left">100</span></li>
         <li class="list-group-item">
           <div class="btn btn-secondary control-button"
             (mousedown)="valveControl('pistonReleaseValve', 'bowPort', 'open')"
             (touchstart)="valveControl('pistonReleaseValve', 'bowPort', 'open')"
-            (mouseup)="valveControl('pistonReleaseValve', 'bowPort', 'close')"
-            (touchend)="valveControl('pistonReleaseValve', 'bowPort', 'close')">Vent
+            (mouseup)="valveControl('pistonReleaseValve', 'bowPort', 'closed')"
+            (touchend)="valveControl('pistonReleaseValve', 'bowPort', 'closed')">Vent
         </div></li>
       </ul>
   </div>
@@ -31,24 +31,24 @@
         <div class="btn btn-secondary control-button"
           (mousedown)="valveControl('ballastIntakeValve', 'bowStarboard', 'open')"
           (touchstart)="valveControl('ballastIntakeValve', 'bowStarboard', 'open')"
-          (mouseup)="valveControl('ballastIntakeValve', 'bowStarboard', 'close')"
-          (touchend)="valveControl('ballastIntakeValve', 'bowStarboard', 'close')">Ballast
+          (mouseup)="valveControl('ballastIntakeValve', 'bowStarboard', 'closed')"
+          (touchend)="valveControl('ballastIntakeValve', 'bowStarboard', 'closed')">Ballast
         </div>
       </li>
         <li class="list-group-item"><span class="pressure-right">100</span>
           <div class="btn btn-secondary control-button"
             (mousedown)="valveControl('ballastToPistonValve', 'bowStarboard', 'open')"
             (touchstart)="valveControl('ballastToPistonValve', 'bowStarboard', 'open')"
-            (mouseup)="valveControl('ballastToPistonValve', 'bowStarboard', 'close')"
-            (touchend)="valveControl('ballastToPistonValve', 'bowStarboard', 'close')">Jack
+            (mouseup)="valveControl('ballastToPistonValve', 'bowStarboard', 'closed')"
+            (touchend)="valveControl('ballastToPistonValve', 'bowStarboard', 'closed')">Jack
           </div>
         </li>
         <li class="list-group-item">
           <div class="btn btn-secondary control-button"
             (mousedown)="valveControl('pistonReleaseValve', 'bowStarboard', 'open')"
             (touchstart)="valveControl('pistonReleaseValve', 'bowStarboard', 'open')"
-            (mouseup)="valveControl('pistonReleaseValve', 'bowStarboard', 'close')"
-            (touchend)="valveControl('pistonReleaseValve', 'bowStarboard', 'close')">Vent
+            (mouseup)="valveControl('pistonReleaseValve', 'bowStarboard', 'closed')"
+            (touchend)="valveControl('pistonReleaseValve', 'bowStarboard', 'closed')">Vent
           </div>
         </li>
       </ul>
@@ -62,24 +62,24 @@
           <div class="btn btn-secondary control-button"
             (mousedown)="valveControl('ballastIntakeValve', 'sternPort', 'open')"
             (touchstart)="valveControl('ballastIntakeValve', 'sternPort', 'open')"
-            (mouseup)="valveControl('ballastIntakeValve', 'sternPort', 'close')"
-            (touchend)="valveControl('ballastIntakeValve', 'sternPort', 'close')">Ballast
+            (mouseup)="valveControl('ballastIntakeValve', 'sternPort', 'closed')"
+            (touchend)="valveControl('ballastIntakeValve', 'sternPort', 'closed')">Ballast
           </div><span class="pressure-left">100</span>
         </li>
         <li class="list-group-item">
           <div class="btn btn-secondary control-button"
             (mousedown)="valveControl('ballastToPistonValve', 'sternPort', 'open')"
             (touchstart)="valveControl('ballastToPistonValve', 'sternPort', 'open')"
-            (mouseup)="valveControl('ballastToPistonValve', 'sternPort', 'close')"
-            (touchend)="valveControl('ballastToPistonValve', 'sternPort', 'close')">Jack
+            (mouseup)="valveControl('ballastToPistonValve', 'sternPort', 'closed')"
+            (touchend)="valveControl('ballastToPistonValve', 'sternPort', 'closed')">Jack
           </div><span class="pressure-left">100</span>
         </li>
         <li class="list-group-item">
           <div class="btn btn-secondary control-button"
             (mousedown)="valveControl('pistonReleaseValve', 'sternPort', 'open')"
             (touchstart)="valveControl('pistonReleaseValve', 'sternPort', 'open')"
-            (mouseup)="valveControl('pistonReleaseValve', 'sternPort', 'close')"
-            (touchend)="valveControl('pistonReleaseValve', 'sternPort', 'close')">Vent
+            (mouseup)="valveControl('pistonReleaseValve', 'sternPort', 'closed')"
+            (touchend)="valveControl('pistonReleaseValve', 'sternPort', 'closed')">Vent
           </div>
         </li>
       </ul>
@@ -90,24 +90,24 @@
         <div class="btn btn-secondary control-button"
           (mousedown)="valveControl('ballastIntakeValve', 'sternStarboard', 'open')"
           (touchstart)="valveControl('ballastIntakeValve', 'sternStarboard', 'open')"
-          (mouseup)="valveControl('ballastIntakeValve', 'sternStarboard', 'close')"
-          (touchend)="valveControl('ballastIntakeValve', 'sternStarboard', 'close')">Ballast
+          (mouseup)="valveControl('ballastIntakeValve', 'sternStarboard', 'closed')"
+          (touchend)="valveControl('ballastIntakeValve', 'sternStarboard', 'closed')">Ballast
         </div>
       </li>
       <li class="list-group-item"><span class="pressure-right">100</span>
         <div class="btn btn-secondary control-button"
           (mousedown)="valveControl('ballastToPistonValve', 'sternStarboard', 'open')"
           (touchstart)="valveControl('ballastToPistonValve', 'sternStarboard', 'open')"
-          (mouseup)="valveControl('ballastToPistonValve', 'sternStarboard', 'close')"
-          (touchend)="valveControl('ballastToPistonValve', 'sternStarboard', 'close')">Jack
+          (mouseup)="valveControl('ballastToPistonValve', 'sternStarboard', 'closed')"
+          (touchend)="valveControl('ballastToPistonValve', 'sternStarboard', 'closed')">Jack
         </div>
       </li>
       <li class="list-group-item">
         <div class="btn btn-secondary control-button"
           (mousedown)="valveControl('pistonReleaseValve', 'sternStarboard', 'open')"
           (touchstart)="valveControl('pistonReleaseValve', 'sternStarboard', 'open')"
-          (mouseup)="valveControl('pistonReleaseValve', 'sternStarboard', 'close')"
-          (touchend)="valveControl('pistonReleaseValve', 'sternStarboard', 'close')">Vent
+          (mouseup)="valveControl('pistonReleaseValve', 'sternStarboard', 'closed')"
+          (touchend)="valveControl('pistonReleaseValve', 'sternStarboard', 'closed')">Vent
         </div>
       </li>
     </ul>

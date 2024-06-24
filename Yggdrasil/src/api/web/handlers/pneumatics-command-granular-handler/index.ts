@@ -97,11 +97,12 @@ class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranu
             [validatedData.command.assembly]: assemblyCommand,
             sendTime: validatedData.sendTime
         };
+        const pneumaticCommandStringified = JSON.stringify(pneumaticCommand)
 
         console.log("Processed Command:", pneumaticCommand);
 
     if ('esp32' in webSocketConnections) {
-        webSocketConnections['esp32'].send(validatedData);
+        webSocketConnections['esp32'].send(pneumaticCommandStringified);
         console.log("Data sent to esp32.");
     } else {
         console.log("Failed to send data: 'esp32' connection does not exist.");

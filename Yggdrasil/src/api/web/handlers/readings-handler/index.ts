@@ -41,7 +41,8 @@ class ReadingsHandler implements Handler<ReadingsData> {
         }
 
         const cmd = data as Partial<ReadingsData>; // Use Partial to handle optional properties
-
+        console.log("THIS")
+        console.log(cmd)
         if (cmd.type !== 'espToServerSystemState' || typeof cmd.sendTime !== 'string') {
             throw new Error('Missing or invalid required fields: type or sendTime');
         }
@@ -77,9 +78,10 @@ class ReadingsHandler implements Handler<ReadingsData> {
         console.log("Received data:", data);
 
         const validatedData = this.validate(data);
+        const stringifiedValidatedData = JSON.stringify(validatedData)
         
     if ('frontend' in webSocketConnections) {
-        webSocketConnections['frontend'].send(validatedData);
+        webSocketConnections['frontend'].send(stringifiedValidatedData);
         console.log("Data sent to frontend.");
     } else {
         console.log("Failed to send data: 'frontend' connection does not exist.");
