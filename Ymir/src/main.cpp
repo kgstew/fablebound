@@ -1,148 +1,242 @@
 #include <WiFi.h>
 #include <WebSocketsClient.h>
-#include "index.h"
+// #include "index.h"
+
+#include <ControlCode/json.hpp>
+// for convenience
+using json = nlohmann::json;
+
 #include "ControlCode/Leg.h"
+
 #ifdef ARDUINO
 #include <Arduino.h>
 #else
 #include "MockArduino/MockArduino.h"
 #endif
-#include <iostream>
-#include <string>
-#include <vector>
-#include <chrono>
-#include <thread>
 
 #define LED 2
+#define TESTSOLENOID 15
 
-Leg *LegStarboardAft = NULL;
-Leg *LegPortAft = NULL;
+// Init 4 leg objects
+Leg *LegStarboardStern = NULL;
+Leg *LegPortStern = NULL;
 Leg *LegStarboardBow = NULL;
 Leg *LegPortBow = NULL;
 
-class YmirPneumaticsControl {
-private:
-    // Enum for leg components , not sure if this is needed or handled by the Leg.cpp
-    enum LegComponent {
-        BallastSolenoid,
-        BallastPressureSensor,
-        JackSolenoid,
-        JackPressureSensor,
-        VentSolenoid
-    };
+// init Json data object
+json system_state = {
+    {"type", "espToServerSystemState"},
+    {"sendTime","notime"},
+    {"bigAssMainTank", {{"pressurePsi", 0}, {"compressorToTankValve", "closed"}}},
+    {"bowStarboard", {{"ballastPressurePsi", 0}, {"pistonPressurePsi", 0}, {"ballastIntakeValve", "closed"}, {"ballastToPistonValve", "closed"}, {"pistonReleaseValve", "closed"}}},
+    {"bowPort", {{"ballastPressurePsi", 0}, {"pistonPressurePsi", 0}, {"ballastIntakeValve", "closed"}, {"ballastToPistonValve", "closed"}, {"pistonReleaseValve", "closed"}}},
+    {"sternPort", {{"ballastPressurePsi", 0}, {"pistonPressurePsi", 0}, {"ballastIntakeValve", "closed"}, {"ballastToPistonValve", "closed"}, {"pistonReleaseValve", "closed"}}},
+    {"sternStarboard", {{"ballastPressurePsi", 0}, {"pistonPressurePsi", 0}, {"ballastIntakeValve", "closed"}, {"ballastToPistonValve", "closed"}, {"pistonReleaseValve", "closed"}}}};
 
-    // Struct to hold pressure readings for each leg component, TODO : modify to also store soleinoid state
-    struct PressureReading {
-        double pressure; // Pressure in psi
-        std::chrono::system_clock::time_point timestamp;
-    };
 
-    // Map to store pressure readings for each leg component, TODO : modify to also store soleinoid state
-    std::vector<std::pair<LegComponent, PressureReading>> pressureReadings;
+// Replace with your network credentials
+const char *ssid = "ML-14-pro";
+const char *password = "helloooo";
 
-    // Websocket connection to Yggdrasil
-    //
-    //
-    //
+// WebSocket server address and port
+const char *websocket_server = "172.20.10.10";
+const uint16_t websocket_port = 8079;
 
-public:
-    // Constructor
-    YmirPneumaticsControl() {
-        // Initialize pressure readings for each leg component
-        for (int i = 0; i < 5; ++i) {
-            pressureReadings.push_back(std::make_pair(static_cast<LegComponent>(i), PressureReading{0.0, std::chrono::system_clock::now()}));
-        }
-    }
+// Create a WebSocket client instance
+WebSocketsClient webSocket;
 
-    // Destructor
-    ~YmirPneumaticsControl() {
-        // Cleanup code if necessary
-    }
 
-    // Method to establish websocket connection to Yggdrasil
-    void connectToYggdrasil() {
-        // Implement websocket connection logic here
-        std::cout << "Connecting to Yggdrasil..." << std::endl;
-        // Placeholder for connection logic
-        //
-        // see socket_server.cpp for websocket server connection logic
-        // see socket_client.cpp for websocket client connection logic
-        //
-        //
+void updateLeg(Leg *leg, json desired_state)
+{
+  Serial.println("Updating Leg: ");
+  Serial.printf("leg %s\n", leg);
+  auto output = desired_state.dump();
+  Serial.println(output.c_str());
 
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        std::cout << "Connected to Yggdrasil." << std::endl;
-    }
+  if (desired_state["ballastToPistonValve"] == "open") {
+    Serial.print("Opening ballastToPistonValve");
+    leg->setSolenoidState(Solenoid::SolenoidPosition::piston, true);
+  } else {
+    leg->setSolenoidState(Solenoid::SolenoidPosition::piston, false);
+    Serial.println("Closing ballastToPistonValve");
+  }
 
-    // Method to continuously retry connecting to Yggdrasil
-    void retryConnecting() {
-        while (true) {
-            connectToYggdrasil();
-            // Retry logic here
-            std::this_thread::sleep_for(std::chrono::seconds(5));
-        }
-    }
+  if (desired_state["ballastIntakeValve"] == "open") {
+    leg->setSolenoidState(Solenoid::SolenoidPosition::ballast, true);
+    Serial.println("Opening ballastIntakeValve");
+  } else {
+    leg->setSolenoidState(Solenoid::SolenoidPosition::ballast, false);
+    Serial.println("Closing ballastIntakeValve");
+  }
 
-    // Method to receive pressure readings from Yggdrasil
-    void receivePressureReadings() {
-        // Placeholder for receiving pressure readings
-        // This method will be continuously running in a separate thread
-        while (true) {
-            // Placeholder for receiving pressure readings
-            //
-            // LegStarboardAft->getPressureSensorReading(PressureSensor::PressurePosition::ballast)
-            // LegPortAft->getPressureSensorReading(PressureSensor::PressurePosition::ballast)
-            // LegStarboardBow->getPressureSensorReading(PressureSensor::PressurePosition::ballast)
-            // LegPortBow->getPressureSensorReading(PressureSensor::PressurePosition::ballast)
+  if (desired_state["pistonReleaseValve"] == "open") {
+    leg->setSolenoidState(Solenoid::SolenoidPosition::vent, true);
+    Serial.print("Opening pistonReleaseValve");
+  } else {
+    leg->setSolenoidState(Solenoid::SolenoidPosition::vent, false);
+    Serial.print("Closing pistonReleaseValve");
+  }
+}
 
-            // Update pressureReadings vector with received readings
-            std::this_thread::sleep_for(std::chrono::milliseconds(250)); // Simulate receiving readings every 250ms
-        }
-    }
 
-    // Method to control pneumatics based on pressure readings
-    void controlPneumatics() {
-        // Placeholder for pneumatics control logic
-        // This method will be continuously running in a separate thread
-        while (true) {
-            // Placeholder for controlling pneumatics based on pressure readings
-            // Implement the control logic described in the problem statement
-            //
-            // When filling the BallastSolenoid of a Leg the JackSolenoid must be closed
-            // When filling the JackSolenoid of a Leg the VentSolenoid must be closed
-            // If the Jack pressure exceeds 150 psi the JackSolenoid is closed and the VentSolenoid opens until the pressure is less than 100 PSI
-            // If the JackSolenoid is closed and the pressure in the Ballast is less than 90 psi the ballast solenoid opens
-            // The VentSolenoid is closed and will not open if the JackPressure is <= 30 PSI
-            //
-            // Pressure readings for each sensors are sent 4 times a second to Yggdrasil
+void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
+{ 
+  json desired_state;
+  std::string s;
+  // system_state["sternStarboard"]["ballastPressurePsi"] = LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::ballast);
+  // system_state["sternStarboard"]["pistonPressurePsi"] = LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston);
+  
+  switch (type)
+  {
+  case WStype_DISCONNECTED:
+    Serial.println("Disconnected from WebSocket server");
+    break;
+  case WStype_CONNECTED:
 
-            // Yggdrasil will send either : 
-            //      1)  comands to move specific components 
-            //      2)  An object repensenting the state of the system that this control loop 
-            //          will attempt to atain subject to above constraints 
+    Serial.println("Connected to WebSocket server");
+    s = system_state.dump();
+    webSocket.sendTXT(s.c_str(), s.length());
+    Serial.println("Sent JSON to WebSocket server");
+    // webSocket.sendTXT("hello world");
+    break;
+  case WStype_TEXT:
+    // When the websocket client sends a Hello from ESP32 message,
+    // toggle the Blue LED(Pin2) and TESTSOLENOID(Pin15) pins ,
+    // wait 5 seconds and then toggle them back.
+    Serial.printf("Received text: %s\n", payload);
 
-            std::this_thread::sleep_for(std::chrono::seconds(1)); // Run control logic every second
-        }
-    }
-};
+    // Serial.println("Toggling TESTSOLENOID / LED ");
+    // digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
+    // digitalWrite(LED, !digitalRead(LED));
+    // Serial.println("Toggling TESTSOLENOID / LED back in 5 seconds");
+    // delay(1000);
+    // Serial.println("Toggling TESTSOLENOID / LED back in 4 seconds");
+    // delay(1000);
+    // Serial.println("Toggling TESTSOLENOID / LED back in 3 seconds");
+    // delay(1000);
+    // Serial.println("Toggling TESTSOLENOID / LED back in 2 seconds");
+    // delay(1000);
+    // Serial.println("Toggling TESTSOLENOID / LED back in 1 seconds");
+    // delay(1000);
+    // Serial.println("Toggling TESTSOLENOID / LED back");
+    // digitalWrite(LED, !digitalRead(LED));
+    // digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
+    desired_state = json::parse(payload);
+    updateLeg(LegStarboardStern, desired_state["sternStarboard"]);
+    break;
+  case WStype_BIN:
+    Serial.println("Received binary data");
+    Serial.println("Toggling TESTSOLENOID / LED ");
+    digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
+    digitalWrite(LED, !digitalRead(LED));
+    Serial.println("Toggling TESTSOLENOID / LED back in 5 seconds");
+    delay(1000);
+    Serial.println("Toggling TESTSOLENOID / LED back in 4 seconds");
+    delay(1000);
+    Serial.println("Toggling TESTSOLENOID / LED back in 3 seconds");
+    delay(1000);
+    Serial.println("Toggling TESTSOLENOID / LED back in 2 seconds");
+    delay(1000);
+    Serial.println("Toggling TESTSOLENOID / LED back in 1 seconds");
+    delay(1000);
+    Serial.println("Toggling TESTSOLENOID / LED back");
+    digitalWrite(LED, !digitalRead(LED));
+    digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
+    break;
+  case WStype_PING:
+    Serial.println("Received ping");
+    break;
+  case WStype_PONG:
+    Serial.println("Received pong");
+    break;
+  case WStype_ERROR:
+    Serial.println("Error occurred");
+    break;
+  }
+}
 
-int main() {
-    // Create an instance of the YmirPneumaticsControl class
-    YmirPneumaticsControl pneumaticsControl;
+void setup()
 
-    // Start websocket connection
-    std::thread connectThread(&YmirPneumaticsControl::retryConnecting, &pneumaticsControl);
+{
 
-    // Start receiving pressure readings
-    std::thread receiveThread(&YmirPneumaticsControl::receivePressureReadings, &pneumaticsControl);
+  Serial.begin(115200);
+  delay(1000);
+  pinMode(LED, OUTPUT);
+  pinMode(TESTSOLENOID, OUTPUT);
+  digitalWrite(TESTSOLENOID, LOW);
+  LegStarboardStern = new Leg("StarboardStern");
+  // Connect to Wi-Fi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
 
-    // Start controlling pneumatics
-    std::thread controlThread(&YmirPneumaticsControl::controlPneumatics, &pneumaticsControl);
+  // Set up WebSocket client
+  webSocket.begin(websocket_server, websocket_port, "/");
+  webSocket.onEvent(webSocketEvent);
+}
 
-    // Join threads
-    connectThread.join();
-    receiveThread.join();
-    controlThread.join();
+// {
+//   // When filling the BallastSolenoid of a Leg, the pistonSolenoid must be closed
+//   if (leg->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) && leg->isSolenoidOpen(Solenoid::SolenoidPosition::piston))
+//   {
+//     leg->toggleSolenoid(Solenoid::SolenoidPosition::piston);
+//   }
 
-    return 0;
+//   // When filling the JackSolenoid of a Leg, the VentSolenoid must be closed
+//   if (leg->isSolenoidOpen(Solenoid::SolenoidPosition::piston) && leg->isSolenoidOpen(Solenoid::SolenoidPosition::vent))
+//   {
+//     leg->toggleSolenoid(Solenoid::SolenoidPosition::vent);
+//   }
+
+//   // If the Jack pressure exceeds 150 psi, the JackSolenoid is closed and the VentSolenoid opens until the pressure is less than 100 PSI
+//   if (leg->getPressureSensorReading(PressureSensor::PressurePosition::piston) > 150)
+//   {
+//     leg->toggleSolenoid(Solenoid::SolenoidPosition::piston);
+//     leg->toggleSolenoid(Solenoid::SolenoidPosition::vent);
+//     while (leg->getPressureSensorReading(PressureSensor::PressurePosition::piston) > 100)
+//     {
+//       // Wait until the pressure is less than 100 PSI
+//     }
+//     leg->toggleSolenoid(Solenoid::SolenoidPosition::vent);
+//   }
+
+//   // If the JackSolenoid is closed and the pressure in the Ballast is less than 90 psi, the ballast solenoid opens
+//   if (!leg->isSolenoidOpen(Solenoid::SolenoidPosition::piston) && (leg->getPressureSensorReading(PressureSensor::PressurePosition::ballast) < 90))
+//   {
+//     leg->toggleSolenoid(Solenoid::SolenoidPosition::ballast);
+//   }
+
+//   // The VentSolenoid is closed and will not open if the pistonPressure is <= 30 PSI
+//   if ((leg->getPressureSensorReading(PressureSensor::PressurePosition::piston) <= 30) && leg->isSolenoidOpen(Solenoid::SolenoidPosition::vent))
+//   {
+//     leg->toggleSolenoid(Solenoid::SolenoidPosition::vent);
+//   }
+
+//   // Add any additional control code logic here
+// }
+
+void loop()
+{
+  // Run the WebSocket client
+  webSocket.loop();
+
+  // updateLeg(LegStarboardStern, desired_state["sternStarboard"]);
+  // updateLeg(LegPortStern, desired_state["sternPort"]);
+  // updateLeg(LegStarboardBow, desired_state["bowStarboard"]);
+  // updateLeg(LegPortBow, desired_state["bowPort"]);
+
+  //Serial.println(LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::ballast));
+  // system_state["sternStarboard"]["pistonPressurePsi"] = LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston);
+  // webSocket.sendTXT("{\"type\":\"greeting\", \"msg\":\"Hello from ESP32\"}");
+  // {
+  //   // Perform the necessary control code logic here
+
+  //   // Switch Case for the Solenoid Position based on incoming json
+
+  //   // Sleep for a certain period of time before running the loop again
+  // }
 }
