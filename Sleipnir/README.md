@@ -7,6 +7,8 @@ This app was designed primarily for use with the phone, so it works best in that
 
 ## Run the app locally
 
+Install angular command line on your computer -> npm install -g @angular/cli
+
 Run `ng serve` to start a server server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 If you want to run the app on your computer and access on your phone over the same WLAN, go to your terminal, type 'ipconfig' and get the value for your IPv4 Address. Run `ng serve <IPv4 Address>:4200`. Then you can access that address from your phone.
 
