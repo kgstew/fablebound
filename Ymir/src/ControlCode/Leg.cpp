@@ -10,7 +10,7 @@
 int ballastFillPin = 23;
 int pistonFillPin = 22;
 int ventPin = 21;
-int ballastPressureSensorPin = 32; // Location of the pins for the sensor and 
+int ballastPressureSensorPin = 32; // Location of the pins for the sensor and
 int pistonPressureSensorPin = 33;
 /*
 
@@ -79,13 +79,13 @@ LEG
 */
 
 Leg::Leg(std::string position)
-    : ballastSolenoid(false, ballastFillPin), 
-    pistonSolenoid(false, pistonFillPin), 
-    ventSolenoid(false, ventPin), 
-    ballastPressureSensor(-1, 
-    ballastPressureSensorPin), 
-    pistonPressureSensor(-1, pistonPressureSensorPin),
-    position(position)
+    : ballastSolenoid(false, ballastFillPin),
+      pistonSolenoid(false, pistonFillPin),
+      ventSolenoid(false, ventPin),
+      ballastPressureSensor(-1,
+                            ballastPressureSensorPin),
+      pistonPressureSensor(-1, pistonPressureSensorPin),
+      position(position)
 {
     std::cout << "constructing " << position << '\n';
 }
@@ -149,8 +149,9 @@ uint16_t Leg::getPressureSensorReading(PressureSensor::PressurePosition position
     }
 }
 
-void Leg::setSolenoidState(Solenoid::SolenoidPosition position, bool state) {
-    Serial.printf("Set Solenoid State state %s\n", state);
+void Leg::setSolenoidState(Solenoid::SolenoidPosition position, bool state)
+{
+    Serial.printf("Set Solenoid State: state %s\n", state ? "true" : "false");
     switch (position)
     {
     case Solenoid::SolenoidPosition::ballast:
@@ -216,12 +217,9 @@ void Leg::setSolenoidState(Solenoid::SolenoidPosition position, bool state) {
 //     }
 // }
 
-
-
-
-            //
-            // When filling the BallastSolenoid of a Leg the JackSolenoid must be closed
-            // When filling the JackSolenoid of a Leg the VentSolenoid must be closed
-            // If the Jack pressure exceeds 150 psi the JackSolenoid is closed and the VentSolenoid opens until the pressure is less than 100 PSI
-            // If the JackSolenoid is closed and the pressure in the Ballast is less than 90 psi the ballast solenoid opens
-            // The VentSolenoid is closed and will not open if the JackPressure is <= 30 PSI
+//
+// When filling the BallastSolenoid of a Leg the JackSolenoid must be closed
+// When filling the JackSolenoid of a Leg the VentSolenoid must be closed
+// If the Jack pressure exceeds 150 psi the JackSolenoid is closed and the VentSolenoid opens until the pressure is less than 100 PSI
+// If the JackSolenoid is closed and the pressure in the Ballast is less than 90 psi the ballast solenoid opens
+// The VentSolenoid is closed and will not open if the JackPressure is <= 30 PSI
