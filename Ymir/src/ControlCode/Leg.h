@@ -11,7 +11,7 @@ public:
     enum class PressurePosition
     {
         ballast,
-        shock,
+        piston,
     };
     PressureSensor(double reading, int pin);
     ~PressureSensor();
@@ -28,13 +28,14 @@ public:
     enum class SolenoidPosition
     {
         ballast,
-        shock,
+        piston,
         vent
     };
     Solenoid(bool open, int pin);
     ~Solenoid();
     bool isOpen();
     void toggleOpen();
+    void setState(bool state);
 };
 
 class Leg
@@ -42,13 +43,13 @@ class Leg
 
 private:
     Solenoid ballastSolenoid;
-    Solenoid shockSolenoid;
+    Solenoid pistonSolenoid;
     Solenoid ventSolenoid;
     PressureSensor ballastPressureSensor;
-    PressureSensor shockPressureSensor;
+    PressureSensor pistonPressureSensor;
     std::string position;
     double ballastPressure;
-    double shockPressure;
+    double pistonPressure;
 
 public:
     Leg(std::string position);
@@ -56,5 +57,12 @@ public:
     std::string getPosition();
     bool isSolenoidOpen(Solenoid::SolenoidPosition position);
     void toggleSolenoid(Solenoid::SolenoidPosition position);
+    void setSolenoidState(Solenoid::SolenoidPosition position, bool state);
     uint16_t getPressureSensorReading(PressureSensor::PressurePosition position);
 };
+
+// Init 4 leg objects
+extern Leg *LegStarboardStern;
+extern Leg *LegPortStern;
+extern Leg *LegStarboardBow;
+extern Leg *LegPortBow;
