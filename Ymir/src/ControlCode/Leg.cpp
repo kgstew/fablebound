@@ -40,7 +40,7 @@ SOLENOID
 Solenoid::Solenoid(bool open, int pin)
     : open(open), pin(pin)
 {
-    pinMode(pin, INPUT);
+    pinMode(pin, OUTPUT);
     digitalWrite(pin, LOW);
 }
 
@@ -60,8 +60,9 @@ void Solenoid::toggleOpen()
 
 void Solenoid::setState(bool state)
 {
-    Serial.print("Setting Solenoid State");
-    Serial.print(state);
+    Serial.printf("Setting Solenoid State to %s", state ? "Opening" : "Closing");
+    Serial.print("pin");
+    Serial.println(pin);
     open = state;
     digitalWrite(pin, open ? HIGH : LOW);
 }
@@ -214,8 +215,7 @@ void Leg::setSolenoidState(Solenoid::SolenoidPosition position, bool state)
 // }
 
 //
-// When filling the BallastSolenoid of a Leg the JackSolenoid must be closed
-// When filling the JackSolenoid of a Leg the VentSolenoid must be closed
+// Safety Rules:
 // If the Jack pressure exceeds 150 psi the JackSolenoid is closed and the VentSolenoid opens until the pressure is less than 100 PSI
-// If the JackSolenoid is closed and the pressure in the Ballast is less than 90 psi the ballast solenoid opens
 // The VentSolenoid is closed and will not open if the JackPressure is <= 30 PSI
+// If the esp32 disconnects from the websocket server all solenoids are closed

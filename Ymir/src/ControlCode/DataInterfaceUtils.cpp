@@ -1,4 +1,3 @@
-
 #include "DataInterfaceUtils.h"
 #include "Leg.h"
 #include <Arduino.h>
@@ -93,10 +92,10 @@ void updateLeg(Leg *leg, json leg_state)
                 break;
             }
         }
-        else
-        {
-            Serial.printf("Error: '%s' key is missing in leg_state\n", valveName.c_str());
-        }
+        // else
+        // {
+        //     Serial.printf("Error: '%s' key is missing in leg_state\n", valveName.c_str());
+        // }
     }
 }
 
@@ -137,9 +136,9 @@ void findLegsToUpdate(json desired_state)
                 break;
             }
         }
-        else
-        {
-            Serial.printf("Error: '%s' key is missing in desired_state\n", position.c_str());
-        }
+        // else
+        // {
+        //     Serial.printf("Error: '%s' key is missing in desired_state\n", position.c_str());
+        // }
     }
 }
