@@ -32,4 +32,3 @@ void updateLeg(Leg *leg, json leg_state);
 void findLegsToUpdate(json desired_state);
 
 json getStateJson();
-void sendStateJson();
