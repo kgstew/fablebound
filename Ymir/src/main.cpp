@@ -44,7 +44,68 @@ const uint16_t websocket_port = 8079;
 // Create a WebSocket client instance
 WebSocketsClient webSocket;
 
-void updateLeg(Leg *leg, json desired_state)
+enum LegPosition
+{
+  BOW_STARBOARD,
+  BOW_PORT,
+  STERN_STARBOARD,
+  STERN_PORT,
+  UNKNOWN_POSITION
+};
+
+LegPosition getLegPositions(const std::string &legPosition)
+{
+  if (legPosition == "bowStarboard")
+  {
+    return BOW_STARBOARD;
+  }
+  else if (legPosition == "bowPort")
+  {
+    return BOW_PORT;
+  }
+  else if (legPosition == "sternStarboard")
+  {
+    return STERN_STARBOARD;
+  }
+  else if (legPosition == "sternPort")
+  {
+    return STERN_PORT;
+  }
+  else
+  {
+    return UNKNOWN_POSITION;
+  }
+}
+
+enum ValveType
+{
+  BALLAST_INTAKE_VALVE,
+  BALLAST_TO_PISTON_VALVE,
+  PISTON_RELEASE_VALVE,
+  UNKNOWN_VALVE
+};
+
+ValveType getValveType(const std::string &valveName)
+{
+  if (valveName == "ballastIntakeValve")
+  {
+    return BALLAST_INTAKE_VALVE;
+  }
+  else if (valveName == "ballastToPistonValve")
+  {
+    return BALLAST_TO_PISTON_VALVE;
+  }
+  else if (valveName == "pistonReleaseValve")
+  {
+    return PISTON_RELEASE_VALVE;
+  }
+  else
+  {
+    return UNKNOWN_VALVE;
+  }
+}
+
+void updateLeg(Leg *leg, json leg_state)
 {
   if (leg == nullptr)
   {
@@ -54,80 +115,92 @@ void updateLeg(Leg *leg, json desired_state)
 
   Serial.println("Updating Leg: ");
   Serial.printf("leg %p\n", leg);
-  auto output = desired_state.dump();
+  auto output = leg_state.dump();
   Serial.println(output.c_str());
 
-  switch (desired_state)
-  {
-  case Solenoid::SolenoidPosition::ballast:
-    ballastSolenoid.setState(state);
-    break;
+  // List of valves to check
+  std::vector<std::string> valves = {"ballastIntakeValve", "ballastToPistonValve", "pistonReleaseValve"};
 
-  case Solenoid::SolenoidPosition::piston:
-    pistonSolenoid.setState(state);
-    break;
+  for (const auto &valveName : valves)
+  {
+    if (leg_state.contains(valveName))
+    {
+      ValveType valveType = getValveType(valveName);
+      bool open = leg_state[valveName] == "open";
 
-  case Solenoid::SolenoidPosition::vent:
-    ventSolenoid.setState(state);
-    break;
-  }
-}
+      switch (valveType)
+      {
+      case BALLAST_INTAKE_VALVE:
+        Serial.printf("%s ballastIntakeValve\n", open ? "Opening" : "Closing");
+        leg->setSolenoidState(Solenoid::SolenoidPosition::ballast, open);
+        break;
 
-// Check for the existence of the keys before accessing them
-if (desired_state.contains("ballastToPistonValve"))
-{
-  if (desired_state["ballastToPistonValve"] == "open")
-  {
-    Serial.print("Opening ballastToPistonValve");
-    leg->setSolenoidState(Solenoid::SolenoidPosition::piston, true);
-  }
-  else
-  {
-    leg->setSolenoidState(Solenoid::SolenoidPosition::piston, false);
-    Serial.println("Closing ballastToPistonValve");
-  }
-}
-else
-{
-  Serial.println("Error: 'ballastToPistonValve' key is missing in desired_state");
-}
+      case BALLAST_TO_PISTON_VALVE:
+        Serial.printf("%s ballastToPistonValve\n", open ? "Opening" : "Closing");
+        leg->setSolenoidState(Solenoid::SolenoidPosition::piston, open);
+        break;
 
-if (desired_state.contains("ballastIntakeValve"))
-{
-  if (desired_state["ballastIntakeValve"] == "open")
-  {
-    leg->setSolenoidState(Solenoid::SolenoidPosition::ballast, true);
-    Serial.println("Opening ballastIntakeValve");
+      case PISTON_RELEASE_VALVE:
+        Serial.printf("%s pistonReleaseValve\n", open ? "Opening" : "Closing");
+        leg->setSolenoidState(Solenoid::SolenoidPosition::vent, open);
+        break;
+
+      case UNKNOWN_VALVE:
+      default:
+        Serial.printf("Unknown valve: %s\n", valveName.c_str());
+        break;
+      }
+    }
+    else
+    {
+      Serial.printf("Error: '%s' key is missing in leg_state\n", valveName.c_str());
+    }
   }
-  else
-  {
-    leg->setSolenoidState(Solenoid::SolenoidPosition::ballast, false);
-    Serial.println("Closing ballastIntakeValve");
-  }
-}
-else
-{
-  Serial.println("Error: 'ballastIntakeValve' key is missing in desired_state");
 }
 
-if (desired_state.contains("pistonReleaseValve"))
+void findLegsToUpdate(json desired_state)
 {
-  if (desired_state["pistonReleaseValve"] == "open")
+  // List of valves to check
+  std::vector<std::string> positions = {"bowStarboard", "bowPort", "sternStarboard", "sternPort"};
+
+  for (const auto &position : positions)
   {
-    leg->setSolenoidState(Solenoid::SolenoidPosition::vent, true);
-    Serial.print("Opening pistonReleaseValve");
+    if (desired_state.contains(position))
+    {
+      LegPosition legPosition = getLegPositions(position);
+
+      switch (legPosition)
+      {
+      case BOW_PORT:
+        Serial.printf("%s updating \n", position.c_str());
+        updateLeg(LegStarboardBow, desired_state[position]);
+        break;
+
+      case BOW_STARBOARD:
+        Serial.printf("%s updating \n", position.c_str());
+        updateLeg(LegStarboardBow, desired_state[position]);
+        break;
+
+      case STERN_PORT:
+        Serial.printf("%s updating \n", position.c_str());
+        updateLeg(LegPortStern, desired_state[position]);
+        break;
+
+      case STERN_STARBOARD:
+        Serial.printf("%s updating \n", position.c_str());
+        updateLeg(LegStarboardStern, desired_state[position]);
+        break;
+      default:
+        Serial.printf("Unknown position: %s\n", position.c_str());
+        break;
+      }
+    }
+    else
+    {
+      Serial.printf("Error: '%s' key is missing in desired_state\n", position.c_str());
+    }
   }
-  else
-  {
-    leg->setSolenoidState(Solenoid::SolenoidPosition::vent, false);
-    Serial.print("Closing pistonReleaseValve");
-  }
-}
-else
-{
-  Serial.println("Error: 'pistonReleaseValve' key is missing in desired_state");
-}
-}
+};
 
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 {
@@ -147,49 +220,17 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
     s = system_state.dump();
     webSocket.sendTXT(s.c_str(), s.length());
     Serial.println("Sent JSON to WebSocket server");
-    // webSocket.sendTXT("hello world");
     break;
   case WStype_TEXT:
-    // When the websocket client sends a Hello from ESP32 message,
-    // toggle the Blue LED(Pin2) and TESTSOLENOID(Pin15) pins ,
-    // wait 5 seconds and then toggle them back.
     Serial.printf("Received text: %s\n", payload);
-
-    // Serial.println("Toggling TESTSOLENOID / LED ");
-    // digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
-    // digitalWrite(LED, !digitalRead(LED));
-    // Serial.println("Toggling TESTSOLENOID / LED back in 5 seconds");
-    // delay(1000);
-    // Serial.println("Toggling TESTSOLENOID / LED back in 4 seconds");
-    // delay(1000);
-    // Serial.println("Toggling TESTSOLENOID / LED back in 3 seconds");
-    // delay(1000);
-    // Serial.println("Toggling TESTSOLENOID / LED back in 2 seconds");
-    // delay(1000);
-    // Serial.println("Toggling TESTSOLENOID / LED back in 1 seconds");
-    // delay(1000);
-    // Serial.println("Toggling TESTSOLENOID / LED back");
-    // digitalWrite(LED, !digitalRead(LED));
-    // digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
     desired_state = json::parse(payload);
-    updateLeg(LegStarboardStern, desired_state["sternStarboard"]);
+    findLegsToUpdate(desired_state);
     break;
   case WStype_BIN:
     Serial.println("Received binary data");
     Serial.println("Toggling TESTSOLENOID / LED ");
     digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
     digitalWrite(LED, !digitalRead(LED));
-    Serial.println("Toggling TESTSOLENOID / LED back in 5 seconds");
-    delay(1000);
-    Serial.println("Toggling TESTSOLENOID / LED back in 4 seconds");
-    delay(1000);
-    Serial.println("Toggling TESTSOLENOID / LED back in 3 seconds");
-    delay(1000);
-    Serial.println("Toggling TESTSOLENOID / LED back in 2 seconds");
-    delay(1000);
-    Serial.println("Toggling TESTSOLENOID / LED back in 1 seconds");
-    delay(1000);
-    Serial.println("Toggling TESTSOLENOID / LED back");
     digitalWrite(LED, !digitalRead(LED));
     digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
     break;
@@ -215,6 +256,9 @@ void setup()
   pinMode(TESTSOLENOID, OUTPUT);
   digitalWrite(TESTSOLENOID, LOW);
   LegStarboardStern = new Leg("StarboardStern");
+  LegStarboardBow = new Leg("StarboardBow");
+  LegPortStern = new Leg("PortStern");
+  LegPortBow = new Leg("PortBow");
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
@@ -274,19 +318,6 @@ void loop()
   // Run the WebSocket client
   webSocket.loop();
 
-  // updateLeg(LegStarboardStern, desired_state["sternStarboard"]);
-  // updateLeg(LegPortStern, desired_state["sternPort"]);
-  // updateLeg(LegStarboardBow, desired_state["bowStarboard"]);
-  // updateLeg(LegPortBow, desired_state["bowPort"]);
-
   // Serial.println(LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::ballast));
-  //  system_state["sternStarboard"]["pistonPressurePsi"] = LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston);
-  //  webSocket.sendTXT("{\"type\":\"greeting\", \"msg\":\"Hello from ESP32\"}");
-  //  {
-  //    // Perform the necessary control code logic here
-
-  //   // Switch Case for the Solenoid Position based on incoming json
-
-  //   // Sleep for a certain period of time before running the loop again
-  // }
+  // system_state["sternStarboard"]["pistonPressurePsi"] = LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston);
 }
