@@ -40,7 +40,7 @@ const char* ssid = "Whitesands";
 const char* password = "alllowercasenocaps";
 
 // WebSocket server address and port
-const char* websocket_server = "192.168.0.14";
+const char* websocket_server = "192.168.0.36";
 const uint16_t websocket_port = 8079;
 
 // Create a WebSocket client instance
@@ -105,9 +105,6 @@ void setup()
 
     Serial.begin(115200);
     delay(1000);
-    pinMode(LED, OUTPUT);
-    pinMode(TESTSOLENOID, OUTPUT);
-    digitalWrite(TESTSOLENOID, LOW);
 
     LegStarboardStern = new Leg("StarboardStern",
         23, // ballast fill pin
@@ -148,7 +145,7 @@ void setup()
     // Set up WebSocket client
     webSocket.begin(websocket_server, websocket_port, "/");
     webSocket.onEvent(webSocketEvent);
-    updateTicker.attach(0.25, sendStateJson);
+    updateTicker.attach(10, sendStateJson);
 }
 
 // {
