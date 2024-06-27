@@ -60,3 +60,9 @@ public:
     void setSolenoidState(Solenoid::SolenoidPosition position, bool state);
     uint16_t getPressureSensorReading(PressureSensor::PressurePosition position);
 };
+
+// Init 4 leg objects
+extern Leg *LegStarboardStern;
+extern Leg *LegPortStern;
+extern Leg *LegStarboardBow;
+extern Leg *LegPortBow;
