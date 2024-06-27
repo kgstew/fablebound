@@ -8,12 +8,7 @@ using json = nlohmann::json;
 
 #include "ControlCode/Leg.h"
 #include "ControlCode/DataInterfaceUtils.h"
-
-#ifdef ARDUINO
 #include <Arduino.h>
-#else
-#include "MockArduino/MockArduino.h"
-#endif
 
 #define LED 2
 #define TESTSOLENOID 15

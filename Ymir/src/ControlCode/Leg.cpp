@@ -1,11 +1,7 @@
 #include "Leg.h"
 #include <iostream>
 #include <string>
-#ifdef ARDUINO
 #include <Arduino.h>
-#else
-#include "MockArduino/MockArduino.h"
-#endif
 
 int ballastFillPin = 23;
 int pistonFillPin = 22;
