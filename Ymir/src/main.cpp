@@ -95,33 +95,33 @@ void setup()
   pinMode(TESTSOLENOID, OUTPUT);
   digitalWrite(TESTSOLENOID, LOW);
 
-  LegStarboardStern = new Leg("StarboardStern"
-                              23, // ballast fill pin
-                              22, // piston fill pin
-                              21, // vent pin
-                              32, // ballast pressure sensor pin
-                              33  // piston pressure sensor pin
-                              );
-  LegStarboardBow = new Leg("StarboardBow"
+  LegStarboardStern = new Leg("StarboardStern",
                               23, // ballast fill pin
                               22, // piston fill pin
                               21, // vent pin
                               32, // ballast pressure sensor pin
                               33  // piston pressure sensor pin
   );
-  LegPortStern = new Leg("PortStern"
-                              23, // ballast fill pin
-                              22, // piston fill pin
-                              21, // vent pin
-                              32, // ballast pressure sensor pin
-                              33  // piston pressure sensor pin
+  LegStarboardBow = new Leg("StarboardBow",
+                            23, // ballast fill pin
+                            22, // piston fill pin
+                            21, // vent pin
+                            32, // ballast pressure sensor pin
+                            33  // piston pressure sensor pin
   );
-  LegPortBow = new Leg("PortBow"
-                              23, // ballast fill pin
-                              22, // piston fill pin
-                              21, // vent pin
-                              32, // ballast pressure sensor pin
-                              33  // piston pressure sensor pin
+  LegPortStern = new Leg("PortStern",
+                         23, // ballast fill pin
+                         22, // piston fill pin
+                         21, // vent pin
+                         32, // ballast pressure sensor pin
+                         33  // piston pressure sensor pin
+  );
+  LegPortBow = new Leg("PortBow",
+                       23, // ballast fill pin
+                       22, // piston fill pin
+                       21, // vent pin
+                       32, // ballast pressure sensor pin
+                       33  // piston pressure sensor pin
   );
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
