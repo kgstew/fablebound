@@ -15,6 +15,14 @@ run_with_prefix() {
     done
 }
 
+# Kill any process running on port 4200
+echo "Checking for any process running on port 4200..."
+PID=$(lsof -ti:4200)
+if [ -n "$PID" ]; then
+    echo "Killing process $PID running on port 4200..."
+    kill -9 $PID
+fi
+
 start_services() {
     # Run Yggdrasil first
     (
