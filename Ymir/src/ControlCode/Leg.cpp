@@ -3,11 +3,11 @@
 #include <string>
 #include <Arduino.h>
 
-int ballastFillPin = 23;
-int pistonFillPin = 22;
-int ventPin = 21;
-int ballastPressureSensorPin = 32; // Location of the pins for the sensor and
-int pistonPressureSensorPin = 33;
+// int ballastFillPin = 23;
+// int pistonFillPin = 22;
+// int ventPin = 21;
+// int ballastPressureSensorPin = 32; // Location of the pins for the sensor and
+// int pistonPressureSensorPin = 33;
 /*
 
 
@@ -75,8 +75,14 @@ LEG
 
 */
 
-Leg::Leg(std::string position)
-    : ballastSolenoid(false, ballastFillPin),
+Leg::Leg(std::string position, int ballastFillPin, int pistonFillPin, 
+         int ventPin, int ballastPressureSensorPin, int pistonPressureSensorPin)
+    : ballastFillPin(ballastFillPin),
+      pistonFillPin(pistonFillPin),
+      ventPin(ventPin),
+      ballastPressureSensorPin(ballastPressureSensorPin),
+      pistonPressureSensorPin(pistonPressureSensorPin),
+      ballastSolenoid(false, ballastFillPin),
       pistonSolenoid(false, pistonFillPin),
       ventSolenoid(false, ventPin),
       ballastPressureSensor(-1,

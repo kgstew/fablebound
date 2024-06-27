@@ -13,10 +13,10 @@ using json = nlohmann::json;
 #define LED 2
 #define TESTSOLENOID 15
 
-Leg *LegStarboardStern = NULL;
-Leg *LegPortStern = NULL;
-Leg *LegStarboardBow = NULL;
-Leg *LegPortBow = NULL;
+Leg *LegStarboardStern = nullptr;
+Leg *LegPortStern = nullptr;
+Leg *LegStarboardBow = nullptr;
+Leg *LegPortBow = nullptr;
 
 // init Json data object
 json system_state = {
@@ -92,10 +92,35 @@ void setup()
   pinMode(LED, OUTPUT);
   pinMode(TESTSOLENOID, OUTPUT);
   digitalWrite(TESTSOLENOID, LOW);
-  LegStarboardStern = new Leg("StarboardStern");
-  LegStarboardBow = new Leg("StarboardBow");
-  LegPortStern = new Leg("PortStern");
-  LegPortBow = new Leg("PortBow");
+
+  LegStarboardStern = new Leg("StarboardStern"
+                              23, // ballast fill pin
+                              22, // piston fill pin
+                              21, // vent pin
+                              32, // ballast pressure sensor pin
+                              33  // piston pressure sensor pin
+                              );
+  LegStarboardBow = new Leg("StarboardBow"
+                              23, // ballast fill pin
+                              22, // piston fill pin
+                              21, // vent pin
+                              32, // ballast pressure sensor pin
+                              33  // piston pressure sensor pin
+  );
+  LegPortStern = new Leg("PortStern"
+                              23, // ballast fill pin
+                              22, // piston fill pin
+                              21, // vent pin
+                              32, // ballast pressure sensor pin
+                              33  // piston pressure sensor pin
+  );
+  LegPortBow = new Leg("PortBow"
+                              23, // ballast fill pin
+                              22, // piston fill pin
+                              21, // vent pin
+                              32, // ballast pressure sensor pin
+                              33  // piston pressure sensor pin
+  );
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)

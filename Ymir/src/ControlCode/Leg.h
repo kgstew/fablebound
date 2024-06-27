@@ -51,8 +51,15 @@ private:
     double ballastPressure;
     double pistonPressure;
 
+    int ballastFillPin;
+    int pistonFillPin;
+    int ventPin;
+    int ballastPressureSensorPin; // Location of the pins for the sensor and
+    int pistonPressureSensorPin;
+
 public:
-    Leg(std::string position);
+    Leg(std::string position, int ballastFillPin, int pistonFillPin, 
+        int ventPin, int ballastPressureSensorPin, int pistonPressureSensorPin);
     ~Leg();
     std::string getPosition();
     bool isSolenoidOpen(Solenoid::SolenoidPosition position);
