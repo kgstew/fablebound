@@ -2,6 +2,57 @@
 #include "Leg.h"
 #include <Arduino.h>
 
+json getStateJson() {
+  json system_state = {
+    {"type", "espToServerSystemState"},
+    {"sendTime", "notime"},
+    {"bigAssMainTank", {
+        {"pressurePsi", 0}, 
+        {"compressorToTankValve", "closed"}
+      }
+    },
+    {"bowStarboard", {
+        {"ballastPressurePsi", LegStarboardBow->getPressureSensorReading(PressureSensor::PressurePosition::ballast)}, 
+        {"pistonPressurePsi", LegStarboardBow->getPressureSensorReading(PressureSensor::PressurePosition::piston)}, 
+        {"ballastIntakeValve", LegStarboardBow->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed"}, 
+        {"ballastToPistonValve", LegStarboardBow->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed"}, 
+        {"pistonReleaseValve", LegStarboardBow->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed"}
+      }
+    },
+    {"bowPort", {
+        {"ballastPressurePsi", LegPortBow->getPressureSensorReading(PressureSensor::PressurePosition::ballast)}, 
+        {"pistonPressurePsi", LegPortBow->getPressureSensorReading(PressureSensor::PressurePosition::piston)}, 
+        {"ballastIntakeValve", LegPortBow->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed"}, 
+        {"ballastToPistonValve", LegPortBow->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed"}, 
+        {"pistonReleaseValve", LegPortBow->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed"}
+      }
+    },
+    {"sternPort", {
+        {"ballastPressurePsi", LegPortStern->getPressureSensorReading(PressureSensor::PressurePosition::ballast)}, 
+        {"pistonPressurePsi", LegPortStern->getPressureSensorReading(PressureSensor::PressurePosition::piston)}, 
+        {"ballastIntakeValve", LegPortStern->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed"}, 
+        {"ballastToPistonValve", LegPortStern->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed"}, 
+        {"pistonReleaseValve", LegPortStern->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed"}
+      }
+    },
+    {"sternStarboard", {
+        {"ballastPressurePsi", LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::ballast)}, 
+        {"pistonPressurePsi", LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston)}, 
+        {"ballastIntakeValve", LegStarboardStern->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed"}, 
+        {"ballastToPistonValve", LegStarboardStern->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed"}, 
+        {"pistonReleaseValve", LegStarboardStern->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed"}
+      }
+    }
+  };
+  return system_state;
+}
+
+void sendStateJson() {
+  auto stateJson = getStateJson();
+  std::string s = stateJson.dump(); 
+  webSocket.sendTXT(s.c_str(), s.length());
+}
+
 LegPosition getLegPositions(const std::string &legPosition)
 {
     if (legPosition == "bowStarboard")

@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include <WebSocketsClient.h>
+#include <Ticker.h>
 // #include "index.h"
 
 #include <ControlCode/json.hpp>
@@ -38,6 +39,7 @@ const uint16_t websocket_port = 8079;
 
 // Create a WebSocket client instance
 WebSocketsClient webSocket;
+Ticker updateTicker;
 
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 {
@@ -133,6 +135,7 @@ void setup()
   // Set up WebSocket client
   webSocket.begin(websocket_server, websocket_port, "/");
   webSocket.onEvent(webSocketEvent);
+  updateTicker.attach(0.25, sendStateJson);
 }
 
 // {
