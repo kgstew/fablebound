@@ -16,17 +16,19 @@ PRESSURESENSOR
 
 */
 PressureSensor::PressureSensor(double reading, int pin)
-    : reading(reading)
-    , pin(pin)
+    : reading(reading), pin(pin)
 {
     pinMode(pin, INPUT);
 }
 
-PressureSensor::~PressureSensor() { }
+PressureSensor::~PressureSensor() {}
 uint16_t PressureSensor::getReading()
 {
     uint16_t reading = analogRead(pin);
-    return reading;
+    float voltage = 5.0 * reading / 4095; // voltage = 0..5V;  we do the math in millivolts!!
+    // map(value, fromLow, fromHigh, toLow, toHigh)
+    return map(voltage, 0.5, 4.5, 0.0, 150.0); // Arduino map() function
+    ;
 };
 
 /*
@@ -38,14 +40,13 @@ SOLENOID
 */
 
 Solenoid::Solenoid(bool open, int pin)
-    : open(open)
-    , pin(pin)
+    : open(open), pin(pin)
 {
     pinMode(pin, OUTPUT);
     digitalWrite(pin, LOW);
 }
 
-Solenoid::~Solenoid() { }
+Solenoid::~Solenoid() {}
 
 bool Solenoid::isOpen() { return open; }
 
@@ -67,18 +68,8 @@ LEG
 */
 
 Leg::Leg(std::string position, int ballastFillPin, int pistonFillPin, int ventPin, int ballastPressureSensorPin,
-    int pistonPressureSensorPin)
-    : ballastFillPin(ballastFillPin)
-    , pistonFillPin(pistonFillPin)
-    , ventPin(ventPin)
-    , ballastPressureSensorPin(ballastPressureSensorPin)
-    , pistonPressureSensorPin(pistonPressureSensorPin)
-    , ballastSolenoid(false, ballastFillPin)
-    , pistonSolenoid(false, pistonFillPin)
-    , ventSolenoid(false, ventPin)
-    , ballastPressureSensor(-1, ballastPressureSensorPin)
-    , pistonPressureSensor(-1, pistonPressureSensorPin)
-    , position(position)
+         int pistonPressureSensorPin)
+    : ballastFillPin(ballastFillPin), pistonFillPin(pistonFillPin), ventPin(ventPin), ballastPressureSensorPin(ballastPressureSensorPin), pistonPressureSensorPin(pistonPressureSensorPin), ballastSolenoid(false, ballastFillPin), pistonSolenoid(false, pistonFillPin), ventSolenoid(false, ventPin), ballastPressureSensor(-1, ballastPressureSensorPin), pistonPressureSensor(-1, pistonPressureSensorPin), position(position)
 {
     std::cout << "constructing " << position << '\n';
 }
@@ -89,7 +80,8 @@ std::string Leg::getPosition() { return position; }
 
 bool Leg::isSolenoidOpen(Solenoid::SolenoidPosition position)
 {
-    switch (position) {
+    switch (position)
+    {
     case Solenoid::SolenoidPosition::ballast:
         return ballastSolenoid.isOpen();
 
@@ -105,7 +97,8 @@ bool Leg::isSolenoidOpen(Solenoid::SolenoidPosition position)
 
 uint16_t Leg::getPressureSensorReading(PressureSensor::PressurePosition position)
 {
-    switch (position) {
+    switch (position)
+    {
     case PressureSensor::PressurePosition::ballast:
         return ballastPressureSensor.getReading();
 
@@ -119,7 +112,8 @@ uint16_t Leg::getPressureSensorReading(PressureSensor::PressurePosition position
 void Leg::setSolenoidState(Solenoid::SolenoidPosition position, bool state)
 {
     Serial.printf("Set Solenoid State: state %s\n", state ? "true" : "false");
-    switch (position) {
+    switch (position)
+    {
     case Solenoid::SolenoidPosition::ballast:
         ballastSolenoid.setState(state);
         break;
