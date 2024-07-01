@@ -1,15 +1,13 @@
 #pragma once
 #include <string>
 
-class PressureSensor
-{
+class PressureSensor {
 private:
     double reading;
     int pin;
 
 public:
-    enum class PressurePosition
-    {
+    enum class PressurePosition {
         ballast,
         piston,
     };
@@ -18,28 +16,20 @@ public:
     uint16_t getReading();
 };
 
-class Solenoid
-{
+class Solenoid {
 private:
     bool open;
     int pin;
 
 public:
-    enum class SolenoidPosition
-    {
-        ballast,
-        piston,
-        vent
-    };
+    enum class SolenoidPosition { ballast, piston, vent };
     Solenoid(bool open, int pin);
     ~Solenoid();
     bool isOpen();
-    void toggleOpen();
     void setState(bool state);
 };
 
-class Leg
-{
+class Leg {
 
 private:
     Solenoid ballastSolenoid;
@@ -51,18 +41,24 @@ private:
     double ballastPressure;
     double pistonPressure;
 
+    int ballastFillPin;
+    int pistonFillPin;
+    int ventPin;
+    int ballastPressureSensorPin; // Location of the pins for the sensor and
+    int pistonPressureSensorPin;
+
 public:
-    Leg(std::string position);
+    Leg(std::string position, int ballastFillPin, int pistonFillPin, int ventPin, int ballastPressureSensorPin,
+        int pistonPressureSensorPin);
     ~Leg();
     std::string getPosition();
     bool isSolenoidOpen(Solenoid::SolenoidPosition position);
-    void toggleSolenoid(Solenoid::SolenoidPosition position);
     void setSolenoidState(Solenoid::SolenoidPosition position, bool state);
     uint16_t getPressureSensorReading(PressureSensor::PressurePosition position);
 };
 
 // Init 4 leg objects
-extern Leg *LegStarboardStern;
-extern Leg *LegPortStern;
-extern Leg *LegStarboardBow;
-extern Leg *LegPortBow;
+extern Leg* LegStarboardStern;
+extern Leg* LegPortStern;
+extern Leg* LegStarboardBow;
+extern Leg* LegPortBow;

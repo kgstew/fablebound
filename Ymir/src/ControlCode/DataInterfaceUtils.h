@@ -30,3 +30,5 @@ ValveType getValveType(const std::string &valveName);
 void updateLeg(Leg *leg, json leg_state);
 
 void findLegsToUpdate(json desired_state);
+
+json getStateJson();

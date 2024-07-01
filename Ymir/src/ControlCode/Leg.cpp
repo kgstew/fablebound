@@ -1,13 +1,13 @@
 #include "Leg.h"
+#include <Arduino.h>
 #include <iostream>
 #include <string>
-#include <Arduino.h>
 
-int ballastFillPin = 23;
-int pistonFillPin = 22;
-int ventPin = 21;
-int ballastPressureSensorPin = 32; // Location of the pins for the sensor and
-int pistonPressureSensorPin = 33;
+// int ballastFillPin = 23;
+// int pistonFillPin = 22;
+// int ventPin = 21;
+// int ballastPressureSensorPin = 32; // Location of the pins for the sensor and
+// int pistonPressureSensorPin = 33;
 /*
 
 
@@ -15,18 +15,20 @@ PRESSURESENSOR
 
 
 */
-PressureSensor::PressureSensor(double reading, int pin) : reading(reading), pin(pin)
+PressureSensor::PressureSensor(double reading, int pin)
+    : reading(reading), pin(pin)
 {
     pinMode(pin, INPUT);
 }
 
-PressureSensor::~PressureSensor()
-{
-}
+PressureSensor::~PressureSensor() {}
 uint16_t PressureSensor::getReading()
 {
     uint16_t reading = analogRead(pin);
-    return reading;
+    float voltage = 5.0 * reading / 4095; // voltage = 0..5V;  we do the math in millivolts!!
+    // map(value, fromLow, fromHigh, toLow, toHigh)
+    return map(voltage, 0.5, 4.5, 0.0, 150.0); // Arduino map() function
+    ;
 };
 
 /*
@@ -46,17 +48,7 @@ Solenoid::Solenoid(bool open, int pin)
 
 Solenoid::~Solenoid() {}
 
-bool Solenoid::isOpen()
-{
-    return open;
-}
-
-void Solenoid::toggleOpen()
-{
-    open = !open;
-    digitalWrite(pin, open ? HIGH : LOW);
-    Serial.print("Updates Solenoid Status");
-}
+bool Solenoid::isOpen() { return open; }
 
 void Solenoid::setState(bool state)
 {
@@ -75,60 +67,31 @@ LEG
 
 */
 
-Leg::Leg(std::string position)
-    : ballastSolenoid(false, ballastFillPin),
-      pistonSolenoid(false, pistonFillPin),
-      ventSolenoid(false, ventPin),
-      ballastPressureSensor(-1,
-                            ballastPressureSensorPin),
-      pistonPressureSensor(-1, pistonPressureSensorPin),
-      position(position)
+Leg::Leg(std::string position, int ballastFillPin, int pistonFillPin, int ventPin, int ballastPressureSensorPin,
+         int pistonPressureSensorPin)
+    : ballastFillPin(ballastFillPin), pistonFillPin(pistonFillPin), ventPin(ventPin), ballastPressureSensorPin(ballastPressureSensorPin), pistonPressureSensorPin(pistonPressureSensorPin), ballastSolenoid(false, ballastFillPin), pistonSolenoid(false, pistonFillPin), ventSolenoid(false, ventPin), ballastPressureSensor(-1, ballastPressureSensorPin), pistonPressureSensor(-1, pistonPressureSensorPin), position(position)
 {
     std::cout << "constructing " << position << '\n';
 }
 
-Leg::~Leg()
-{
-    std::cout << "destructing " << position << '\n';
-}
+Leg::~Leg() { std::cout << "destructing " << position << '\n'; }
 
-std::string Leg::getPosition()
-{
-    return position;
-}
+std::string Leg::getPosition() { return position; }
 
 bool Leg::isSolenoidOpen(Solenoid::SolenoidPosition position)
 {
     switch (position)
     {
     case Solenoid::SolenoidPosition::ballast:
-        return Leg::ballastSolenoid.isOpen();
+        return ballastSolenoid.isOpen();
 
     case Solenoid::SolenoidPosition::piston:
-        return Leg::pistonSolenoid.isOpen();
+        return pistonSolenoid.isOpen();
 
     case Solenoid::SolenoidPosition::vent:
-        return Leg::ventSolenoid.isOpen();
+        return ventSolenoid.isOpen();
     default: // This should never be reached
         return false;
-    }
-}
-
-void Leg::toggleSolenoid(Solenoid::SolenoidPosition position)
-{
-    switch (position)
-    {
-    case Solenoid::SolenoidPosition::ballast:
-        ballastSolenoid.toggleOpen();
-        break;
-
-    case Solenoid::SolenoidPosition::piston:
-        pistonSolenoid.toggleOpen();
-        break;
-
-    case Solenoid::SolenoidPosition::vent:
-        ventSolenoid.toggleOpen();
-        break;
     }
 }
 
@@ -183,8 +146,8 @@ void Leg::setSolenoidState(Solenoid::SolenoidPosition position, bool state)
 //             toggleSolenoid(Solenoid::SolenoidPosition::vent);
 //         }
 
-//         // If the Jack pressure exceeds 150 psi, the JackSolenoid is closed and the VentSolenoid opens until the pressure is less than 100 PSI
-//         if (getPressureSensorReading(PressureSensor::PressurePosition::jack) > 150)
+//         // If the Jack pressure exceeds 150 psi, the JackSolenoid is closed and the VentSolenoid opens until the
+//         pressure is less than 100 PSI if (getPressureSensorReading(PressureSensor::PressurePosition::jack) > 150)
 //         {
 //             toggleSolenoid(Solenoid::SolenoidPosition::jack);
 //             toggleSolenoid(Solenoid::SolenoidPosition::vent);
@@ -195,14 +158,16 @@ void Leg::setSolenoidState(Solenoid::SolenoidPosition position, bool state)
 //             toggleSolenoid(Solenoid::SolenoidPosition::vent);
 //         }
 
-//         // If the JackSolenoid is closed and the pressure in the Ballast is less than 90 psi, the ballast solenoid opens
-//         if (!isSolenoidOpen(Solenoid::SolenoidPosition::jack) && getPressureSensorReading(PressureSensor::PressurePosition::ballast) < 90)
+//         // If the JackSolenoid is closed and the pressure in the Ballast is less than 90 psi, the ballast solenoid
+//         opens if (!isSolenoidOpen(Solenoid::SolenoidPosition::jack) &&
+//         getPressureSensorReading(PressureSensor::PressurePosition::ballast) < 90)
 //         {
 //             toggleSolenoid(Solenoid::SolenoidPosition::ballast);
 //         }
 
 //         // The VentSolenoid is closed and will not open if the JackPressure is <= 30 PSI
-//         if (getPressureSensorReading(PressureSensor::PressurePosition::jack) <= 30 && isSolenoidOpen(Solenoid::SolenoidPosition::vent))
+//         if (getPressureSensorReading(PressureSensor::PressurePosition::jack) <= 30 &&
+//         isSolenoidOpen(Solenoid::SolenoidPosition::vent))
 //         {
 //             toggleSolenoid(Solenoid::SolenoidPosition::vent);
 //         }
@@ -216,6 +181,6 @@ void Leg::setSolenoidState(Solenoid::SolenoidPosition position, bool state)
 
 //
 // Safety Rules:
-// If the Jack pressure exceeds 150 psi the JackSolenoid is closed and the VentSolenoid opens until the pressure is less than 100 PSI
-// The VentSolenoid is closed and will not open if the JackPressure is <= 30 PSI
-// If the esp32 disconnects from the websocket server all solenoids are closed
+// If the Jack pressure exceeds 150 psi the JackSolenoid is closed and the VentSolenoid opens until the pressure is less
+// than 100 PSI The VentSolenoid is closed and will not open if the JackPressure is <= 30 PSI If the esp32 disconnects
+// from the websocket server all solenoids are closed
