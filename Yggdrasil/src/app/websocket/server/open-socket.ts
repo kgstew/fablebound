@@ -11,98 +11,6 @@ type Message = {
     payload: unknown
 }
 
-// const sampleESPtoServerData = {
-//     bigAssMainTank: {
-//         pressurePsi: 12,
-//         compressorToTankValve: "closed",
-//     },
-//     bowStarboard: 
-//         {
-//             ballastPressurePsi: 101,
-//             pistonPressurePsi: 102,
-//             ballastIntakeValve: "closed",
-//             ballastToPistonValve: "closed",
-//             pistonReleaseValve: "closed",
-//         },
-//     bowPort: 
-//         {
-//             ballastPressurePsi: 103,
-//             pistonPressurePsi: 104,
-//             ballastIntakeValve: "closed",
-//             ballastToPistonValve: "closed",
-//             pistonReleaseValve: "closed",
-//         },
-//     sternPort: 
-//         {
-//             ballastPressurePsi: 6,
-//             pistonPressurePsi: 22,
-//             ballastIntakeValve: "closed",
-//             ballastToPistonValve: "closed",
-//             pistonReleaseValve: "closed",
-//         },
-//     sternStarboard: 
-//         {
-//             ballastPressurePsi: 8000,
-//             pistonPressurePsi: -12,
-//             ballastIntakeValve: "closed",
-//             ballastToPistonValve: "closed",
-//             pistonReleaseValve: "closed",
-//         },
-// }
-
-// const sampleFrontendToServerData = {
-//     type: "pneumaticsCommandGranular",
-//     command:
-//         {
-//             assembly: "bowStarboard",
-//             valve: "ballastIntakeValve",
-//             state: "open",
-//         },
-//       sendTime: new Date().toLocaleString()
-// }
-
-
-// const sampleFrontendtoServerData = {
-//     type: "pneumaticsCommandGranular",
-//     bigAssMainTank: {
-//         compressorToTankValve: "closed",
-//     },
-//     bowStarboard: 
-//         {
-//             ballastIntakeValve: "closed",
-//         },
-//       sendTime: new Date().toLocaleString()
-// }
-
-
-// const sampleFrontendtoServerData = {
-//     bowStarboard: 
-//         {
-//             ballastIntakeValve: "closed",
-//         },
-//       sendTime: new Date().toLocaleString()
-// }
-
-
-
-// const sampleFrontendToServerDataLegAssembly = {
-//     type: "pneumaticsCommandLegAssembly",
-//     command:
-//         {
-//             assembly: "bowStarboard",
-//             command: "LegUp", //this will be a growing enum
-//             parameters: [] // this will vary based on what command is
-//         },
-//       sendTime: new Date().toLocaleString()
-// }
-
-
-// // Serialize the object to a JSON string
-// const samplePneumaticsDataString = JSON.stringify(samplePneumaticsData);
-
-// // Create a buffer from the JSON string
-// const samplePneumaticsBuffer = Buffer.from(samplePneumaticsDataString);
-
 const openSocket = async (
     port: number,
     socketName: string,
@@ -138,46 +46,14 @@ const openSocket = async (
             
                 try {
 
-                    const jsonObj = JSON.parse(stringMessage);
-
-                    // Check for double-encoded JSON and parse if necessary
-                    if (typeof jsonObj.message === 'string') {
-                        // The message is a string, implying it's double-encoded JSON
-                        try {
-                            const innerJson = JSON.parse(jsonObj.message);
-                            if (innerJson.type) {
-                                parsed = innerJson; // Properly formatted message from double-encoded JSON
-                            } else {
-                                // Default handling if inner JSON does not contain 'type'
-                                parsed = { type: 'defaultType', payload: innerJson };
-                            }
-                        } catch (innerError) {
-                            console.error('Error parsing double-encoded JSON:', innerError);
-                            parsed = { type: 'defaultType', payload: jsonObj.message };
-                        }
-                    } else if (jsonObj.type) {
-                        // Direct format where 'type' is at the root level of JSON
-                        parsed = jsonObj;
-                    } else {
-                        // Assume payload is the entire JSON if no type is directly present
-                        parsed = {
-                            type: jsonObj.type || 'defaultType', // Provide a default or extract appropriately
-                            payload: jsonObj
-                        };
-                    }
+                    parsed = parseJsonMessage(stringMessage, parsed);
             
-                // console.log(
-                //     `📩 Received message on ${socketName} => ${message}`
-                // )
-                // connectionStatus[socketName].lastReceived =
-                //     new Date().toLocaleString()
-                // const stringMessage = message.toString()
-                // const parsed: Message = recursiveJSONParse(stringMessage).message
+                console.log(
+                    `📩 Received message on ${socketName} => ${parsed}`
+                )
+                connectionStatus[socketName].lastReceived =
+                    new Date().toLocaleString()
                 
-                    console.log(parsed)
-                    console.log(parsed?.type)
-                    console.log(parsed?.payload)
-               
                 const handler = handlerMap[parsed.type]
                 if (!handler) {
                     console.error(
@@ -187,7 +63,6 @@ const openSocket = async (
                 }
                 handler.handle(parsed)
 
-                console.log(stringMessage)
                 connectionStatus[socketName].lastSent =
                     new Date().toLocaleString()
                 }catch (error) {
@@ -227,23 +102,38 @@ const openSocket = async (
     })
 }
 
-function recursiveJSONParse(input: any): any {
-    try {
-        // If the input is a string, parse it to JSON
-        if (typeof input === 'string') {
-            let result = JSON.parse(input);
-            // If 'result' is an object and contains the 'message' key as a string, parse it again
-            if (typeof result === 'object' && typeof result.message === 'string') {
-                result.message = JSON.parse(result.message);
+
+function parseJsonMessage(stringMessage: string, parsed: any) {
+    const jsonObj = JSON.parse(stringMessage);
+
+    // Check for double-encoded JSON and parse if necessary
+    if (typeof jsonObj.message === 'string') {
+        // The message is a string, implying it's double-encoded JSON
+        try {
+            const innerJson = JSON.parse(jsonObj.message);
+            if (innerJson.type) {
+                parsed = innerJson; // Properly formatted message from double-encoded JSON
+            } else {
+                // Default handling if inner JSON does not contain 'type'
+                parsed = { type: 'defaultType', payload: innerJson };
             }
-            return result;
+        } catch (innerError) {
+            console.error('Error parsing double-encoded JSON:', innerError);
+            parsed = { type: 'defaultType', payload: jsonObj.message };
         }
-        return input;
-    } catch (error) {
-        console.error('Failed to parse JSON:', error);
-        return input;
+    } else if (jsonObj.type) {
+        // Direct format where 'type' is at the root level of JSON
+        parsed = jsonObj;
+    } else {
+        // Assume payload is the entire JSON if no type is directly present
+        parsed = {
+            type: jsonObj.type || 'defaultType', // Provide a default or extract appropriately
+            payload: jsonObj
+        };
     }
+    return parsed;
 }
+
 
 
 export { openSocket, webSocketConnections }

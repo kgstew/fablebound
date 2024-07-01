@@ -1,7 +1,8 @@
 import { PneumaticsSystemService, Valve } from 'domain/'
 import { Handler } from '../handler'
-import { BigAssMainTankCommandGranular, LegCommandGranular, PneumaticsCommandGranular, } from './pneumatics-command-granular'
 import { webSocketConnections } from 'app/websocket/server/open-socket';
+import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller';
+import { FrontendCommandGranularMessage, LegCommandGranular, PneumaticsCommandGranular } from 'domain/controllers/types';
 
  
 const sampleReadingsData = {
@@ -46,22 +47,10 @@ const sampleReadingsData = {
 // Serialize the object to a JSON string
 const sampleReadingsDataString = JSON.stringify(sampleReadingsData);
 
-type CommandDetail = {
-    assembly: keyof PneumaticsCommandGranular; // Refers to 'bowStarboard', 'bowPort', etc.
-    valve: keyof LegCommandGranular | keyof BigAssMainTankCommandGranular; // Refers to 'ballastIntakeValve', 'ballastToPistonValve', etc.
-    state: Valve;
-};
-
-type FrontendCommand = {
-    type: "pneumaticsCommandGranular";
-    command: CommandDetail;
-    sendTime: string;
-};
-
 class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranular> {
     constructor(private pneumaticSystemService: PneumaticsSystemService) {}
 
-    validate(data: unknown): FrontendCommand {
+    validate(data: unknown): FrontendCommandGranularMessage {
         if (!data) {
             throw new Error('Data is required');
         }
@@ -69,7 +58,7 @@ class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranu
             throw new Error('Invalid data type, expected an object');
         }
 
-        const cmd = data as Partial<FrontendCommand>; // Use Partial to handle optional properties
+        const cmd = data as Partial<FrontendCommandGranularMessage>; 
 
         if (cmd.type !== 'pneumaticsCommandGranular' || typeof cmd.sendTime !== 'string') {
             throw new Error('Missing or invalid required fields: type or sendTime');
@@ -78,31 +67,22 @@ class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranu
             throw new Error('Invalid command structure');
         }
 
-        return cmd as FrontendCommand;
+        return cmd as FrontendCommandGranularMessage;
     }
 
     async handle(data: unknown): Promise<void> {
         console.log("Received data:", data);
 
-        const validatedData = this.validate(data);
+        const validatedFrontendCommand = this.validate(data) as FrontendCommandGranularMessage;
 
-        // Initialize the command structure based on the assembly and valve
-        const assemblyCommand: LegCommandGranular = {
-            [validatedData.command.valve]: validatedData.command.state as Valve // Create a new valve with the specified state
-        };
+        const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
+        const outgoingCommand = pneumaticsModelSingleton.model.handleCommandGranular(validatedFrontendCommand);
+        const outgoingCommandStringified = JSON.stringify(outgoingCommand)
 
-        // Create the complete PneumaticsCommandGranular object
-        const pneumaticCommand: PneumaticsCommandGranular = {
-            type: validatedData.type,
-            [validatedData.command.assembly]: assemblyCommand,
-            sendTime: validatedData.sendTime
-        };
-        const pneumaticCommandStringified = JSON.stringify(pneumaticCommand)
-
-        console.log("Processed Command:", pneumaticCommand);
+        console.log("Processed Command:", validatedFrontendCommand);
 
     if ('esp32' in webSocketConnections) {
-        webSocketConnections['esp32'].send(pneumaticCommandStringified);
+        webSocketConnections['esp32'].send(outgoingCommandStringified);
         console.log("Data sent to esp32.");
     } else {
         console.log("Failed to send data: 'esp32' connection does not exist.");
@@ -123,4 +103,4 @@ class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranu
     }
 }
 
-export { PneumaticsCommandGranularHandler as PneumaticsCommandHandler }
+export { PneumaticsCommandGranularHandler }

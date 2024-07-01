@@ -1,5 +1,5 @@
-import { Corner } from './assembly-name'
+import { AssemblyName } from './assembly-name'
 
-type Side = Corner | 'front' | 'rear' | 'left' | 'right'
+type Side = AssemblyName | 'front' | 'rear' | 'left' | 'right'
 
 export { Side }

@@ -2,6 +2,9 @@ import { PneumaticsSystemService, PressureReading, Valve } from 'domain/'
 import { Handler } from '../handler'
 import { Readings } from './readings'
 import { webSocketConnections } from 'app/websocket/server/open-socket';
+import { ReadingsData } from 'domain/controllers/types';
+import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller';
+import { validateHeaderValue } from 'http';
 
 
 type BigAssMainTankReadings = {
@@ -15,16 +18,6 @@ type LegAssemblyReadings = {
     ballastIntakeValve: Valve;
     ballastToPistonValve: Valve;
     pistonReleaseValve: Valve;
-}
-
-type ReadingsData= {
-    type: 'espToServerSystemState';
-    bigAssMainTank: BigAssMainTankReadings;
-    bowStarboard: LegAssemblyReadings;
-    bowPort: LegAssemblyReadings;
-    sternPort: LegAssemblyReadings;
-    sternStarboard: LegAssemblyReadings;
-    sendTime: string;
 }
 
 
@@ -80,6 +73,10 @@ class ReadingsHandler implements Handler<ReadingsData> {
         const validatedData = this.validate(data);
         const stringifiedValidatedData = JSON.stringify(validatedData)
         
+        const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
+        pneumaticsModelSingleton.model.updateSystemStateFromReadings(validatedData);
+ 
+        
     if ('frontend' in webSocketConnections) {
         webSocketConnections['frontend'].send(stringifiedValidatedData);
         console.log("Data sent to frontend.");
@@ -90,27 +87,5 @@ class ReadingsHandler implements Handler<ReadingsData> {
         console.log("Processed Readings:", validatedData);
     }
 }
-
-// class ReadingsHandler implements Handler<Readings> {
-//     constructor(private pneumaticSystemService: PneumaticsSystemService) {}
-//     validate(data: unknown): Readings {
-//         if (!data) {
-//             throw new Error('Data is required')
-//         }
-//         throw new Error('Method not implemented.')
-//     }
-//     async handle(data: unknown): Promise<void> {
-//         const readings = this.validate(data)
-
-//         this.pneumaticSystemService.updatePressureReadings(
-//             filterReadingsByType(
-//                 readings,
-//                 'pressure'
-//             ) as unknown as PressureReading[] // TODO: Fix PressureReading[]
-//         )
-
-//         throw new Error('Method not implemented.')
-//     }
-// }
 
 export { ReadingsHandler }
