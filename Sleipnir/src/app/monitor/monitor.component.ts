@@ -9,4 +9,7 @@ import { Component } from '@angular/core';
 })
 export class MonitorComponent {
 
+  public move(side: string): void {
+    console.log('Moving to ' + side);
+  }
 }
