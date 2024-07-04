@@ -1,1 +1,38 @@
-<p>monitor works!</p>
+<div class="container text-center pt-3">
+  <div class="row">
+    <div class="col">
+      <p class="border" (click)="move('raiseBow')">Bow</p>
+    </div>
+  </div>
+  <div class="row py-3">
+    <div class="col">
+      <p class="border tall-row" (click)="move('raisePort')">Port</p>
+    </div>
+    <div class="col-6">
+      <div class="row">
+        <div class="col">
+          <p class="border" (click)="move('raiseBowPort')">.</p>
+        </div>
+        <div class="col">
+          <p class="border" (click)="move('raiseBowStarboard')">.</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <p class="border" (click)="move('raiseSternPort')">.</p>
+        </div>
+        <div class="col">
+          <p class="border" (click)="move('raiseSternStarboard')">.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <p class="border tall-row" (click)="move('starboard')">Star</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <p class="border" (click)="move('stern')">Stern</p>
+    </div>
+  </div>
+</div>

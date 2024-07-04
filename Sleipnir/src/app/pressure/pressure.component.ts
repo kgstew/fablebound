@@ -16,7 +16,7 @@ export class PressureComponent {
   
   public bowPortBallastValue: number = 100;
 
-  constructor(@Inject(WebsocketService) private websocketService: WebsocketService) {} // Add the @Inject decorator
+  constructor(@Inject(WebsocketService) private websocketService: WebsocketService) {}
   
   public valveControl(unit: string, location: string, action: string): void {
     const payload = {
