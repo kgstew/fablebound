@@ -105,6 +105,7 @@ const PneumaticsCommandLibrary = {
     lowerStarboardBow: 'lowerStarboardBow',
     raisePortBow: 'raisePortBow',
     lowerPortBow: 'lowerPortBow',
+    holdPosition: 'holdPosition',
   } as const;
   
  export type PneumaticsCommandText = typeof PneumaticsCommandLibrary[keyof typeof PneumaticsCommandLibrary];

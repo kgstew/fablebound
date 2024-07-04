@@ -62,6 +62,13 @@ export class PneumaticsController {
         pistonReleaseValve: 'closed',
     } as LegCommandGranular
 
+    public valveCommandsHold = {
+        ballastIntakeValve: 'open',
+        ballastToPistonValve: 'closed',
+        pistonReleaseValve: 'closed',
+    } as LegCommandGranular
+    
+
     public constructor(
         systemStateReadings: ReadingsData = defaultSystemState
     ) {
@@ -257,6 +264,8 @@ export class PneumaticsController {
                 return this.commandRaisePortBow()
             case 'lowerPortBow':
                 return this.commandLowerPortBow()
+            case 'holdPosition':
+                return this.commandHoldPosition()
             default:
                 throw new Error(`Unsupported command: ${incomingCommandMessage}`)
         }
@@ -388,6 +397,13 @@ export class PneumaticsController {
     private commandLowerPortBow() {
         this.command.bowPort = this.valveCommandsLower
         return this.command
+    }
+
+    private commandHoldPosition() {
+        this.command.bowPort = this.valveCommandsHold
+        this.command.bowStarboard = this.valveCommandsHold
+        this.command.sternPort = this.valveCommandsHold
+        this.command.sternStarboard = this.valveCommandsHold
     }
 }
 
