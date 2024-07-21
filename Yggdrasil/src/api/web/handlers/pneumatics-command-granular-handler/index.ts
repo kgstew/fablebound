@@ -2,7 +2,7 @@ import { PneumaticsSystemService, Valve } from 'domain/'
 import { Handler } from '../handler'
 import { webSocketConnections } from 'app/websocket/server/open-socket';
 import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller';
-import { FrontendCommandGranularMessage, LegCommandGranular, PneumaticsCommandGranular } from 'domain/controllers/types';
+import { FrontendCommandGranularMessage, LegCommandGranular, PneumaticsCommandGranular, PneumaticsCommandGranularBowOrStern, PneumaticsCommandGranularCombined } from 'domain/controllers/types';
 
  
 const sampleReadingsData = {
@@ -77,12 +77,21 @@ class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranu
 
         const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
         const outgoingCommand = pneumaticsModelSingleton.model.handleCommandGranular(validatedFrontendCommand);
-        const outgoingCommandStringified = JSON.stringify(outgoingCommand)
+        const outgoingCommandBow = outgoingCommand.bow
+        const outgoingCommandStern = outgoingCommand.stern
+        const outgoingCommandBowStringified = JSON.stringify(outgoingCommandBow)
+        const outgoingCommandSternStringified = JSON.stringify(outgoingCommandStern)
 
         console.log("Processed Command:", validatedFrontendCommand);
 
-    if ('esp32' in webSocketConnections) {
-        webSocketConnections['esp32'].send(outgoingCommandStringified);
+    if ('esp32-ow' in webSocketConnections) {
+        webSocketConnections['esp32bow'].send(outgoingCommandBowStringified);
+        console.log("Data sent to esp32.");
+    } else {
+        console.log("Failed to send data: 'esp32' connection does not exist.");
+    }
+    if ('esp32stern' in webSocketConnections) {
+        webSocketConnections['esp32stern'].send(outgoingCommandSternStringified);
         console.log("Data sent to esp32.");
     } else {
         console.log("Failed to send data: 'esp32' connection does not exist.");

@@ -8,10 +8,8 @@ using json = nlohmann::json;
 
 enum LegPosition
 {
-    BOW_STARBOARD,
-    BOW_PORT,
-    STERN_STARBOARD,
-    STERN_PORT,
+    STARBOARD,
+    PORT,
     UNKNOWN_POSITION
 };
 

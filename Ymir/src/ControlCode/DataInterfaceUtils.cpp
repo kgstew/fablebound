@@ -6,61 +6,35 @@ json getStateJson()
 {
     json system_state = { { "type", "espToServerSystemState" }, { "sendTime", "notime" },
         { "bigAssMainTank", { { "pressurePsi", 0 }, { "compressorToTankValve", "closed" } } },
-        { "bowStarboard",
+        { "starboard",
             { { "ballastPressurePsi",
-                  LegStarboardBow->getPressureSensorReading(PressureSensor::PressurePosition::ballast) },
+                  LegSarboard->getPressureSensorReading(PressureSensor::PressurePosition::ballast) },
                 { "pistonPressurePsi",
-                    LegStarboardBow->getPressureSensorReading(PressureSensor::PressurePosition::piston) },
+                    LegSarboard->getPressureSensorReading(PressureSensor::PressurePosition::piston) },
                 { "ballastIntakeValve",
-                    LegStarboardBow->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed" },
+                    LegSarboard->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed" },
                 { "ballastToPistonValve",
-                    LegStarboardBow->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed" },
+                    LegSarboard->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed" },
                 { "pistonReleaseValve",
-                    LegStarboardBow->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" } } },
-        { "bowPort",
-            { { "ballastPressurePsi", LegPortBow->getPressureSensorReading(PressureSensor::PressurePosition::ballast) },
-                { "pistonPressurePsi", LegPortBow->getPressureSensorReading(PressureSensor::PressurePosition::piston) },
+                    LegSarboard->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" } } },
+        { "port",
+            { { "ballastPressurePsi", LegPort->getPressureSensorReading(PressureSensor::PressurePosition::ballast) },
+                { "pistonPressurePsi", LegPort->getPressureSensorReading(PressureSensor::PressurePosition::piston) },
                 { "ballastIntakeValve",
-                    LegPortBow->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed" },
+                    LegPort->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed" },
                 { "ballastToPistonValve",
-                    LegPortBow->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed" },
+                    LegPort->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed" },
                 { "pistonReleaseValve",
-                    LegPortBow->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" } } },
-        { "sternPort",
-            { { "ballastPressurePsi",
-                  LegPortStern->getPressureSensorReading(PressureSensor::PressurePosition::ballast) },
-                { "pistonPressurePsi",
-                    LegPortStern->getPressureSensorReading(PressureSensor::PressurePosition::piston) },
-                { "ballastIntakeValve",
-                    LegPortStern->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed" },
-                { "ballastToPistonValve",
-                    LegPortStern->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed" },
-                { "pistonReleaseValve",
-                    LegPortStern->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" } } },
-        { "sternStarboard",
-            { { "ballastPressurePsi",
-                  LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::ballast) },
-                { "pistonPressurePsi",
-                    LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston) },
-                { "ballastIntakeValve",
-                    LegStarboardStern->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed" },
-                { "ballastToPistonValve",
-                    LegStarboardStern->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed" },
-                { "pistonReleaseValve",
-                    LegStarboardStern->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" } } } };
+                    LegPort->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" } } }};
     return system_state;
 }
 
 LegPosition getLegPositions(const std::string& legPosition)
 {
-    if (legPosition == "bowStarboard") {
-        return BOW_STARBOARD;
-    } else if (legPosition == "bowPort") {
-        return BOW_PORT;
-    } else if (legPosition == "sternStarboard") {
-        return STERN_STARBOARD;
-    } else if (legPosition == "sternPort") {
-        return STERN_PORT;
+    if (legPosition == "starboard") {
+        return STARBOARD;
+    } else if (legPosition == "port") {
+        return PORT;
     } else {
         return UNKNOWN_POSITION;
     }
@@ -131,31 +105,20 @@ void updateLeg(Leg* leg, json leg_state)
 void findLegsToUpdate(json desired_state)
 {
     // List of valves to check
-    std::vector<std::string> positions = { "bowStarboard", "bowPort", "sternStarboard", "sternPort" };
+    std::vector<std::string> positions = { "starboard", "port"};
 
     for (const auto& position : positions) {
         if (desired_state.contains(position)) {
             LegPosition legPosition = getLegPositions(position);
 
             switch (legPosition) {
-            case BOW_PORT:
+            case STARBOARD:
                 Serial.printf("%s updating \n", position.c_str());
-                updateLeg(LegStarboardBow, desired_state[position]);
+                updateLeg(LegStarboard, desired_state[position]);
                 break;
-
-            case BOW_STARBOARD:
+            case PORT:
                 Serial.printf("%s updating \n", position.c_str());
-                updateLeg(LegStarboardBow, desired_state[position]);
-                break;
-
-            case STERN_PORT:
-                Serial.printf("%s updating \n", position.c_str());
-                updateLeg(LegPortStern, desired_state[position]);
-                break;
-
-            case STERN_STARBOARD:
-                Serial.printf("%s updating \n", position.c_str());
-                updateLeg(LegStarboardStern, desired_state[position]);
+                updateLeg(LegPort, desired_state[position]);
                 break;
             default:
                 Serial.printf("Unknown position: %s\n", position.c_str());

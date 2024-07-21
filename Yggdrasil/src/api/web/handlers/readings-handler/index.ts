@@ -34,7 +34,6 @@ class ReadingsHandler implements Handler<ReadingsData> {
         }
 
         const cmd = data as Partial<ReadingsData>; // Use Partial to handle optional properties
-        console.log("THIS")
         console.log(cmd)
         if (cmd.type !== 'espToServerSystemState' || typeof cmd.sendTime !== 'string') {
             throw new Error('Missing or invalid required fields: type or sendTime');

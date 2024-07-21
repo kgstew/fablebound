@@ -1,4 +1,4 @@
-import { LegCommandGranular, PneumaticsCommandGranular } from "api/web/handlers/pneumatics-command-granular-handler/pneumatics-command-granular"
+import { LegCommandGranular, PneumaticsCommandGranular, PneumaticsCommandGranularBowOrAft as PneumaticsCommandGranularBowOrStern, PneumaticsCommandGranularCombined } from "api/web/handlers/pneumatics-command-granular-handler/pneumatics-command-granular"
 import { FrontendCommandGranularMessage, ReadingsData, SystemState, PneumaticsCommandText, PneumaticsCommandTextMessage } from "./types"
 import { Valve } from "domain/models"
 
@@ -75,13 +75,33 @@ export class PneumaticsController {
         this.updateSystemStateFromReadings(systemStateReadings)
     }
 
-    public dischargeCommand(): PneumaticsCommandGranular {
-        const outgoingCommand = this.command
+    public dischargeCommand(): PneumaticsCommandGranularCombined {
+        const outgoingCommand = this.splitOutgoingCommand()
         this.command = {
             type: 'pneumaticsCommandGranular',
             sendTime: new Date().toLocaleString(),
         }
         return outgoingCommand
+    }
+
+    public splitOutgoingCommand(): PneumaticsCommandGranularCombined {
+        const outgoingCommandBow: PneumaticsCommandGranularBowOrStern = {
+            type: 'pneumaticsCommandGranular',
+            starboard: this.command.bowStarboard,
+            port: this.command.bowPort,
+            sendTime: this.command.sendTime,
+        }
+        const outgoingCommandStern: PneumaticsCommandGranularBowOrStern = {
+            type: 'pneumaticsCommandGranular',
+            starboard: this.command.sternStarboard,
+            port: this.command.sternPort,
+            sendTime: this.command.sendTime,
+        }
+        const combinedOutgoingCommand: PneumaticsCommandGranularCombined = {
+            bow: outgoingCommandBow,
+            stern: outgoingCommandStern,
+        }
+        return combinedOutgoingCommand
     }
 
     public updateSystemStateFromReadings(systemStateReadings: ReadingsData) {

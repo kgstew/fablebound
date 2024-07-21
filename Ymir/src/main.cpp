@@ -14,26 +14,17 @@ using json = nlohmann::json;
 #define LED 2
 #define TESTSOLENOID 15
 
-Leg* LegStarboardStern = nullptr;
-Leg* LegPortStern = nullptr;
-Leg* LegStarboardBow = nullptr;
-Leg* LegPortBow = nullptr;
+Leg* LegStarboard = nullptr;
+Leg* LegPort = nullptr;
 
 // init Json data object
 json system_state = { { "type", "espToServerSystemState" }, { "sendTime", "notime" },
-    { "bigAssMainTank", { { "pressurePsi", 0 }, { "compressorToTankValve", "closed" } } },
-    { "bowStarboard",
+    { "starboard",
         { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
             { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } },
-    { "bowPort",
+    { "port",
         { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } },
-    { "sternPort",
-        { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } },
-    { "sternStarboard",
-        { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } } };
+            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } }};
 
 // Replace with your network credentials
 const char* ssid = "Whitesands";
@@ -41,7 +32,12 @@ const char* password = "alllowercasenocaps";
 
 // WebSocket server address and port
 const char* websocket_server = "192.168.0.36";
-const uint16_t websocket_port = 8079;
+
+// Websocket server port
+// CHANGE THIS TO CHANGE BOW VS STERN
+// BOW: 8071
+// STERN: 8072
+const uint16_t websocket_port = 8071;
 
 // Create a WebSocket client instance
 WebSocketsClient webSocket;
@@ -106,31 +102,17 @@ void setup()
     Serial.begin(115200);
     delay(1000);
 
-    LegStarboardStern = new Leg("StarboardStern",
-        23, // ballast fill pin
+    LegStarboard = new Leg("Starboard",
+        21, // ballast fill pin
         22, // piston fill pin
-        21, // vent pin
-        32, // ballast pressure sensor pin
-        33 // piston pressure sensor pin
+        23, // vent pin
+        34, // ballast pressure sensor pin
+        35 // piston pressure sensor pin
     );
-    LegStarboardBow = new Leg("StarboardBow",
-        23, // ballast fill pin
-        22, // piston fill pin
-        21, // vent pin
-        32, // ballast pressure sensor pin
-        33 // piston pressure sensor pin
-    );
-    LegPortStern = new Leg("PortStern",
-        23, // ballast fill pin
-        22, // piston fill pin
-        21, // vent pin
-        32, // ballast pressure sensor pin
-        33 // piston pressure sensor pin
-    );
-    LegPortBow = new Leg("PortBow",
-        23, // ballast fill pin
-        22, // piston fill pin
-        21, // vent pin
+    LegPort = new Leg("Port",
+        17, // ballast fill pin
+        18, // piston fill pin
+        19, // vent pin
         32, // ballast pressure sensor pin
         33 // piston pressure sensor pin
     );

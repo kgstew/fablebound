@@ -46,6 +46,19 @@ export type PneumaticsCommandGranular = {
     sendTime: string
 }
 
+export type PneumaticsCommandGranularBowOrStern = {
+    type: string,
+    starboard: LegCommandGranular,
+    port: LegCommandGranular,
+    sendTime: string
+}
+
+
+export type PneumaticsCommandGranularCombined = {
+    bow: PneumaticsCommandGranularBowOrStern,
+    stern: PneumaticsCommandGranularBowOrStern,
+}
+
 
 export type  LegCommandGranular = {
     ballastIntakeValve?: Valve,
