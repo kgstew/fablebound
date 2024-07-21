@@ -17,14 +17,6 @@ using json = nlohmann::json;
 Leg* LegStarboard = nullptr;
 Leg* LegPort = nullptr;
 
-// init Json data object
-json system_state = { { "type", "espToServerSystemState" }, { "sendTime", "notime" },
-    { "starboard",
-        { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } },
-    { "port",
-        { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } }};
 
 // Replace with your network credentials
 const char* ssid = "Whitesands";
@@ -35,9 +27,19 @@ const char* websocket_server = "192.168.0.36";
 
 // Websocket server port
 // CHANGE THIS TO CHANGE BOW VS STERN
-// BOW: 8071
-// STERN: 8072
+// BOW: 8071 and espToServerSystemStateBow
+// STERN: 8072 and espToServerSystemStateStern
 const uint16_t websocket_port = 8071;
+const char* messageType = "espToServerSystemStateBow";
+
+// init Json data object
+json system_state = { { "type", messageType }, { "sendTime", "notime" },
+    { "starboard",
+        { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
+            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } },
+    { "port",
+        { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
+            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } }};
 
 // Create a WebSocket client instance
 WebSocketsClient webSocket;
@@ -45,7 +47,7 @@ Ticker updateTicker;
 
 void sendStateJson()
 {
-    auto stateJson = getStateJson();
+    auto stateJson = getStateJson(messageType);
     std::string s = stateJson.dump();
     webSocket.sendTXT(s.c_str(), s.length());
 }

@@ -52,10 +52,8 @@ rotationInterval = 4000 // Adjust this to change how often rotation occurs
 moveAccumulator = 0
 // Global variables
 moveCounter = 0
-rotationAmount = 0
 export var moveCounter
 export var rotationAmount = 0.0
-export var rotationAmount = 0
 export var frameCounter = 0
 export var previousRotationAmount = 0
 export var framesPerRotation

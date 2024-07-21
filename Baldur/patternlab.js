@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /*
  In this example you'll see:
  - time and animation

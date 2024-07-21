@@ -2,7 +2,7 @@ import { PneumaticsSystemService, PressureReading, Valve } from 'domain/'
 import { Handler } from '../handler'
 import { Readings } from './readings'
 import { webSocketConnections } from 'app/websocket/server/open-socket';
-import { ReadingsData } from 'domain/controllers/types';
+import { BowOrSternReadingsData, ReadingsData } from 'domain/controllers/types';
 import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller';
 import { validateHeaderValue } from 'http';
 
@@ -22,10 +22,12 @@ type LegAssemblyReadings = {
 
 
 
-class ReadingsHandler implements Handler<ReadingsData> {
+
+abstract class ReadingsHandlerBase implements Handler<BowOrSternReadingsData> {
+    abstract readonly position: 'BOW' | 'STERN';
     constructor(private pneumaticSystemService: PneumaticsSystemService) {}
 
-    validate(data: unknown): ReadingsData {
+    validate(data: unknown): BowOrSternReadingsData {
         if (!data) {
             throw new Error('Data is required');
         }
@@ -33,18 +35,15 @@ class ReadingsHandler implements Handler<ReadingsData> {
             throw new Error('Invalid data type, expected an object');
         }
 
-        const cmd = data as Partial<ReadingsData>; // Use Partial to handle optional properties
+        const cmd = data as Partial<BowOrSternReadingsData>; // Use Partial to handle optional properties
         console.log(cmd)
-        if (cmd.type !== 'espToServerSystemState' || typeof cmd.sendTime !== 'string') {
+        if ((cmd.type !== 'espToServerSystemStateBow' && cmd.type !== 'espToServerSystemStateStern') || typeof cmd.sendTime !== 'string') {
             throw new Error('Missing or invalid required fields: type or sendTime');
         }
-        this.validateBigAssMainTankReadings(cmd.bigAssMainTank);
-        this.validateLegAssemblyReadings(cmd.bowStarboard, 'bowStarboard');
-        this.validateLegAssemblyReadings(cmd.bowPort, 'bowPort');
-        this.validateLegAssemblyReadings(cmd.sternPort, 'sternPort');
-        this.validateLegAssemblyReadings(cmd.sternStarboard, 'sternStarboard');
+        this.validateLegAssemblyReadings(cmd.starboard, 'starboard');
+        this.validateLegAssemblyReadings(cmd.port, 'port');
 
-        return cmd as ReadingsData;
+        return cmd as BowOrSternReadingsData;
     }
     private validateBigAssMainTankReadings(tank: BigAssMainTankReadings | undefined): asserts tank is BigAssMainTankReadings {
         if (!tank || typeof tank.pressurePsi !== 'number' || !this.validateValve(tank.compressorToTankValve)) {
@@ -87,4 +86,11 @@ class ReadingsHandler implements Handler<ReadingsData> {
     }
 }
 
-export { ReadingsHandler }
+class ReadingsHandlerBow extends ReadingsHandlerBase {
+    readonly position: 'BOW' = 'BOW';
+}
+
+class ReadingsHandlerStern extends ReadingsHandlerBase {
+    readonly position: 'STERN' = 'STERN';
+}
+export { ReadingsHandlerBow, ReadingsHandlerStern }

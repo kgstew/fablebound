@@ -1,6 +1,6 @@
 const appConfig = {
     sockets: {
-        charlie: 8080,
+        //charlie: 8080,
         frontend: 8078,
         esp32bow: 8071,
         esp32stern: 8072,
@@ -13,7 +13,7 @@ const appConfig = {
         pressure2: 'pressure',
         temperature1: 'temperature',
     },
-    messages: ['espToServerSystemState', 'pneumaticsCommandGranular', 'pneumaticsCommandText'] as const,
+    messages: ['espToServerSystemStateBow', 'espToServerSystemStateStern', 'pneumaticsCommandGranular', 'pneumaticsCommandText'] as const,
 }
 
 export { appConfig }

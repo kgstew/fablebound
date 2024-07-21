@@ -1,5 +1,5 @@
 import { LegCommandGranular, PneumaticsCommandGranular, PneumaticsCommandGranularBowOrAft as PneumaticsCommandGranularBowOrStern, PneumaticsCommandGranularCombined } from "api/web/handlers/pneumatics-command-granular-handler/pneumatics-command-granular"
-import { FrontendCommandGranularMessage, ReadingsData, SystemState, PneumaticsCommandText, PneumaticsCommandTextMessage } from "./types"
+import { FrontendCommandGranularMessage, ReadingsData, SystemState, PneumaticsCommandText, PneumaticsCommandTextMessage, BowOrSternReadingsData } from "./types"
 import { Valve } from "domain/models"
 
 
@@ -72,7 +72,7 @@ export class PneumaticsController {
     public constructor(
         systemStateReadings: ReadingsData = defaultSystemState
     ) {
-        this.updateSystemStateFromReadings(systemStateReadings)
+        this.initializeSystemState(systemStateReadings)
     }
 
     public dischargeCommand(): PneumaticsCommandGranularCombined {
@@ -104,7 +104,7 @@ export class PneumaticsController {
         return combinedOutgoingCommand
     }
 
-    public updateSystemStateFromReadings(systemStateReadings: ReadingsData) {
+    public initializeSystemState(systemStateReadings: ReadingsData) {
         this.systemState = {
             bigAssMainTank: systemStateReadings.bigAssMainTank,
             bowStarboard: systemStateReadings.bowStarboard,
@@ -113,6 +113,19 @@ export class PneumaticsController {
             sternStarboard: systemStateReadings.sternStarboard,
             lastReadingsReceived: new Date(systemStateReadings.sendTime),
         }
+        this.updateSystemStateLogs
+    }
+
+    public updateSystemStateFromReadings(systemStateReadings: BowOrSternReadingsData) {
+        if (systemStateReadings.type == 'espToServerSystemStateBow') {
+            this.systemState.bowStarboard = systemStateReadings.starboard
+            this.systemState.bowPort = systemStateReadings.port
+        } else if (systemStateReadings.type == 'espToServerSystemStateStern') {
+            this.systemState.sternStarboard = systemStateReadings.starboard
+            this.systemState.sternPort = systemStateReadings.port
+        }
+        this.systemState.lastReadingsReceived = new Date(systemStateReadings.sendTime)
+
         this.updateSystemStateLogs()
 
         return this.systemState

@@ -2,21 +2,21 @@
 #include "Leg.h"
 #include <Arduino.h>
 
-json getStateJson()
+json getStateJson(const std::string& messageType)
 {
-    json system_state = { { "type", "espToServerSystemState" }, { "sendTime", "notime" },
+    json system_state = { { "type", messageType }, { "sendTime", "notime" },
         { "bigAssMainTank", { { "pressurePsi", 0 }, { "compressorToTankValve", "closed" } } },
         { "starboard",
             { { "ballastPressurePsi",
-                  LegSarboard->getPressureSensorReading(PressureSensor::PressurePosition::ballast) },
+                  LegStarboard->getPressureSensorReading(PressureSensor::PressurePosition::ballast) },
                 { "pistonPressurePsi",
-                    LegSarboard->getPressureSensorReading(PressureSensor::PressurePosition::piston) },
+                    LegStarboard->getPressureSensorReading(PressureSensor::PressurePosition::piston) },
                 { "ballastIntakeValve",
-                    LegSarboard->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed" },
+                    LegStarboard->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) ? "open" : "closed" },
                 { "ballastToPistonValve",
-                    LegSarboard->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed" },
+                    LegStarboard->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed" },
                 { "pistonReleaseValve",
-                    LegSarboard->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" } } },
+                    LegStarboard->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" } } },
         { "port",
             { { "ballastPressurePsi", LegPort->getPressureSensorReading(PressureSensor::PressurePosition::ballast) },
                 { "pistonPressurePsi", LegPort->getPressureSensorReading(PressureSensor::PressurePosition::piston) },

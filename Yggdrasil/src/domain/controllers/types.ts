@@ -25,6 +25,14 @@ export interface SystemState {
 }
 
 
+export type BowOrSternReadingsData= {
+    type: 'espToServerSystemStateBow' | 'espToServerSystemStateStern';
+    bigAssMainTank: BigAssMainTankReadings;
+    starboard: LegAssemblyReadings;
+    port: LegAssemblyReadings;
+    sendTime: string;
+}
+
 export type ReadingsData= {
     type: 'espToServerSystemState';
     bigAssMainTank: BigAssMainTankReadings;

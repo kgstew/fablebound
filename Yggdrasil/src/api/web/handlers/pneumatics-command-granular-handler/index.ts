@@ -84,7 +84,7 @@ class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranu
 
         console.log("Processed Command:", validatedFrontendCommand);
 
-    if ('esp32-ow' in webSocketConnections) {
+    if ('esp32bow' in webSocketConnections) {
         webSocketConnections['esp32bow'].send(outgoingCommandBowStringified);
         console.log("Data sent to esp32.");
     } else {
