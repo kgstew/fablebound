@@ -11,7 +11,7 @@ using json = nlohmann::json;
 #include "ControlCode/Leg.h"
 #include <Arduino.h>
 
-#define LED 2
+#define LED 5
 #define TESTSOLENOID 15
 
 Leg* LegStarboard = nullptr;
@@ -23,14 +23,20 @@ const char* ssid = "Whitesands";
 const char* password = "alllowercasenocaps";
 
 // WebSocket server address and port
-const char* websocket_server = "192.168.0.36";
+const char* websocket_server = "192.168.0.38";
 
 // Websocket server port
 // CHANGE THIS TO CHANGE BOW VS STERN
 // BOW: 8071 and espToServerSystemStateBow
 // STERN: 8072 and espToServerSystemStateStern
+
+// UNCOMMENT THIS FOR BOW 
 const uint16_t websocket_port = 8071;
 const char* messageType = "espToServerSystemStateBow";
+
+// UNCOMMENT THIS FOR STERN
+// const uint16_t websocket_port = 8072;
+// const char* messageType = "espToServerSystemStateStern";
 
 // init Json data object
 json system_state = { { "type", messageType }, { "sendTime", "notime" },
