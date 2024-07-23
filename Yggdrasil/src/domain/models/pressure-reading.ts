@@ -1,7 +1,7 @@
-import { Corner } from './corner'
+import { AssemblyName } from './assembly-name'
 
 type PressureReading = {
-    corner: Corner
+    assemblyName: AssemblyName
     pressureVesselType: 'ballast' | 'piston'
     readingPsi: number
     readDate: Date

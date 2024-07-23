@@ -9,25 +9,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "C/C++: clang++ build and debug active file",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${fileDirname}",
-            "environment": [],
-            "externalConsole": true,
-            "MIMode": "lldb",
-            "preLaunchTask": "C/C++: clang++ build active file"
-        },
-        {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "C:/Users/stenf/Software/FableBound/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
+            "executable": "/Users/mattlevitan/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
             "projectEnvName": "esp32dev",
-            "toolchainBinDir": "C:/Users/stenf/.platformio/packages/toolchain-xtensa-esp32/bin",
+            "toolchainBinDir": "/Users/mattlevitan/.platformio/packages/toolchain-xtensa-esp32/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": {
                 "type": "PlatformIO",
@@ -38,18 +25,18 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "C:/Users/stenf/Software/FableBound/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
+            "executable": "/Users/mattlevitan/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
             "projectEnvName": "esp32dev",
-            "toolchainBinDir": "C:/Users/stenf/.platformio/packages/toolchain-xtensa-esp32/bin",
+            "toolchainBinDir": "/Users/mattlevitan/.platformio/packages/toolchain-xtensa-esp32/bin",
             "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "C:/Users/stenf/Software/FableBound/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
+            "executable": "/Users/mattlevitan/fablebound/Ymir/.pio/build/esp32dev/firmware.elf",
             "projectEnvName": "esp32dev",
-            "toolchainBinDir": "C:/Users/stenf/.platformio/packages/toolchain-xtensa-esp32/bin",
+            "toolchainBinDir": "/Users/mattlevitan/.platformio/packages/toolchain-xtensa-esp32/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "loadMode": "manual"
         }

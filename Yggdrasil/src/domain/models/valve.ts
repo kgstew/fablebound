@@ -1,5 +1,4 @@
-type Valve = {
-    state: 'open' | 'closed' | 'unknown'
-}
+type Valve =  'open' | 'closed' | 'unknown'
+
 
 export { Valve }

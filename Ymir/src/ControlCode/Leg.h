@@ -1,60 +1,62 @@
 #pragma once
 #include <string>
 
-class PressureSensor
-{
+class PressureSensor {
 private:
     double reading;
     int pin;
 
 public:
-    enum class PressurePosition
-    {
+    enum class PressurePosition {
         ballast,
-        shock,
+        piston,
     };
     PressureSensor(double reading, int pin);
     ~PressureSensor();
     uint16_t getReading();
 };
 
-class Solenoid
-{
+class Solenoid {
 private:
     bool open;
     int pin;
 
 public:
-    enum class SolenoidPosition
-    {
-        ballast,
-        shock,
-        vent
-    };
+    enum class SolenoidPosition { ballast, piston, vent };
     Solenoid(bool open, int pin);
     ~Solenoid();
     bool isOpen();
-    void toggleOpen();
+    void setState(bool state);
 };
 
-class Leg
-{
+class Leg {
 
 private:
     Solenoid ballastSolenoid;
-    Solenoid shockSolenoid;
+    Solenoid pistonSolenoid;
     Solenoid ventSolenoid;
     PressureSensor ballastPressureSensor;
-    PressureSensor shockPressureSensor;
+    PressureSensor pistonPressureSensor;
     std::string position;
     double ballastPressure;
-    double shockPressure;
+    double pistonPressure;
+
+    int ballastFillPin;
+    int pistonFillPin;
+    int ventPin;
+    int ballastPressureSensorPin; // Location of the pins for the sensor and
+    int pistonPressureSensorPin;
 
 public:
-    Leg(std::string position);
+    Leg(std::string position, int ballastFillPin, int pistonFillPin, int ventPin, int ballastPressureSensorPin,
+        int pistonPressureSensorPin);
     ~Leg();
     std::string getPosition();
     bool isSolenoidOpen(Solenoid::SolenoidPosition position);
-    void toggleSolenoid(Solenoid::SolenoidPosition position);
+    void setSolenoidState(Solenoid::SolenoidPosition position, bool state);
     uint16_t getPressureSensorReading(PressureSensor::PressurePosition position);
 };
+
+// Init 2 leg objects
+extern Leg* LegStarboard;
+extern Leg* LegPort;
