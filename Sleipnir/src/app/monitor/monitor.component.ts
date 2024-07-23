@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
+import { WebsocketService } from '../services/websocket.service';
 
 @Component({
   selector: 'app-monitor',
@@ -9,7 +10,15 @@ import { Component } from '@angular/core';
 })
 export class MonitorComponent {
 
+  constructor(@Inject(WebsocketService) private websocketService: WebsocketService) {}
+
   public move(side: string): void {
-    console.log('Moving to ' + side);
+    const payload = {
+      "type": "pneumaticsCommandText",
+      "command": side,
+      "sendTime": Date().toLocaleString()
+    }
+    console.log(JSON.stringify(payload));
+    this.websocketService.sendMessage(JSON.stringify(payload))
   }
 }
