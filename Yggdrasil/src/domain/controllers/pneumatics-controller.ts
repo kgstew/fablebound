@@ -1,4 +1,4 @@
-import { LegCommandGranular, PneumaticsCommandGranular, PneumaticsCommandGranularBowOrAft as PneumaticsCommandGranularBowOrStern, PneumaticsCommandGranularCombined } from "api/web/handlers/pneumatics-command-granular-handler/pneumatics-command-granular"
+import { LegCommandGranular, PneumaticsCommandGranular, PneumaticsCommandGranularBowOrStern as PneumaticsCommandGranularBowOrStern, PneumaticsCommandGranularCombined } from "api/web/handlers/pneumatics-command-granular-handler/pneumatics-command-granular"
 import { FrontendCommandGranularMessage, ReadingsData, SystemState, PneumaticsCommandText, PneumaticsCommandTextMessage, BowOrSternReadingsData } from "./types"
 import { Valve } from "domain/models"
 
@@ -45,10 +45,10 @@ export class PneumaticsController {
     public systemStateLog: SystemState[] = []
     public logLength = 2400 // at 4 readings per second this is 10 minutes of readings data
     public command!: PneumaticsCommandGranular
-    public bigAssMainTankMinPressure = 100
-    public bigAssMainTankMaxPressure = 250
-    public ballastTankMaxPressure = 100
-    public maxPistonPressure = 100
+    public bigAssMainTankMinPressure = 0
+    public bigAssMainTankMaxPressure = 25000
+    public ballastTankMaxPressure = 10000
+    public maxPistonPressure = 10000
 
     public valveCommandsLower = {
         ballastIntakeValve: 'closed',
@@ -66,6 +66,12 @@ export class PneumaticsController {
         ballastIntakeValve: 'open',
         ballastToPistonValve: 'closed',
         pistonReleaseValve: 'closed',
+    } as LegCommandGranular
+
+    public valveCommandsVent = {
+        ballastIntakeValve: 'closed',
+        ballastToPistonValve: 'open',
+        pistonReleaseValve: 'open',
     } as LegCommandGranular
     
 
@@ -125,7 +131,9 @@ export class PneumaticsController {
             this.systemState.sternPort = systemStateReadings.port
         }
         this.systemState.lastReadingsReceived = new Date(systemStateReadings.sendTime)
-
+        console.log("SYSTEM STATE")
+        console.log(this.systemState)
+        console.log("END SYSTEM STATE")
         this.updateSystemStateLogs()
 
         return this.systemState
@@ -215,7 +223,9 @@ export class PneumaticsController {
         commandMessage: PneumaticsCommandTextMessage
     ): PneumaticsCommandGranular {
         this.buildCommand(commandMessage)
-        this.opportunisticBallastFill()
+        if (commandMessage.command != 'ventAll') {
+            this.opportunisticBallastFill()
+        }
         this.preventOverfill()
         return this.dischargeCommand()
     }
@@ -253,52 +263,78 @@ export class PneumaticsController {
                 return this.commandRaiseBow()
             case 'lowerBow':
                 return this.commandLowerBow()
+            case 'holdBow':
+                return this.commandHoldBow()
             case 'raiseStern':
                 return this.commandRaiseStern()
             case 'lowerStern':
                 return this.commandLowerStern()
+            case 'holdStern':
+                return this.commandHoldStern()
             case 'raiseStarboard':
                 return this.commandRaiseStarboard()
             case 'lowerStarboard':
                 return this.commandLowerStarboard()
+            case 'holdStarboard':
+                return this.commandHoldStarboard()
             case 'raisePort':
                 return this.commandRaisePort()
             case 'lowerPort':
                 return this.commandLowerPort()
+            case 'holdPort':
+                return this.commandHoldPort()
             case 'raiseBowStarboard':
                 return this.commandRaiseBowStarboard()
             case 'lowerBowStarboard':
                 return this.commandLowerBowStarboard()
+            case 'holdBowStarboard':
+                return this.commandHoldBowStarboard()
             case 'raiseBowPort':
                 return this.commandRaiseBowPort()
             case 'lowerBowPort':
                 return this.commandLowerBowPort()
+            case 'holdBowPort':
+                return this.commandHoldBowPort()
             case 'raiseSternStarboard':
                 return this.commandRaiseSternStarboard()
             case 'lowerSternStarboard':
                 return this.commandLowerSternStarboard()
+            case 'holdSternStarboard':
+                return this.commandHoldSternStarboard()
             case 'raiseSternPort':
                 return this.commandRaiseSternPort()
             case 'lowerSternPort':
                 return this.commandLowerSternPort()
-            case 'raiseStarboardAft':
-                return this.commandRaiseStarboardAft()
-            case 'lowerStarboardAft':
-                return this.commandLowerStarboardAft()
-            case 'raisePortAft':
-                return this.commandRaisePortAft()
-            case 'lowerPortAft':
-                return this.commandLowerPortAft()
+            case 'holdSternPort':
+                return this.commandHoldSternPort()
+            case 'raiseStarboardStern':
+                return this.commandRaiseStarboardStern()
+            case 'lowerStarboardStern':
+                return this.commandLowerStarboardStern()
+            case 'holdStarboardStern':
+                return this.commandHoldStarboardStern()
+            case 'raisePortStern':
+                return this.commandRaisePortStern()
+            case 'lowerPortStern':
+                return this.commandLowerPortStern()
+            case 'holdPortStern':
+                return this.commandHoldPortStern()
             case 'raiseStarboardBow':
                 return this.commandRaiseStarboardBow()
             case 'lowerStarboardBow':
                 return this.commandLowerStarboardBow()
+            case 'holdStarboardBow':
+                return this.commandHoldStarboardBow()
             case 'raisePortBow':
                 return this.commandRaisePortBow()
             case 'lowerPortBow':
                 return this.commandLowerPortBow()
+            case 'holdPortBow':
+                return this.commandHoldPortBow()
             case 'holdPosition':
                 return this.commandHoldPosition()
+            case 'ventAll':
+                return this.commandVentAll()
             default:
                 throw new Error(`Unsupported command: ${incomingCommandMessage}`)
         }
@@ -392,22 +428,22 @@ export class PneumaticsController {
         return this.command
     }
 
-    private commandRaiseStarboardAft() {
+    private commandRaiseStarboardStern() {
         this.command.sternStarboard = this.valveCommandsRaise
         return this.command
     }
 
-    private commandLowerStarboardAft() {
+    private commandLowerStarboardStern() {
         this.command.sternStarboard = this.valveCommandsLower
         return this.command
     }
 
-    private commandRaisePortAft() {
+    private commandRaisePortStern() {
         this.command.sternPort = this.valveCommandsRaise
         return this.command
     }
 
-    private commandLowerPortAft() {
+    private commandLowerPortStern() {
         this.command.sternPort = this.valveCommandsLower
         return this.command
     }
@@ -437,6 +473,76 @@ export class PneumaticsController {
         this.command.bowStarboard = this.valveCommandsHold
         this.command.sternPort = this.valveCommandsHold
         this.command.sternStarboard = this.valveCommandsHold
+    }
+    private commandHoldBow() {
+        this.command.bowPort = this.valveCommandsHold
+        this.command.bowStarboard = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandHoldStern() {
+        this.command.sternPort = this.valveCommandsHold
+        this.command.sternStarboard = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandHoldStarboard() {
+        this.command.bowStarboard = this.valveCommandsHold
+        this.command.sternStarboard = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandHoldPort() {
+        this.command.bowPort = this.valveCommandsHold
+        this.command.sternPort = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandHoldBowStarboard() {
+        this.command.bowStarboard = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandHoldBowPort() {
+        this.command.bowPort = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandHoldSternStarboard() {
+        this.command.sternStarboard = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandHoldSternPort() {
+        this.command.sternPort = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandHoldStarboardStern() {
+        this.command.sternStarboard = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandHoldPortStern() {
+        this.command.sternPort = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandHoldStarboardBow() {
+        this.command.bowStarboard = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandHoldPortBow() {
+        this.command.bowPort = this.valveCommandsHold
+        return this.command
+    }
+    
+    private commandVentAll() {
+        this.command.bowPort = this.valveCommandsVent
+        this.command.bowStarboard = this.valveCommandsVent
+        this.command.sternPort = this.valveCommandsVent
+        this.command.sternStarboard = this.valveCommandsVent
     }
 }
 

@@ -25,9 +25,9 @@ PressureSensor::~PressureSensor() {}
 uint16_t PressureSensor::getReading()
 {
     uint16_t reading = analogRead(pin);
-    float voltage = 5.0 * reading / 4095; // voltage = 0..5V;  we do the math in millivolts!!
-    // map(value, fromLow, fromHigh, toLow, toHigh)
-    return map(voltage, 0.5, 4.5, 0.0, 150.0); // Arduino map() function
+    //float voltage = 5.0 * reading / 4095; // voltage = 0..5V;  we do the math in millivolts!!
+    //map(value, fromLow, fromHigh, toLow, toHigh)
+    return reading //map(voltage, 0.5, 3.0, 0.0, 150.0); // Arduino map() function
     ;
 };
 

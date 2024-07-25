@@ -31,12 +31,12 @@ const char* websocket_server = "192.168.0.38";
 // STERN: 8072 and espToServerSystemStateStern
 
 // UNCOMMENT THIS FOR BOW 
-const uint16_t websocket_port = 8071;
-const char* messageType = "espToServerSystemStateBow";
+// const uint16_t websocket_port = 8071;
+// const char* messageType = "espToServerSystemStateBow";
 
 // UNCOMMENT THIS FOR STERN
-// const uint16_t websocket_port = 8072;
-// const char* messageType = "espToServerSystemStateStern";
+const uint16_t websocket_port = 8072;
+const char* messageType = "espToServerSystemStateStern";
 
 // init Json data object
 json system_state = { { "type", messageType }, { "sendTime", "notime" },
