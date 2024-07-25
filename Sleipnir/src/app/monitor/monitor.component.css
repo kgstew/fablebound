@@ -7,7 +7,7 @@
   color: blueviolet; */
 }
 
-.lowering {
+.button.pressed {
   background-color: rgb(250, 121, 74);
   color: black;
 }

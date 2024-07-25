@@ -12,6 +12,7 @@ import { NgClass } from '@angular/common';
 export class MonitorComponent {
 
   public pistonSettings: any;
+  public isPressed: boolean = false;
 
   constructor(@Inject(WebsocketService) private websocketService: WebsocketService) {}
 
@@ -29,17 +30,21 @@ export class MonitorComponent {
   }
 
   public move(side: string): void {
-    let movement: string = "";
-    if (this.pistonSettings[side]) {
-      this.pistonSettings[side] = !this.pistonSettings[side];
-      movement = "raise";
-    } else {
-      this.pistonSettings[side] = !this.pistonSettings[side];
-      movement = "lower";
-    }
+    this.isPressed = true;
     const payload = {
       "type": "pneumaticsCommandText",
-      "command": movement + side,
+      "command": side,
+      "sendTime": Date().toLocaleString()
+    }
+    console.log(JSON.stringify(payload));
+    this.websocketService.sendMessage(JSON.stringify(payload))
+  }
+
+  public hold(side: string): void {
+    this.isPressed = false;
+    const payload = {
+      "type": "pneumaticsCommandText",
+      "command": 'hold' + side,
       "sendTime": Date().toLocaleString()
     }
     console.log(JSON.stringify(payload));
