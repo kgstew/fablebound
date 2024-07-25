@@ -125,7 +125,9 @@ export class PneumaticsController {
             this.systemState.sternPort = systemStateReadings.port
         }
         this.systemState.lastReadingsReceived = new Date(systemStateReadings.sendTime)
-
+        console.log("SYSTEM STATE")
+        console.log(this.systemState)
+        console.log("END SYSTEM STATE")
         this.updateSystemStateLogs()
 
         return this.systemState
