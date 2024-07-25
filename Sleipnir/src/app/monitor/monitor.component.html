@@ -1,38 +1,38 @@
 <div class="container text-center pt-3">
   <div class="row">
     <div class="col">
-      <p class="border" (click)="move('raiseBow')">Bow</p>
+      <p class="border p-3" (click)="move('Bow')" [ngClass]="{'raising': pistonSettings['Bow'], 'lowering': !pistonSettings['Bow']}">Bow</p>
     </div>
   </div>
   <div class="row py-3">
     <div class="col">
-      <p class="border tall-row" (click)="move('raisePort')">Port</p>
+      <p class="border tall-row pt-5" (click)="move('Port')" [ngClass]="{'raising': pistonSettings['Port'], 'lowering': !pistonSettings['Port']}">Port</p>
     </div>
     <div class="col-6">
       <div class="row">
         <div class="col">
-          <p class="border" (click)="move('raiseBowPort')">.</p>
+          <p class="border p-3" (click)="move('BowPort')" [ngClass]="{'raising': pistonSettings['BowPort'], 'lowering': !pistonSettings['BowPort']}">.</p>
         </div>
         <div class="col">
-          <p class="border" (click)="move('raiseBowStarboard')">.</p>
+          <p class="border p-3" (click)="move('BowStarboard')" [ngClass]="{'raising': pistonSettings['BowStarboard'], 'lowering': !pistonSettings['BowStarboard']}">.</p>
         </div>
       </div>
       <div class="row">
         <div class="col">
-          <p class="border" (click)="move('raiseSternPort')">.</p>
+          <p class="border p-3" (click)="move('SternPort')" [ngClass]="{'raising': pistonSettings['SternPort'], 'lowering': !pistonSettings['SternPort']}">.</p>
         </div>
         <div class="col">
-          <p class="border" (click)="move('raiseSternStarboard')">.</p>
+          <p class="border p-3" (click)="move('SternStarboard')" [ngClass]="{'raising': pistonSettings['SternStarboard'], 'lowering': !pistonSettings['SternStarboard']}">.</p>
         </div>
       </div>
     </div>
     <div class="col">
-      <p class="border tall-row" (click)="move('starboard')">Star</p>
+      <p class="border tall-row pt-5" (click)="move('Starboard')" [ngClass]="{'raising': pistonSettings['Starboard'], 'lowering': !pistonSettings['Starboard']}">Star</p>
     </div>
   </div>
   <div class="row">
     <div class="col">
-      <p class="border" (click)="move('stern')">Stern</p>
+      <p class="border p-3" (click)="move('Stern')" [ngClass]="{'raising': pistonSettings['Stern'], 'lowering': !pistonSettings['Stern']}">Stern</p>
     </div>
   </div>
 </div>
