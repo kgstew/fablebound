@@ -45,10 +45,10 @@ export class PneumaticsController {
     public systemStateLog: SystemState[] = []
     public logLength = 2400 // at 4 readings per second this is 10 minutes of readings data
     public command!: PneumaticsCommandGranular
-    public bigAssMainTankMinPressure = 100
-    public bigAssMainTankMaxPressure = 250
-    public ballastTankMaxPressure = 100
-    public maxPistonPressure = 100
+    public bigAssMainTankMinPressure = 0
+    public bigAssMainTankMaxPressure = 25000
+    public ballastTankMaxPressure = 10000
+    public maxPistonPressure = 10000
 
     public valveCommandsLower = {
         ballastIntakeValve: 'closed',
