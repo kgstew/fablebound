@@ -1,161 +1,109 @@
-<div class="container text-center pt-3">
-  <div class="row">
-    <div class="col border">
-      <!-- <p class="border p-3" (click)="move('Bow')" [ngClass]="{'raising': pistonSettings['Bow'], 'lowering': !pistonSettings['Bow']}">Bow</p> -->
-      <div class="row border pt-3">
-        <p class="text-center"
-          (mousedown)="move('raiseBow')" 
-          (touchstart)="move('raiseBow')" 
-          (mouseup)="hold('Bow')" 
-          (touchend)="hold('Bow')">Bow up</p>
+<div class="text-center pt-3">
+  <div class="row m-2">
+    <div class="col">
+      <div class="row pt-3 button"
+        (touchstart)="buttonPress($event,'raise', 'Bow')" 
+        (touchend)="buttonPress($event,'hold','Bow')"
+        (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Bow up</p>
       </div>
-      <div class="row border pt-3">
-        <p class="text-center" 
-        (mousedown)="move('lowerBow')" 
-        (touchstart)="move('lowerBow')" 
-        (mouseup)="hold('Bow')" 
-        (touchend)="hold('Bow')">Bow down</p>
+      <div class="row pt-3 button"
+        (touchstart)="buttonPress($event,'lower', 'Bow')" 
+        (touchend)="buttonPress($event, 'hold', 'Bow')"
+        (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Bow down</p>
       </div>
     </div>
   </div>
   <div class="row py-3">
     <div class="col">
-      <!-- <p class="border tall-row pt-5" (click)="move('Port')" [ngClass]="{'raising': pistonSettings['Port'], 'lowering': !pistonSettings['Port']}">Port</p> -->
-      <div class="row border pt-5">
-        <p class="text-center"
-          (mousedown)="move('raisePort')" 
-          (touchstart)="move('raisePort')" 
-          (mouseup)="hold('Port')" 
-          (touchend)="hold('Port')"
-          [class.pressed]="isPressed">Port up</p>
+      <div class="row pt-5 button"
+        (touchstart)="buttonPress($event,'raise', 'Port')" 
+        (touchend)="buttonPress($event, 'hold', 'Port')"
+        (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Port up</p>
       </div>
-      <div class="row border pt-5">
-        <p class="text-center" 
-        (mousedown)="move('lowerPort')" 
-        (touchstart)="move('lowerPort')" 
-        (mouseup)="hold('Port')" 
-        (touchend)="hold('Port')"
-        [class.pressed]="isPressed">Port down</p>
+      <div class="row pt-5 button"
+        (touchstart)="buttonPress($event, 'lower', 'Port')" 
+        (touchend)="buttonPress($event, 'hold', 'Port')"
+        (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Port down</p>
       </div>
     </div>
     <div class="col-6">
       <div class="row">
         <div class="col">
-          <!-- <p class="border p-3" (click)="move('BowPort')" [ngClass]="{'raising': pistonSettings['BowPort'], 'lowering': !pistonSettings['BowPort']}">.</p> -->
-          <div class="row border pt-3">
-            <p class="text-center"
-              (mousedown)="move('raiseBowPort')" 
-              (touchstart)="move('raiseBowPort')" 
-              (mouseup)="hold('BowPort')" 
-              (touchend)="hold('BowPort')"
-              [class.pressed]="isPressed">up</p>
+          <div class="row pt-3 button"
+            (touchstart)="buttonPress($event,'raise', 'BowPort')" 
+            (touchend)="buttonPress($event, 'hold', 'BowPort')"
+            (contextmenu)="$event.preventDefault()"><p class="text-center no-select">up</p>
           </div>
-          <div class="row border pt-3">
-            <p class="text-center" 
-            (mousedown)="move('lowerBowPort')" 
-            (touchstart)="move('lowerBowPort')" 
-            (mouseup)="hold('BowPort')" 
-            (touchend)="hold('BowPort')"
-            [class.pressed]="isPressed">down</p>
+          <div class="row pt-3 button"
+            (touchstart)="buttonPress($event, 'lower', 'BowPort')" 
+            (touchend)="buttonPress($event, 'hold', 'BowPort')"
+            (contextmenu)="$event.preventDefault()"><p class="text-center no-select">down</p>
           </div>
         </div>
         <div class="col">
-          <!-- <p class="border p-3" (click)="move('BowStarboard')" [ngClass]="{'raising': pistonSettings['BowStarboard'], 'lowering': !pistonSettings['BowStarboard']}">.</p> -->
-          <div class="row border pt-3">
-            <p class="text-center"
-              (mousedown)="move('raiseBowStarboard')" 
-              (touchstart)="move('raiseBowStarboard')" 
-              (mouseup)="hold('BowStarboard')" 
-              (touchend)="hold('BowStarboard')"
-              [class.pressed]="isPressed">up</p>
+          <div class="row pt-3 button"
+            (touchstart)="buttonPress($event,'raise', 'BowStarboard')" 
+            (touchend)="buttonPress($event, 'hold', 'BowStarboard')"
+            (contextmenu)="$event.preventDefault()"><p class="text-center no-select">up</p>
           </div>
-          <div class="row border pt-3">
-            <p class="text-center" 
-            (mousedown)="move('lowerBowStarboard')" 
-            (touchstart)="move('lowerBowStarboard')" 
-            (mouseup)="hold('BowStarboard')" 
-            (touchend)="hold('BowStarboard')"
-            [class.pressed]="isPressed">down</p>
+          <div class="row pt-3 button"
+            (touchstart)="buttonPress($event, 'lower', 'BowStarboard')" 
+            (touchend)="buttonPress($event, 'hold', 'BowStarboard')"
+            (contextmenu)="$event.preventDefault()"><p class="text-center no-select">down</p>
           </div>
         </div>
       </div>
       <div class="row">
         <div class="col">
-          <!-- <p class="border p-3" (click)="move('SternPort')" [ngClass]="{'raising': pistonSettings['SternPort'], 'lowering': !pistonSettings['SternPort']}">.</p> -->
-          <div class="row border pt-3">
-            <p class="text-center"
-              (mousedown)="move('raiseSternPort')" 
-              (touchstart)="move('raiseSternPort')" 
-              (mouseup)="hold('SternPort')" 
-              (touchend)="hold('SternPort')"
-              [class.pressed]="isPressed">up</p>
+          <div class="row pt-3 button"
+            (touchstart)="buttonPress($event,'raise', 'SternPort')" 
+            (touchend)="buttonPress($event, 'hold', 'SternPort')"
+            (contextmenu)="$event.preventDefault()"><p class="text-center no-select">up</p>
           </div>
-          <div class="row border pt-3">
-            <p class="text-center" 
-            (mousedown)="move('lowerSternPort')" 
-            (touchstart)="move('lowerSternPort')" 
-            (mouseup)="hold('SternPort')" 
-            (touchend)="hold('SternPort')"
-            [class.pressed]="isPressed">down</p>
+          <div class="row pt-3 button"
+            (touchstart)="buttonPress($event, 'lower', 'SternPort')" 
+            (touchend)="buttonPress($event, 'hold', 'SternPort')"
+            (contextmenu)="$event.preventDefault()"><p class="text-center no-select">down</p>
           </div>
         </div>
         <div class="col">
-          <!-- <p class="border p-3" (click)="move('SternStarboard')" [ngClass]="{'raising': pistonSettings['SternStarboard'], 'lowering': !pistonSettings['SternStarboard']}">.</p> -->
-          <div class="row border pt-3">
-            <p class="text-center"
-              (mousedown)="move('raiseSternStarboard')" 
-              (touchstart)="move('raiseSternStarboard')" 
-              (mouseup)="hold('SternStarboard')" 
-              (touchend)="hold('SternStarboard')"
-              [class.pressed]="isPressed">up</p>
+          <div class="row pt-3 button"
+            (touchstart)="buttonPress($event,'raise', 'SternStarboard')" 
+            (touchend)="buttonPress($event, 'hold', 'SternStarboard')"
+            (contextmenu)="$event.preventDefault()"><p class="text-center no-select">up</p>
           </div>
-          <div class="row border pt-3">
-            <p class="text-center" 
-            (mousedown)="move('lowerSternStarboard')" 
-            (touchstart)="move('lowerSternStarboard')" 
-            (mouseup)="hold('SternStarboard')" 
-            (touchend)="hold('SternStarboard')"
-            [class.pressed]="isPressed">down</p>
+          <div class="row pt-3 button"
+            (touchstart)="buttonPress($event, 'lower', 'SternStarboard')" 
+            (touchend)="buttonPress($event, 'hold', 'SternStarboard')"
+            (contextmenu)="$event.preventDefault()"><p class="text-center no-select">down</p>
           </div>
         </div>
       </div>
     </div>
     <div class="col">
-      <!-- <p class="border tall-row pt-5" (click)="move('Starboard')" [ngClass]="{'raising': pistonSettings['Starboard'], 'lowering': !pistonSettings['Starboard']}">Star</p> -->
-      <div class="row border pt-5">
-        <p class="text-center"
-          (mousedown)="move('raiseStarboard')" 
-          (touchstart)="move('raiseStarboard')" 
-          (mouseup)="hold('Starboard')" 
-          (touchend)="hold('Starboard')"
-          [class.pressed]="isPressed">Star up</p>
+      <div class="row pt-5 button"
+        (touchstart)="buttonPress($event,'raise', 'Starboard')" 
+        (touchend)="buttonPress($event, 'hold', 'Starboard')"
+        (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Star up</p>
       </div>
-      <div class="row border pt-5">
-        <p class="text-center" 
-        (mousedown)="move('lowerStarboard')" 
-        (touchstart)="move('lowerStarboard')" 
-        (mouseup)="hold('Starboard')" 
-        (touchend)="hold('Starboard')"
-        [class.pressed]="isPressed">Star down</p>
+      <div class="row pt-5 button"
+        (touchstart)="buttonPress($event, 'lower', 'Starboard')" 
+        (touchend)="buttonPress($event, 'hold', 'Starboard')"
+        (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Star down</p>
       </div>
     </div>
   </div>
   <div class="row">
     <div class="col">
-      <!-- <p class="border p-3" (click)="move('Stern')" [ngClass]="{'raising': pistonSettings['Stern'], 'lowering': !pistonSettings['Stern']}">Stern</p> -->
-      <div class="row border pt-3">
-        <p class="text-center"
-          (mousedown)="move('raiseStern')" 
-          (touchstart)="move('raiseStern')" 
-          (mouseup)="hold('Stern')" 
-          (touchend)="hold('Stern')">Stern up</p>
+      <div class="row pt-3 button"
+        (touchstart)="buttonPress($event,'raise', 'Stern')" 
+        (touchend)="buttonPress($event, 'hold', 'Stern')"
+        (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Stern up</p>
       </div>
-      <div class="row border pt-3">
-        <p class="text-center" 
-        (mousedown)="move('lowerStern')" 
-        (touchstart)="move('lowerStern')" 
-        (mouseup)="hold('Stern')" 
-        (touchend)="hold('Stern')">Stern down</p>
+      <div class="row pt-3 button"
+        (touchstart)="buttonPress($event, 'lower', 'Stern')" 
+        (touchend)="buttonPress($event, 'hold', 'Stern')"
+        (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Stern down</p>
       </div>
     </div>
   </div>

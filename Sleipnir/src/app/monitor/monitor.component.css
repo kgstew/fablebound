@@ -2,12 +2,35 @@
   height: 100%;
 }
 
-.raising {
-  /* background-color: aquamarine;
-  color: blueviolet; */
+.row {
+  /* padding: 0 10px; */
 }
 
+.button {
+  display: inline-block;
+  width: 100%;
+  padding: 2px;
+  /* margin: 10px 0; */
+  margin: 2px;
+  border: 2px solid #4a5c70;
+  border-radius: 10px;
+  background-color: #4a5c70;
+  color: #007bff;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 1.5s, color 0.3s, transform .5s;
+}
+
+.button:active,
 .button.pressed {
+  background-color: #ae5649;
+  color: #fff;
+  transform: scale(0.97);
+}
+
+.active {
   background-color: rgb(250, 121, 74);
   color: black;
 }

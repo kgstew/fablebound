@@ -10,3 +10,11 @@ p {
 h3 {
   color: #56B7C6;
 }
+
+/* Disabling text selection */
+* {
+  user-select: none; /* Standard syntax */
+  -webkit-user-select: none; /* WebKit (Safari, Chrome) */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+}
