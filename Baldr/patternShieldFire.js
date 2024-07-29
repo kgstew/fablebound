@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 // Flame pattern for shields. Brighter at the bottom then fades upward. Mirrored vertically so the
 // flames look the lights look the same on either side.
 

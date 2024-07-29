@@ -19,8 +19,8 @@ Leg* LegPort = nullptr;
 
 
 // Replace with your network credentials
-const char* ssid = "Whitesands";
-const char* password = "alllowercasenocaps";
+const char* ssid = "VikingRadio";
+const char* password = "vikinglongship";
 
 // WebSocket server address and port
 const char* websocket_server = "192.168.0.101";
