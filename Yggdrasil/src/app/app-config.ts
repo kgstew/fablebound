@@ -13,7 +13,7 @@ const appConfig = {
         pressure2: 'pressure',
         temperature1: 'temperature',
     },
-    messages: ['espToServerSystemStateBow', 'espToServerSystemStateStern', 'pneumaticsCommandGranular', 'pneumaticsCommandText'] as const,
+    messages: ['espToServerSystemStateBow', 'espToServerSystemStateStern', 'pneumaticsCommandGranular', 'pneumaticsCommandText', 'pneumaticsCommandPattern'] as const,
 }
 
 export { appConfig }

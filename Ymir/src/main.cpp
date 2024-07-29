@@ -23,7 +23,7 @@ const char* ssid = "Whitesands";
 const char* password = "alllowercasenocaps";
 
 // WebSocket server address and port
-const char* websocket_server = "192.168.0.38";
+const char* websocket_server = "192.168.0.101";
 
 // Websocket server port
 // CHANGE THIS TO CHANGE BOW VS STERN

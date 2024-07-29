@@ -1,4 +1,5 @@
 import { Valve } from "domain/models"
+import { PneumaticsController } from "./pneumatics-controller"
 
 
 interface LegAssemblyReadings {
@@ -42,7 +43,6 @@ export type ReadingsData= {
     sternStarboard: LegAssemblyReadings;
     sendTime: string;
 }
-
 
 export type PneumaticsCommandGranular = {
     type: string,
@@ -101,6 +101,13 @@ export interface PneumaticsCommandTextMessage {
     sendTime: string
 }
 
+
+export interface PneumaticsCommandPatternMessage {
+    type: 'pneumaticsCommandPattern'
+    pattern: PneumaticsCommandPatternName
+    sendTime: string
+}
+
 const PneumaticsCommandLibrary = {
     raiseBow: 'raiseBow',
     lowerBow: 'lowerBow',
@@ -142,8 +149,26 @@ const PneumaticsCommandLibrary = {
     ventAll: 'ventAll',
   } as const;
   
+
+    const PneumaticsPatternLibrary = {
+    stormySeas: 'stormySeas'
+  } as const;
+
  export type PneumaticsCommandText = typeof PneumaticsCommandLibrary[keyof typeof PneumaticsCommandLibrary];
   
- export function isValidPneumaticsCommand(command: string): command is PneumaticsCommandText {
+ export interface PneumaticsCommandPattern {
+    name: PneumaticsCommandPatternName;
+    main: (controller: PneumaticsController) => void;
+    shouldContinue: () => boolean;
+}
+
+export type PneumaticsCommandPatternName = typeof PneumaticsPatternLibrary[keyof typeof PneumaticsPatternLibrary];  
+export type PneumaticsCommandPatternMap = Map<PneumaticsCommandPatternName, PneumaticsCommandPattern>;
+
+export function isValidPneumaticsCommand(command: string): command is PneumaticsCommandText {
     return command in PneumaticsCommandLibrary;
+  }
+
+export function isValidPneumaticsPattern(pattern: string): pattern is PneumaticsCommandPatternName {
+    return pattern in PneumaticsPatternLibrary;
   }

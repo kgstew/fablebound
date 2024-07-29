@@ -1,6 +1,7 @@
 import { LegCommandGranular, PneumaticsCommandGranular, PneumaticsCommandGranularBowOrStern as PneumaticsCommandGranularBowOrStern, PneumaticsCommandGranularCombined } from "api/web/handlers/pneumatics-command-granular-handler/pneumatics-command-granular"
-import { FrontendCommandGranularMessage, ReadingsData, SystemState, PneumaticsCommandText, PneumaticsCommandTextMessage, BowOrSternReadingsData } from "./types"
+import { FrontendCommandGranularMessage, ReadingsData, SystemState, PneumaticsCommandText, PneumaticsCommandTextMessage, BowOrSternReadingsData, PneumaticsCommandPattern, PneumaticsCommandPatternName, PneumaticsCommandPatternMap } from "./types"
 import { Valve } from "domain/models"
+import { PneumaticsCommandGranularHandler } from "api"
 
 
 export const defaultSystemState: ReadingsData = {
@@ -543,6 +544,90 @@ export class PneumaticsController {
         this.command.bowStarboard = this.valveCommandsVent
         this.command.sternPort = this.valveCommandsVent
         this.command.sternStarboard = this.valveCommandsVent
+    }
+}
+
+export class PneumaticsPatternController {
+    private pneumaticsController: PneumaticsController;
+    private currentPattern: PneumaticsCommandPattern | null = null;
+    private patterns: PneumaticsCommandPatternMap = new Map();
+    private isRunning: boolean = false;
+    private stopRequested: boolean = false;
+
+    constructor(pneumaticsController: PneumaticsController) {
+        this.pneumaticsController = pneumaticsController;
+        this.initializePatterns();
+    }
+
+    private initializePatterns() {
+        this.patterns.set("stormySeas", {
+            name: "stormySeas",
+            main: async (controller) => {
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseBow', sendTime: new Date().toLocaleString() });
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStern', sendTime: new Date().toLocaleString() });
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerBow', sendTime: new Date().toLocaleString() });
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerStern', sendTime: new Date().toLocaleString() });
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+            },
+            shouldContinue: () => !this.stopRequested
+        });
+
+        // Add more patterns here
+    }
+
+    public setPattern(patternName: PneumaticsCommandPatternName) {
+        const pattern = this.patterns.get(patternName);
+        if (pattern) {
+            this.currentPattern = pattern;
+        } else {
+            throw new Error(`Pattern '${patternName}' not found`);
+        }
+    }
+
+    public async startPattern() {
+        if (this.isRunning) {
+            console.log("A pattern is already running.");
+            return;
+        }
+
+        if (!this.currentPattern) {
+            console.log("No pattern selected.");
+            return;
+        }
+
+        this.isRunning = true;
+        this.stopRequested = false;
+
+        try {
+            while (this.currentPattern.shouldContinue()) {
+                await this.currentPattern.main(this.pneumaticsController);
+                if (this.stopRequested) break;
+            }
+        } catch (error) {
+            console.error("Error running pattern:", error);
+        } finally {
+            this.isRunning = false;
+            this.stopRequested = false;
+        }
+    }
+
+    public stopPattern() {
+        this.stopRequested = true;
+    }
+
+    public isPatternRunning(): boolean {
+        return this.isRunning;
+    }
+
+    public getAvailablePatterns(): PneumaticsCommandPatternName[] {
+        return Array.from(this.patterns.keys());
+    }
+
+    public getCurrentPattern(): PneumaticsCommandPatternName | null {
+        return this.currentPattern ? this.currentPattern.name : null;
     }
 }
 
