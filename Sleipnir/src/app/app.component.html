@@ -2,7 +2,7 @@
   <app-header (menuSelected)="menuSelected($event)"></app-header>
   <div class="container">
     <app-dashboard *ngIf="selectedMenuItem === ''"></app-dashboard>
-    <app-light *ngIf="selectedMenuItem === 'light'"></app-light>
+    <app-patterns *ngIf="selectedMenuItem === 'patterns'"></app-patterns>
     <app-pressure *ngIf="selectedMenuItem === 'pressure'"></app-pressure>
     <app-monitor *ngIf="selectedMenuItem === 'movement'"></app-monitor>
   </div>
