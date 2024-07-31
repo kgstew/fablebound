@@ -6,13 +6,15 @@ import { PressureComponent } from './pressure/pressure.component';
 import { MonitorComponent } from './monitor/monitor.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CommonModule } from '@angular/common';
+import { PatternsComponent } from './patterns/patterns.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-root',
     standalone: true,
     templateUrl: './app.component.html',
     styleUrl: './app.component.css',
-    imports: [RouterOutlet, CommonModule, HeaderComponent, LightComponent, PressureComponent, MonitorComponent, DashboardComponent]
+    imports: [RouterOutlet, CommonModule, FormsModule, HeaderComponent, LightComponent, PressureComponent, MonitorComponent, DashboardComponent, PatternsComponent]
 })
 export class AppComponent {
   title = 'Sleipnir';
