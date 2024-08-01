@@ -1,3 +1,4 @@
+import { pixelblazeClients } from 'app/pixelblaze/clients/pixelblaze-clients';
 import { Input } from 'midi';
 
 const startMidiServer = async (
@@ -25,6 +26,16 @@ input.openPort(0);
 // Configure a callback.
 input.on('message', (deltaTime: number, message: number[]) => {
   console.log(`m: ${message} d: ${deltaTime}`);
+  const params = {
+    TRIGGER_SEGMENT_CHANGE: 1,
+  }
+  pixelblazeClients.forEach(client => {
+    if (client.isConnected()) {
+        client.sendVars(params);
+    } else {
+        console.log(`Cannot send pattern to ${client.name}: not connected`);
+    }
+});
 });
 
 console.log('Listening for MIDI messages.');
