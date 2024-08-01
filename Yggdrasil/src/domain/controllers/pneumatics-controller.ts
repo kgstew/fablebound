@@ -2,6 +2,7 @@ import { LegCommandGranular, PneumaticsCommandGranular, PneumaticsCommandGranula
 import { FrontendCommandGranularMessage, ReadingsData, SystemState, PneumaticsCommandText, PneumaticsCommandTextMessage, BowOrSternReadingsData, PneumaticsCommandPattern, PneumaticsCommandPatternName, PneumaticsCommandPatternMap } from "./types"
 import { Valve } from "domain/models"
 import { PneumaticsCommandGranularHandler } from "api"
+import { webSocketConnections } from "app/websocket/server/open-socket"
 
 
 export const defaultSystemState: ReadingsData = {
@@ -84,6 +85,18 @@ export class PneumaticsController {
 
     public dischargeCommand(): PneumaticsCommandGranularCombined {
         const outgoingCommand = this.splitOutgoingCommand()
+        if ('esp32bow' in webSocketConnections) {
+            webSocketConnections['esp32bow'].send(JSON.stringify(outgoingCommand.bow));
+            console.log("Data sent to esp32.");
+        } else {
+            console.log("Failed to send data: 'esp32' connection does not exist.");
+        }
+        if ('esp32stern' in webSocketConnections) {
+            webSocketConnections['esp32stern'].send(JSON.stringify(outgoingCommand.stern));
+            console.log("Data sent to esp32.");
+        } else {
+            console.log("Failed to send data: 'esp32' connection does not exist.");
+        }
         this.command = {
             type: 'pneumaticsCommandGranular',
             sendTime: new Date().toLocaleString(),

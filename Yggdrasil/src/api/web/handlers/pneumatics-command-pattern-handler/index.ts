@@ -37,25 +37,7 @@ class PneumaticsCommandPatternHandler implements Handler<PneumaticsCommandPatter
 
         const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
         const outgoingCommand = pneumaticsModelSingleton.model.handleCommand(validatedFrontendCommand);
-        const outgoingCommandBow = outgoingCommand.bow
-        const outgoingCommandStern = outgoingCommand.stern
-        const outgoingCommandBowStringified = JSON.stringify(outgoingCommandBow)
-        const outgoingCommandSternStringified = JSON.stringify(outgoingCommandStern)
-
-        console.log("Processed Command:", validatedFrontendCommand);
-
-    if ('esp32bow' in webSocketConnections) {
-        webSocketConnections['esp32bow'].send(outgoingCommandBowStringified);
-        console.log("Data sent to esp32.");
-    } else {
-        console.log("Failed to send data: 'esp32' connection does not exist.");
-    }
-    if ('esp32stern' in webSocketConnections) {
-        webSocketConnections['esp32stern'].send(outgoingCommandSternStringified);
-        console.log("Data sent to esp32.");
-    } else {
-        console.log("Failed to send data: 'esp32' connection does not exist.");
-    }
+      
     }
 }
 
