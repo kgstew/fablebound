@@ -630,6 +630,7 @@ export class PneumaticsPatternController {
     }
 
     public stopPattern() {
+        console.log("Stopping pneumatics pattern, processing manual commands...")
         this.stopRequested = true;
     }
 

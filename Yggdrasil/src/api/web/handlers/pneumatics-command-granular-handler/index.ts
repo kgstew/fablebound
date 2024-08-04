@@ -1,7 +1,7 @@
 import { PneumaticsSystemService, Valve } from 'domain/'
 import { Handler } from '../handler'
 import { webSocketConnections } from 'app/websocket/server/open-socket';
-import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller';
+import { PneumaticsModelSingleton, PneumaticsPatternController } from 'domain/controllers/pneumatics-controller';
 import { FrontendCommandGranularMessage, LegCommandGranular, PneumaticsCommandGranular, PneumaticsCommandGranularBowOrStern, PneumaticsCommandGranularCombined } from 'domain/controllers/types';
 
  
@@ -48,7 +48,12 @@ const sampleReadingsData = {
 const sampleReadingsDataString = JSON.stringify(sampleReadingsData);
 
 class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranular> {
-    constructor(private pneumaticSystemService: PneumaticsSystemService) {}
+    private pneumaticsPatternController: PneumaticsPatternController;
+
+    constructor(private pneumaticSystemService: PneumaticsSystemService) {
+        const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
+        this.pneumaticsPatternController = new PneumaticsPatternController(pneumaticsModelSingleton.model);
+    }
 
     validate(data: unknown): FrontendCommandGranularMessage {
         if (!data) {
@@ -73,6 +78,13 @@ class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranu
     async handle(data: unknown): Promise<void> {
         console.log("Received data:", data);
 
+        // Stop any live patterns
+        try {
+            await this.pneumaticsPatternController.stopPattern();
+        } catch (error) {
+            console.error("Error running pattern:", error);
+        }
+        
         const validatedFrontendCommand = this.validate(data) as FrontendCommandGranularMessage;
 
         const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
