@@ -3,12 +3,16 @@
     <div class="col">
       <div class="row pt-3 button"
         (touchstart)="buttonPress($event,'raise', 'Bow')" 
+        (mousedown)="buttonPress($event,'raise', 'Bow')" 
         (touchend)="buttonPress($event,'hold','Bow')"
+        (mouseup)="buttonPress($event,'hold','Bow')"
         (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Bow up</p>
       </div>
       <div class="row pt-3 button"
         (touchstart)="buttonPress($event,'lower', 'Bow')" 
+        (mousedown)="buttonPress($event,'lower', 'Bow')" 
         (touchend)="buttonPress($event, 'hold', 'Bow')"
+        (mouseup)="buttonPress($event, 'hold', 'Bow')"
         (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Bow down</p>
       </div>
     </div>
@@ -17,12 +21,16 @@
     <div class="col">
       <div class="row pt-5 button"
         (touchstart)="buttonPress($event,'raise', 'Port')" 
+        (mousedown)="buttonPress($event,'raise', 'Port')" 
         (touchend)="buttonPress($event, 'hold', 'Port')"
+        (mouseup)="buttonPress($event, 'hold', 'Port')"
         (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Port up</p>
       </div>
       <div class="row pt-5 button"
         (touchstart)="buttonPress($event, 'lower', 'Port')" 
+        (mousedown)="buttonPress($event, 'lower', 'Port')" 
         (touchend)="buttonPress($event, 'hold', 'Port')"
+        (mouseup)="buttonPress($event, 'hold', 'Port')"
         (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Port down</p>
       </div>
     </div>
@@ -31,24 +39,32 @@
         <div class="col">
           <div class="row pt-3 button"
             (touchstart)="buttonPress($event,'raise', 'BowPort')" 
+            (mousedown)="buttonPress($event,'raise', 'BowPort')" 
             (touchend)="buttonPress($event, 'hold', 'BowPort')"
+            (mouseup)="buttonPress($event, 'hold', 'BowPort')"
             (contextmenu)="$event.preventDefault()"><p class="text-center no-select">up</p>
           </div>
           <div class="row pt-3 button"
             (touchstart)="buttonPress($event, 'lower', 'BowPort')" 
+            (mousedown)="buttonPress($event, 'lower', 'BowPort')" 
             (touchend)="buttonPress($event, 'hold', 'BowPort')"
+            (mouseup)="buttonPress($event, 'hold', 'BowPort')"
             (contextmenu)="$event.preventDefault()"><p class="text-center no-select">down</p>
           </div>
         </div>
         <div class="col">
           <div class="row pt-3 button"
             (touchstart)="buttonPress($event,'raise', 'BowStarboard')" 
+            (mousedown)="buttonPress($event,'raise', 'BowStarboard')" 
             (touchend)="buttonPress($event, 'hold', 'BowStarboard')"
+            (mouseup)="buttonPress($event, 'hold', 'BowStarboard')"
             (contextmenu)="$event.preventDefault()"><p class="text-center no-select">up</p>
           </div>
           <div class="row pt-3 button"
             (touchstart)="buttonPress($event, 'lower', 'BowStarboard')" 
+            (mousedown)="buttonPress($event, 'lower', 'BowStarboard')" 
             (touchend)="buttonPress($event, 'hold', 'BowStarboard')"
+            (mouseup)="buttonPress($event, 'hold', 'BowStarboard')"
             (contextmenu)="$event.preventDefault()"><p class="text-center no-select">down</p>
           </div>
         </div>
@@ -57,24 +73,32 @@
         <div class="col">
           <div class="row pt-3 button"
             (touchstart)="buttonPress($event,'raise', 'SternPort')" 
+            (mousedown)="buttonPress($event,'raise', 'SternPort')" 
             (touchend)="buttonPress($event, 'hold', 'SternPort')"
+            (mouseup)="buttonPress($event, 'hold', 'SternPort')"
             (contextmenu)="$event.preventDefault()"><p class="text-center no-select">up</p>
           </div>
           <div class="row pt-3 button"
             (touchstart)="buttonPress($event, 'lower', 'SternPort')" 
+            (mousedown)="buttonPress($event, 'lower', 'SternPort')" 
             (touchend)="buttonPress($event, 'hold', 'SternPort')"
+            (mouseup)="buttonPress($event, 'hold', 'SternPort')"
             (contextmenu)="$event.preventDefault()"><p class="text-center no-select">down</p>
           </div>
         </div>
         <div class="col">
           <div class="row pt-3 button"
             (touchstart)="buttonPress($event,'raise', 'SternStarboard')" 
+            (mousedown)="buttonPress($event,'raise', 'SternStarboard')" 
             (touchend)="buttonPress($event, 'hold', 'SternStarboard')"
+            (mouseup)="buttonPress($event, 'hold', 'SternStarboard')"
             (contextmenu)="$event.preventDefault()"><p class="text-center no-select">up</p>
           </div>
           <div class="row pt-3 button"
             (touchstart)="buttonPress($event, 'lower', 'SternStarboard')" 
+            (mousedown)="buttonPress($event, 'lower', 'SternStarboard')" 
             (touchend)="buttonPress($event, 'hold', 'SternStarboard')"
+            (mouseup)="buttonPress($event, 'hold', 'SternStarboard')"
             (contextmenu)="$event.preventDefault()"><p class="text-center no-select">down</p>
           </div>
         </div>
@@ -83,12 +107,16 @@
     <div class="col">
       <div class="row pt-5 button"
         (touchstart)="buttonPress($event,'raise', 'Starboard')" 
+        (mousedown)="buttonPress($event,'raise', 'Starboard')" 
         (touchend)="buttonPress($event, 'hold', 'Starboard')"
+        (mouseup)="buttonPress($event, 'hold', 'Starboard')"
         (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Star up</p>
       </div>
       <div class="row pt-5 button"
         (touchstart)="buttonPress($event, 'lower', 'Starboard')" 
+        (mousedown)="buttonPress($event, 'lower', 'Starboard')" 
         (touchend)="buttonPress($event, 'hold', 'Starboard')"
+        (mouseup)="buttonPress($event, 'hold', 'Starboard')"
         (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Star down</p>
       </div>
     </div>
@@ -97,12 +125,16 @@
     <div class="col">
       <div class="row pt-3 button"
         (touchstart)="buttonPress($event,'raise', 'Stern')" 
+        (mousedown)="buttonPress($event,'raise', 'Stern')" 
         (touchend)="buttonPress($event, 'hold', 'Stern')"
+        (mouseup)="buttonPress($event, 'hold', 'Stern')"
         (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Stern up</p>
       </div>
       <div class="row pt-3 button"
         (touchstart)="buttonPress($event, 'lower', 'Stern')" 
+        (mousedown)="buttonPress($event, 'lower', 'Stern')" 
         (touchend)="buttonPress($event, 'hold', 'Stern')"
+        (mouseup)="buttonPress($event, 'hold', 'Stern')"
         (contextmenu)="$event.preventDefault()"><p class="text-center no-select">Stern down</p>
       </div>
     </div>
