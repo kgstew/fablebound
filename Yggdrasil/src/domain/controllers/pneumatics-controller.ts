@@ -687,9 +687,11 @@ export class PneumaticsPatternController {
 export class PneumaticsModelSingleton {
     private static instance: PneumaticsModelSingleton;
     public model: PneumaticsController;
+    public patternController: PneumaticsPatternController;
 
     private constructor() {
         this.model = new PneumaticsController();
+        this.patternController = new PneumaticsPatternController(this.model);
     }
 
     public static getInstance(): PneumaticsModelSingleton {

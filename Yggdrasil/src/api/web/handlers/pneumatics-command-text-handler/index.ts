@@ -6,11 +6,10 @@ import { PneumaticsCommandText, PneumaticsCommandTextMessage, isValidPneumaticsC
 
  
 class PneumaticsCommandTextHandler implements Handler<PneumaticsCommandTextMessage> {    
-    private pneumaticsPatternController: PneumaticsPatternController;
+    private pneumaticsModelSingleton: PneumaticsModelSingleton;
 
     constructor(private pneumaticSystemService: PneumaticsSystemService) {
-        const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
-        this.pneumaticsPatternController = new PneumaticsPatternController(pneumaticsModelSingleton.model);
+        this.pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
     }
 
     validate(data: unknown): PneumaticsCommandTextMessage {
@@ -39,14 +38,13 @@ class PneumaticsCommandTextHandler implements Handler<PneumaticsCommandTextMessa
         console.log("Received data:", data);
         // Stop any live patterns
         try {
-            await this.pneumaticsPatternController.stopPattern();
+            await this.pneumaticsModelSingleton.patternController.stopPattern();
         } catch (error) {
             console.error("Error running pattern:", error);
         }
         const validatedFrontendCommand = this.validate(data) as PneumaticsCommandTextMessage;
 
-        const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
-        const outgoingCommand = pneumaticsModelSingleton.model.handleCommand(validatedFrontendCommand);
+        const outgoingCommand = this.pneumaticsModelSingleton.model.handleCommand(validatedFrontendCommand);
 
         console.log("Processed Command:", validatedFrontendCommand);
 

@@ -4,13 +4,11 @@ import { PneumaticsModelSingleton, PneumaticsPatternController } from 'domain/co
 import { PneumaticsCommandPatternMessage, isValidPneumaticsPattern } from 'domain/controllers/types'
 
 class PneumaticsCommandPatternHandler implements Handler<PneumaticsCommandPatternMessage> {
-    private pneumaticsPatternController: PneumaticsPatternController;
+    private pneumaticsModelSingleton: PneumaticsModelSingleton;
 
     constructor(private pneumaticSystemService: PneumaticsSystemService) {
-        const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
-        this.pneumaticsPatternController = new PneumaticsPatternController(pneumaticsModelSingleton.model);
+        this.pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
     }
-
     validate(data: unknown): PneumaticsCommandPatternMessage {
         if (!data) {
             throw new Error('Data is required');
@@ -37,11 +35,11 @@ class PneumaticsCommandPatternHandler implements Handler<PneumaticsCommandPatter
         const validatedCommand = this.validate(data);
 
         // Set the pattern
-        this.pneumaticsPatternController.setPattern(validatedCommand.pattern);
+        this.pneumaticsModelSingleton.patternController.setPattern(validatedCommand.pattern);
 
         // Start the pattern
         try {
-            await this.pneumaticsPatternController.startPattern();
+            await this.pneumaticsModelSingleton.patternController.startPattern();
         } catch (error) {
             console.error("Error running pattern:", error);
         }
