@@ -1,12 +1,15 @@
-import { PneumaticsSystemService, Valve } from 'domain/'
+import { PneumaticsSystemService } from 'domain/'
 import { Handler } from '../handler'
-import { webSocketConnections } from 'app/websocket/server/open-socket';
-import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller';
-import { PneumaticsCommandPattern, PneumaticsCommandPatternMessage, isValidPneumaticsPattern } from 'domain/controllers/types';
+import { PneumaticsModelSingleton, PneumaticsPatternController } from 'domain/controllers/pneumatics-controller'
+import { PneumaticsCommandPatternMessage, isValidPneumaticsPattern } from 'domain/controllers/types'
 
- 
 class PneumaticsCommandPatternHandler implements Handler<PneumaticsCommandPatternMessage> {
-    constructor(private pneumaticSystemService: PneumaticsSystemService) {}
+    private pneumaticsPatternController: PneumaticsPatternController;
+
+    constructor(private pneumaticSystemService: PneumaticsSystemService) {
+        const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
+        this.pneumaticsPatternController = new PneumaticsPatternController(pneumaticsModelSingleton.model);
+    }
 
     validate(data: unknown): PneumaticsCommandPatternMessage {
         if (!data) {
@@ -16,8 +19,8 @@ class PneumaticsCommandPatternHandler implements Handler<PneumaticsCommandPatter
             throw new Error('Invalid data type, expected an object');
         }
 
-        const cmd = data as Partial<PneumaticsCommandPatternMessage>; 
-
+        const cmd = data as Partial<PneumaticsCommandPatternMessage>;
+        
         if (cmd.type !== 'pneumaticsCommandPattern' || typeof cmd.sendTime !== 'string') {
             throw new Error('Missing or invalid required fields: type or sendTime');
         }
@@ -28,16 +31,20 @@ class PneumaticsCommandPatternHandler implements Handler<PneumaticsCommandPatter
         return cmd as PneumaticsCommandPatternMessage;
     }
 
-
-
     async handle(data: unknown): Promise<void> {
         console.log("Received data:", data);
 
-        const validatedFrontendCommand = this.validate(data) as PneumaticsCommandPatternMessage;
+        const validatedCommand = this.validate(data);
 
-        const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
-        const outgoingCommand = pneumaticsModelSingleton.model.handleCommand(validatedFrontendCommand);
-      
+        // Set the pattern
+        this.pneumaticsPatternController.setPattern(validatedCommand.pattern);
+
+        // Start the pattern
+        try {
+            await this.pneumaticsPatternController.startPattern();
+        } catch (error) {
+            console.error("Error running pattern:", error);
+        }
     }
 }
 
