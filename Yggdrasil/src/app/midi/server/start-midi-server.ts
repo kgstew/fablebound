@@ -1,4 +1,6 @@
 import { pixelblazeClients } from 'app/pixelblaze/clients/pixelblaze-clients';
+import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller';
+import { PneumaticsCommandTextMessage } from 'domain/controllers/types';
 import { Input } from 'midi';
 
 const startMidiServer = async (
@@ -26,6 +28,12 @@ input.openPort(0);
 // Configure a callback.
 input.on('message', (deltaTime: number, message: number[]) => {
   console.log(`m: ${message} d: ${deltaTime}`);
+  const commandMessage: PneumaticsCommandTextMessage = {
+    type: 'pneumaticsCommandText',
+    command: "lowerStarboardBow",
+    sendTime: new Date().toISOString(),
+  }
+  PneumaticsModelSingleton.getInstance().model.handleCommand(commandMessage)
   const params = {
     TRIGGER_SEGMENT_CHANGE: 1,
   }
