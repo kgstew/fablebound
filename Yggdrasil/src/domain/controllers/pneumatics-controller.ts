@@ -589,6 +589,22 @@ export class PneumaticsPatternController {
             },
             shouldContinue: () => !this.stopRequested
         });
+        this.patterns.set("upDownUpDown", {
+            name: "upDownUpDown",
+            main: async (controller) => {
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseBow', sendTime: new Date().toLocaleString() });
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStern', sendTime: new Date().toLocaleString() });
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerBow', sendTime: new Date().toLocaleString() });
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerStern', sendTime: new Date().toLocaleString() });
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+            shouldContinue: () => !this.stopRequested
+        });
 
         // Add more patterns here
     }

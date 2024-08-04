@@ -151,7 +151,8 @@ const PneumaticsCommandLibrary = {
   
 
     const PneumaticsPatternLibrary = {
-    stormySeas: 'stormySeas'
+    stormySeas: 'stormySeas',
+    upDownUpDown: 'upDownUpDown',
   } as const;
 
  export type PneumaticsCommandText = typeof PneumaticsCommandLibrary[keyof typeof PneumaticsCommandLibrary];
