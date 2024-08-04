@@ -559,6 +559,7 @@ export class PneumaticsController {
         this.command.sternStarboard = this.valveCommandsVent
     }
 }
+
 export class PneumaticsPatternController {
     private pneumaticsController: PneumaticsController;
     private currentPattern: PneumaticsCommandPattern | null = null;
@@ -576,34 +577,45 @@ export class PneumaticsPatternController {
         this.patterns.set("stormySeas", {
             name: "stormySeas",
             main: async (controller) => {
+                if (this.stopRequested) return;
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseBow', sendTime: new Date().toLocaleString() });
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStern', sendTime: new Date().toLocaleString() });
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                if (this.stopRequested) return;
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                if (this.stopRequested) return;
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerBow', sendTime: new Date().toLocaleString() });
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerStern', sendTime: new Date().toLocaleString() });
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                if (this.stopRequested) return;
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
-            },
-            shouldContinue: () => !this.stopRequested
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
         });
         this.patterns.set("upDownUpDown", {
             name: "upDownUpDown",
             main: async (controller) => {
+                if (this.stopRequested) return;
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseBow', sendTime: new Date().toLocaleString() });
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStern', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerBow', sendTime: new Date().toLocaleString() });
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerStern', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
             },
-            shouldContinue: () => !this.stopRequested
         });
 
         // Add more patterns here
@@ -620,7 +632,6 @@ export class PneumaticsPatternController {
             throw new Error(`Pattern '${patternName}' not found`);
         }
     }
-
     public async startPattern() {
         if (this.isRunning) {
             console.log("A pattern is already running. Switching to the new pattern.");
@@ -638,11 +649,10 @@ export class PneumaticsPatternController {
         this.patternSwitchRequested = false;
 
         try {
-            while (this.currentPattern && this.currentPattern.shouldContinue()) {
+            while (!this.stopRequested) {
                 if (this.patternSwitchRequested) {
                     console.log("Switching to new pattern...");
                     this.patternSwitchRequested = false;
-                    // The loop will continue with the new pattern in the next iteration
                 }
                 await this.currentPattern.main(this.pneumaticsController);
                 if (this.stopRequested) break;
@@ -653,14 +663,14 @@ export class PneumaticsPatternController {
             this.isRunning = false;
             this.stopRequested = false;
             this.patternSwitchRequested = false;
+            await this.pneumaticsController.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
         }
     }
 
     public stopPattern() {
-        console.log("Stopping pneumatics pattern, processing manual commands...")
+        console.log("Stopping pneumatics pattern, processing manual commands...");
         this.stopRequested = true;
     }
-
     public isPatternRunning(): boolean {
         return this.isRunning;
     }

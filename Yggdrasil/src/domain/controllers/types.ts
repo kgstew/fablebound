@@ -160,7 +160,6 @@ const PneumaticsCommandLibrary = {
  export interface PneumaticsCommandPattern {
     name: PneumaticsCommandPatternName;
     main: (controller: PneumaticsController) => void;
-    shouldContinue: () => boolean;
 }
 
 export type PneumaticsCommandPatternName = typeof PneumaticsPatternLibrary[keyof typeof PneumaticsPatternLibrary];  
