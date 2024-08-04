@@ -559,13 +559,13 @@ export class PneumaticsController {
         this.command.sternStarboard = this.valveCommandsVent
     }
 }
-
 export class PneumaticsPatternController {
     private pneumaticsController: PneumaticsController;
     private currentPattern: PneumaticsCommandPattern | null = null;
     private patterns: PneumaticsCommandPatternMap = new Map();
     private isRunning: boolean = false;
     private stopRequested: boolean = false;
+    private patternSwitchRequested: boolean = false;
 
     constructor(pneumaticsController: PneumaticsController) {
         this.pneumaticsController = pneumaticsController;
@@ -593,10 +593,13 @@ export class PneumaticsPatternController {
         // Add more patterns here
     }
 
-    public setPattern(patternName: PneumaticsCommandPatternName) {
+        public setPattern(patternName: PneumaticsCommandPatternName) {
         const pattern = this.patterns.get(patternName);
         if (pattern) {
             this.currentPattern = pattern;
+            if (this.isRunning) {
+                this.patternSwitchRequested = true;
+            }
         } else {
             throw new Error(`Pattern '${patternName}' not found`);
         }
@@ -604,7 +607,8 @@ export class PneumaticsPatternController {
 
     public async startPattern() {
         if (this.isRunning) {
-            console.log("A pattern is already running.");
+            console.log("A pattern is already running. Switching to the new pattern.");
+            this.patternSwitchRequested = true;
             return;
         }
 
@@ -615,9 +619,15 @@ export class PneumaticsPatternController {
 
         this.isRunning = true;
         this.stopRequested = false;
+        this.patternSwitchRequested = false;
 
         try {
-            while (this.currentPattern.shouldContinue()) {
+            while (this.currentPattern && this.currentPattern.shouldContinue()) {
+                if (this.patternSwitchRequested) {
+                    console.log("Switching to new pattern...");
+                    this.patternSwitchRequested = false;
+                    // The loop will continue with the new pattern in the next iteration
+                }
                 await this.currentPattern.main(this.pneumaticsController);
                 if (this.stopRequested) break;
             }
@@ -626,6 +636,7 @@ export class PneumaticsPatternController {
         } finally {
             this.isRunning = false;
             this.stopRequested = false;
+            this.patternSwitchRequested = false;
         }
     }
 
