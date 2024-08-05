@@ -49,7 +49,7 @@ export class PneumaticsController {
     public command!: PneumaticsCommandGranular
     public bigAssMainTankMinPressure = 0
     public bigAssMainTankMaxPressure = 25000
-    public ballastTankMaxPressure = 100
+    public ballastTankMaxPressure = 30
     public maxPistonPressure = 50
     public minPistonPressure = 20
 
