@@ -147,6 +147,7 @@ const PneumaticsCommandLibrary = {
     holdPortBow: 'holdPortBow',
     holdPosition: 'holdPosition',
     ventAll: 'ventAll',
+    closeAllValves: 'closeAllValves',
   } as const;
   
 
@@ -154,6 +155,7 @@ const PneumaticsCommandLibrary = {
     stormySeas: 'stormySeas',
     upDownUpDown: 'upDownUpDown',
     ventEverything: 'ventEverything',
+    closeAllValves: 'closeAllValves',
   } as const;
 
  export type PneumaticsCommandText = typeof PneumaticsCommandLibrary[keyof typeof PneumaticsCommandLibrary];

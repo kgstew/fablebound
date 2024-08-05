@@ -77,6 +77,12 @@ export class PneumaticsController {
         pistonReleaseValve: 'open',
     } as LegCommandGranular
     
+    public valveCommandsCloseAll = {
+        ballastIntakeValve: 'closed',
+        ballastToPistonValve: 'closed',
+        pistonReleaseValve: 'closed',
+    } as LegCommandGranular
+    
 
     public constructor(
         systemStateReadings: ReadingsData = defaultSystemState
@@ -371,6 +377,8 @@ export class PneumaticsController {
                 return this.commandHoldPosition()
             case 'ventAll':
                 return this.commandVentAll()
+            case 'closeAllValves':
+                    return this.commandCloseAllValves()
             default:
                 throw new Error(`Unsupported command: ${incomingCommandMessage}`)
         }
@@ -580,6 +588,13 @@ export class PneumaticsController {
         this.command.sternPort = this.valveCommandsVent
         this.command.sternStarboard = this.valveCommandsVent
     }
+
+    private commandCloseAllValves() {
+        this.command.bowPort = this.valveCommandsCloseAll
+        this.command.bowStarboard = this.valveCommandsCloseAll
+        this.command.sternPort = this.valveCommandsCloseAll
+        this.command.sternStarboard = this.valveCommandsCloseAll
+    }
 }
 
 export class PneumaticsPatternController {
@@ -641,6 +656,15 @@ export class PneumaticsPatternController {
         });
         this.patterns.set("ventEverything", {
             name: "ventEverything",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'ventAll', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
+        this.patterns.set("closeAllValves", {
+            name: "closeAllValves",
             main: async (controller) => {
                 if (this.stopRequested) return;
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'ventAll', sendTime: new Date().toLocaleString() });

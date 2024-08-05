@@ -237,7 +237,7 @@ export function segment2_0() {
     segmentHSVs[0][0][2] = 1
 }
 
-// Pixelblaze 2 - Rail UV and Rail RGB
+// Pixelblaze 2 - Rail RGB and Misc
 // Segment 1 - Left Shield
 export function preRender2_1() {
     // Blank preRender function for Pixelblaze 0, Segment 0
@@ -249,7 +249,7 @@ export function segment2_1() {
     segmentHSVs[0][1][2] = 1
 }
 
-// Pixelblaze 2 - Rail UV and Rail RGB
+// Pixelblaze 2 - Rail RGB and Misc
 // Segment 2 - Right Shield
 export function preRender2_2() {
     // Blank preRender function for Pixelblaze 0, Segment 0
@@ -261,7 +261,7 @@ export function segment2_2() {
     segmentHSVs[0][2][2] = 1
 }
 
-// Pixelblaze 2 - Rail UV and Rail RGB
+// Pixelblaze 2 - Rail RGB and Misc
 // Segment 3 - Left Accent
 export function preRender2_3() {
     // Blank preRender function for Pixelblaze 0, Segment 0
@@ -273,7 +273,7 @@ export function segment2_3() {
     segmentHSVs[0][3][2] = 1
 }
 
-// Pixelblaze 2 - Rail UV and Rail RGB
+// Pixelblaze 2 - Rail RGB and Misc
 // Segment 4 - Right Accent
 export function preRender2_4() {
     // Blank preRender function for Pixelblaze 0, Segment 0
@@ -285,7 +285,7 @@ export function segment2_4() {
     segmentHSVs[0][4][2] = 1
 }
 
-// Pixelblaze 2 - Rail UV and Rail RGB
+// Pixelblaze 2 - Rail RGB and Misc
 // Segment 5 - Left Detail
 export function preRender2_5() {
     // Blank preRender function for Pixelblaze 0, Segment 0
@@ -297,7 +297,7 @@ export function segment2_5() {
     segmentHSVs[0][5][2] = 1
 }
 
-// Pixelblaze 2 - Rail UV and Rail RGB
+// Pixelblaze 2 - Rail RGB and Misc
 // Segment 6 - Right Detail
 export function preRender2_6() {
     // Blank preRender function for Pixelblaze 0, Segment 0
@@ -309,109 +309,13 @@ export function segment2_6() {
     segmentHSVs[0][6][2] = 1
 }
 
-// Pixelblaze 3 - Rail UV and Rail RGB
+// Pixelblaze 2 - Rail RGB and Misc
 // Segment 7 - Base
 export function preRender2_7() {
     // Blank preRender function for Pixelblaze 0, Segment 0
   }
   
 export function segment2_7() {
-    segmentHSVs[0][7][0] = 0.85
-    segmentHSVs[0][7][1] = 1
-    segmentHSVs[0][7][2] = 1
-}
-
-// Pixelblaze 3 - Misc
-// Segment 0 - Front Center
-export function preRender3_0() {
-    // Blank preRender function for Pixelblaze 0, Segment 0
-  }
-  
-export function segment3_0() {
-    segmentHSVs[1][0][0] = 0.2
-    segmentHSVs[1][0][1] = 1
-    segmentHSVs[1][0][2] = 1
-}
-
-// Pixelblaze 3 - Misc
-// Segment 1 - Left Shield
-export function preRender3_1() {
-    // Blank preRender function for Pixelblaze 0, Segment 0
-  }
-  
-export function segment3_1() {
-    segmentHSVs[0][1][0] = 0.5
-    segmentHSVs[0][1][1] = 1
-    segmentHSVs[0][1][2] = 1
-}
-
-// Pixelblaze 3 - Misc
-// Segment 2 - Right Shield
-export function preRender3_2() {
-    // Blank preRender function for Pixelblaze 0, Segment 0
-  }
-  
-export function segment3_2() {
-    segmentHSVs[0][2][0] = 0.25
-    segmentHSVs[0][2][1] = 1
-    segmentHSVs[0][2][2] = 1
-}
-
-// Pixelblaze 3 - Misc
-// Segment 3 - Left Accent
-export function preRender3_3() {
-    // Blank preRender function for Pixelblaze 0, Segment 0
-  }
-  
-export function segment3_3() {
-    segmentHSVs[0][3][0] = 0.75
-    segmentHSVs[0][3][1] = 1
-    segmentHSVs[0][3][2] = 1
-}
-
-// Pixelblaze 3 - Misc
-// Segment 4 - Right Accent
-export function preRender3_4() {
-    // Blank preRender function for Pixelblaze 0, Segment 0
-  }
-  
-export function segment3_4() {
-    segmentHSVs[0][4][0] = 0.1
-    segmentHSVs[0][4][1] = 1
-    segmentHSVs[0][4][2] = 1
-}
-
-// Pixelblaze 3 - Misc
-// Segment 5 - Left Detail
-export function preRender3_5() {
-    // Blank preRender function for Pixelblaze 0, Segment 0
-  }
-  
-export function segment3_5() {
-    segmentHSVs[0][5][0] = 0.6
-    segmentHSVs[0][5][1] = 1
-    segmentHSVs[0][5][2] = 1
-}
-
-// Pixelblaze 3 - Misc
-// Segment 6 - Right Detail
-export function preRender3_6() {
-    // Blank preRender function for Pixelblaze 0, Segment 0
-  }
-  
-export function segment3_6() {
-    segmentHSVs[0][6][0] = 0.35
-    segmentHSVs[0][6][1] = 1
-    segmentHSVs[0][6][2] = 1
-}
-
-// Pixelblaze 3 - Misc
-// Segment 7 - Base
-export function preRender3_7() {
-    // Blank preRender function for Pixelblaze 0, Segment 0
-  }
-  
-export function segment3_7() {
     segmentHSVs[0][7][0] = 0.85
     segmentHSVs[0][7][1] = 1
     segmentHSVs[0][7][2] = 1
@@ -442,15 +346,6 @@ preRenders[2][4] = preRender2_4
 preRenders[2][5] = preRender2_5
 preRenders[2][6] = preRender2_6
 preRenders[2][7] = preRender2_7
-preRenders[3][0] = preRender3_0
-preRenders[3][1] = preRender3_1
-preRenders[3][2] = preRender3_2
-preRenders[3][3] = preRender3_3
-preRenders[3][4] = preRender3_4
-preRenders[3][5] = preRender3_5
-preRenders[3][6] = preRender3_6
-preRenders[3][7] = preRender3_7
-
 
   
 // Add more segment functions for other Pixelblaze devices...
@@ -478,14 +373,6 @@ segmentPatterns[2][4] = segment2_4
 segmentPatterns[2][5] = segment2_5
 segmentPatterns[2][6] = segment2_6
 segmentPatterns[2][7] = segment2_7
-segmentPatterns[3][0] = segment3_0
-segmentPatterns[3][1] = segment3_1
-segmentPatterns[3][2] = segment3_2
-segmentPatterns[3][3] = segment3_3
-segmentPatterns[3][4] = segment3_4
-segmentPatterns[3][5] = segment3_5
-segmentPatterns[3][6] = segment3_6
-segmentPatterns[3][7] = segment3_7
 
 // Set patterns for other Pixelblaze devices...
 

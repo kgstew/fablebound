@@ -33,10 +33,10 @@
         <p class="text-center no-select">{{ patterns[4] }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
-        (touchstart)="buttonPress($event,patterns[5])" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,patterns[5])" (mouseup)="buttonRelease($event, '')"
+        (touchstart)="buttonPress($event,'closeAllValves')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'closeAllValves')" (mouseup)="buttonRelease($event, '')"
         >
-        <p class="text-center no-select">{{ patterns[5] }}</p>
+        <p class="text-center no-select">{{ 'closeAllValves' }}</p>
     </div>
 </div>
 
