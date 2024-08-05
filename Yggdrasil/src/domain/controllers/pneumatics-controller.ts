@@ -51,7 +51,7 @@ export class PneumaticsController {
     public bigAssMainTankMaxPressure = 25000
     public ballastTankMaxPressure = 30
     public maxPistonPressure = 50
-    public minPistonPressure = 20
+    public minPistonPressure = 10
 
     public valveCommandsLower = {
         ballastIntakeValve: 'closed',
