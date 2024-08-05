@@ -203,9 +203,8 @@ export class PneumaticsController {
         legAssembly: 'bowStarboard' | 'bowPort' | 'sternPort' | 'sternStarboard'
     ) {
         if (
-            this.systemState[legAssembly].pistonPressurePsi <
-            this.minPistonPressure && this.systemState[legAssembly].pistonPressurePsi <
-            this.systemState[legAssembly].ballastPressurePsi
+            this.systemState[legAssembly].pistonPressurePsi < this.minPistonPressure && 
+            this.systemState[legAssembly].pistonPressurePsi < this.systemState[legAssembly].ballastPressurePsi
         ) {
             ;(this.command[legAssembly] ??= {}).pistonReleaseValve = 'closed'
         }
