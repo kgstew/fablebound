@@ -27,10 +27,10 @@
         <p class="text-center no-select">{{ patterns[3] }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
-        (touchstart)="buttonPress($event,'baselineMaintain')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'baselineMaintain')" (mouseup)="buttonRelease($event, '')"
+        (touchstart)="buttonPress($event,'maintainBaseline')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'maintainBaseline')" (mouseup)="buttonRelease($event, '')"
         >
-        <p class="text-center no-select">{{ 'baselineMaintain' }}</p>
+        <p class="text-center no-select">{{ 'maintainBaseline' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'closeAllValves')" (touchend)="buttonRelease($event, '')"
