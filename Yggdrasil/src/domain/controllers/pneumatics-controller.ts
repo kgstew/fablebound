@@ -207,7 +207,7 @@ export class PneumaticsController {
             this.minPistonPressure && this.systemState[legAssembly].pistonPressurePsi <
             this.systemState[legAssembly].ballastPressurePsi
         ) {
-            ;(this.command[legAssembly] ??= {}).ballastToPistonValve = 'open'
+            ;(this.command[legAssembly] ??= {}).pistonReleaseValve = 'closed'
         }
     }
 
