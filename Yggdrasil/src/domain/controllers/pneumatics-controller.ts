@@ -47,6 +47,10 @@ export class PneumaticsController {
     public systemStateLog: SystemState[] = []
     public logLength = 2400 // at 4 readings per second this is 10 minutes of readings data
     public command!: PneumaticsCommandGranular
+    private lastCommand: PneumaticsCommandText = 'none';
+    private maintenanceInterval: NodeJS.Timeout | null = null;
+
+
     public bigAssMainTankMinPressure = 0
     public bigAssMainTankMaxPressure = 25000
     public ballastTankMaxPressure = 30
@@ -87,7 +91,27 @@ export class PneumaticsController {
     public constructor(
         systemStateReadings: ReadingsData = defaultSystemState
     ) {
-        this.initializeSystemState(systemStateReadings)
+        this.initializeSystemState(systemStateReadings)        
+        this.startBaselineMaintain();
+    }
+
+    private startBaselineMaintain() {
+        this.maintenanceInterval = setInterval(() => {
+            this.maintainBaseline();
+        }, 200); // Run every 200ms (5 times per second)
+    }
+
+
+    private maintainBaseline() {
+        if (this.lastCommand !== 'ventAll' && this.lastCommand !== 'closeAllValves') {
+            this.opportunisticBallastFill();
+            this.preventOverfill();
+            this.keepPistonsALilFull();
+            // Discharge the command if any changes were made
+            if (this.command && Object.keys(this.command).length > 2) { // Check if command has more than just type and sendTime
+                this.dischargeCommand();
+            }
+        }
     }
 
     public dischargeCommand(): PneumaticsCommandGranularCombined {
@@ -234,19 +258,11 @@ export class PneumaticsController {
         }
     }
 
-    private preventOverfillForBigAssMainTank() {
-        if (
-            this.systemState.bigAssMainTank.pressurePsi >
-            this.bigAssMainTankMaxPressure
-        ) {
-            ;(this.command.bigAssMainTank ??= {}).compressorToTankValve =
-                'closed'
-        }
-    }
 
     public handleCommandGranular(
         commandMessage: FrontendCommandGranularMessage
     ): PneumaticsCommandGranular {
+        this.lastCommand = "none"
         this.buildCommandGranular(commandMessage)
         this.opportunisticBallastFill()
         this.preventOverfill()
@@ -255,7 +271,8 @@ export class PneumaticsController {
 
     public handleCommand(
         commandMessage: PneumaticsCommandTextMessage
-    ): PneumaticsCommandGranular {
+    ): PneumaticsCommandGranular {        
+        this.lastCommand = commandMessage.command;
         this.buildCommand(commandMessage)
         if (commandMessage.command != 'ventAll' && commandMessage.command != 'closeAllValves') {
             this.opportunisticBallastFill()
