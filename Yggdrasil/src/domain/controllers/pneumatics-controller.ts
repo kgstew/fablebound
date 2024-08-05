@@ -168,15 +168,10 @@ export class PneumaticsController {
     }
 
     public opportunisticBallastFill() {
-        if (
-            this.systemState.bigAssMainTank.pressurePsi >
-            this.bigAssMainTankMinPressure
-        ) {
-            this.checkAndOpportunisticallyFillBallast('bowStarboard')
-            this.checkAndOpportunisticallyFillBallast('bowPort')
-            this.checkAndOpportunisticallyFillBallast('sternStarboard')
-            this.checkAndOpportunisticallyFillBallast('sternPort')
-        }
+        this.checkAndOpportunisticallyFillBallast('bowStarboard')
+        this.checkAndOpportunisticallyFillBallast('bowPort')
+        this.checkAndOpportunisticallyFillBallast('sternStarboard')
+        this.checkAndOpportunisticallyFillBallast('sternPort')
     }
 
     private checkAndOpportunisticallyFillBallast(
@@ -201,7 +196,6 @@ export class PneumaticsController {
         this.preventOverfillForLegAssembly('bowPort')
         this.preventOverfillForLegAssembly('sternStarboard')
         this.preventOverfillForLegAssembly('sternPort')
-        this.preventOverfillForBigAssMainTank()
     }
 
 
@@ -264,9 +258,9 @@ export class PneumaticsController {
         commandMessage: PneumaticsCommandTextMessage
     ): PneumaticsCommandGranular {
         this.buildCommand(commandMessage)
-        if (commandMessage.command != 'ventAll') {
+        if (commandMessage.command != 'ventAll' && commandMessage.command != 'closeAllValves') {
             this.opportunisticBallastFill()
-            this.keepPistonsALilFull()
+           // this.keepPistonsALilFull()
         }
         this.preventOverfill()
         return this.dischargeCommand()
@@ -379,6 +373,8 @@ export class PneumaticsController {
                 return this.commandVentAll()
             case 'closeAllValves':
                     return this.commandCloseAllValves()
+            case 'none':
+                    return this.commandNone()
             default:
                 throw new Error(`Unsupported command: ${incomingCommandMessage}`)
         }
@@ -595,6 +591,8 @@ export class PneumaticsController {
         this.command.sternPort = this.valveCommandsCloseAll
         this.command.sternStarboard = this.valveCommandsCloseAll
     }
+
+    private commandNone() {}
 }
 
 export class PneumaticsPatternController {
@@ -672,11 +670,20 @@ export class PneumaticsPatternController {
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
             },
         });
+        this.patterns.set("maintainBaseline", {
+            name: "maintainBaseline",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'none', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
 
         // Add more patterns here
     }
 
-        public setPattern(patternName: PneumaticsCommandPatternName) {
+    public setPattern(patternName: PneumaticsCommandPatternName) {
         const pattern = this.patterns.get(patternName);
         if (pattern) {
             this.currentPattern = pattern;
@@ -723,8 +730,7 @@ export class PneumaticsPatternController {
     }
 
     public stopPattern() {
-        console.log("Stopping pneumatics pattern, processing manual commands...");
-        this.stopRequested = true;
+        this.setPattern("maintainBaseline");
     }
     public isPatternRunning(): boolean {
         return this.isRunning;

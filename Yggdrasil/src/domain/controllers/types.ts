@@ -148,6 +148,7 @@ const PneumaticsCommandLibrary = {
     holdPosition: 'holdPosition',
     ventAll: 'ventAll',
     closeAllValves: 'closeAllValves',
+    none: 'none',
   } as const;
   
 
@@ -156,6 +157,7 @@ const PneumaticsCommandLibrary = {
     upDownUpDown: 'upDownUpDown',
     ventEverything: 'ventEverything',
     closeAllValves: 'closeAllValves',
+    maintainBaseline: 'maintainBaseline',
   } as const;
 
  export type PneumaticsCommandText = typeof PneumaticsCommandLibrary[keyof typeof PneumaticsCommandLibrary];
