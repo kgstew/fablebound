@@ -49,8 +49,9 @@ export class PneumaticsController {
     public command!: PneumaticsCommandGranular
     public bigAssMainTankMinPressure = 0
     public bigAssMainTankMaxPressure = 25000
-    public ballastTankMaxPressure = 10000
-    public maxPistonPressure = 10000
+    public ballastTankMaxPressure = 100
+    public maxPistonPressure = 50
+    public minPistonPressure = 20
 
     public valveCommandsLower = {
         ballastIntakeValve: 'closed',
@@ -197,6 +198,26 @@ export class PneumaticsController {
         this.preventOverfillForBigAssMainTank()
     }
 
+
+    private holdMinPistonPressureForLegAssembly(
+        legAssembly: 'bowStarboard' | 'bowPort' | 'sternPort' | 'sternStarboard'
+    ) {
+        if (
+            this.systemState[legAssembly].pistonPressurePsi <
+            this.minPistonPressure && this.systemState[legAssembly].pistonPressurePsi <
+            this.systemState[legAssembly].ballastPressurePsi
+        ) {
+            ;(this.command[legAssembly] ??= {}).ballastToPistonValve = 'open'
+        }
+    }
+
+    public keepPistonsALilFull() {
+        this.holdMinPistonPressureForLegAssembly('bowStarboard')
+        this.holdMinPistonPressureForLegAssembly('bowPort')
+        this.holdMinPistonPressureForLegAssembly('sternStarboard')
+        this.holdMinPistonPressureForLegAssembly('sternPort')
+    }
+
     private preventOverfillForLegAssembly(
         legAssembly: 'bowStarboard' | 'bowPort' | 'sternPort' | 'sternStarboard'
     ) {
@@ -239,6 +260,7 @@ export class PneumaticsController {
         this.buildCommand(commandMessage)
         if (commandMessage.command != 'ventAll') {
             this.opportunisticBallastFill()
+            this.keepPistonsALilFull()
         }
         this.preventOverfill()
         return this.dischargeCommand()
@@ -613,6 +635,15 @@ export class PneumaticsPatternController {
                 if (this.stopRequested) return;
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
+        this.patterns.set("ventEverything", {
+            name: "ventEverything",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'ventAll', sendTime: new Date().toLocaleString() });
                 if (this.stopRequested) return;
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
             },

@@ -42,10 +42,10 @@
 
 <div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
-        (touchstart)="buttonPress($event,patterns[6])" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,patterns[6])" (mouseup)="buttonRelease($event, '')"
+        (touchstart)="buttonPress($event,'ventEverything')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'ventEverything')" (mouseup)="buttonRelease($event, '')"
         >
-        <p class="text-center no-select">{{ patterns[6] }}</p>
+        <p class="text-center no-select">{{ 'ventEverything' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'upDownUpDown')" (touchend)="buttonRelease($event, '')"

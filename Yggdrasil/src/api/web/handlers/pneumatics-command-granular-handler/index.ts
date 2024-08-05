@@ -91,12 +91,6 @@ class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranu
 
         console.log("Processed Command:", validatedFrontendCommand);
 
-    if ('frontend' in webSocketConnections) {
-        webSocketConnections['frontend'].send(sampleReadingsDataString);
-        console.log("Sample data sent to frontend.");
-    } else {
-        console.log("Dang man we're not connected to the frontend either??? wtf")
-    }
     }
 
     createValve(valveName: keyof LegCommandGranular, state: Valve): LegCommandGranular {
