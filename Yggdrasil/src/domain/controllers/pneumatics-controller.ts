@@ -667,7 +667,7 @@ export class PneumaticsPatternController {
             name: "closeAllValves",
             main: async (controller) => {
                 if (this.stopRequested) return;
-                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'ventAll', sendTime: new Date().toLocaleString() });
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'closeAllValves', sendTime: new Date().toLocaleString() });
                 if (this.stopRequested) return;
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
             },
