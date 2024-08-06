@@ -120,7 +120,7 @@ export class PneumaticsController {
             webSocketConnections['esp32bow'].send(JSON.stringify(outgoingCommand.bow));
             console.log("Data sent to esp32.");
         } else {
-            console.log("Failed to send data: 'esp32' connection does not exist.");
+            console.log("Failed to send data: 'esp32' connection does not ePpaxist.");
         }
         if ('esp32stern' in webSocketConnections) {
             webSocketConnections['esp32stern'].send(JSON.stringify(outgoingCommand.stern));
@@ -210,7 +210,7 @@ export class PneumaticsController {
                 this.systemState[legAssembly].ballastPressurePsi <
                 this.ballastTankMaxPressure
             ) {
-                ;(this.command[legAssembly] ??= {}).ballastIntakeValve = 'open'
+                (this.command[legAssembly] ??= {}).ballastIntakeValve = 'open'
             }
         }
     }
@@ -230,7 +230,7 @@ export class PneumaticsController {
             this.systemState[legAssembly].pistonPressurePsi < this.minPistonPressure && 
             this.systemState[legAssembly].pistonPressurePsi < this.systemState[legAssembly].ballastPressurePsi
         ) {
-            ;(this.command[legAssembly] ??= {}).pistonReleaseValve = 'closed'
+            (this.command[legAssembly] ??= {}).pistonReleaseValve = 'closed'
         }
     }
 
@@ -248,13 +248,13 @@ export class PneumaticsController {
             this.systemState[legAssembly].pistonPressurePsi >
             this.maxPistonPressure
         ) {
-            ;(this.command[legAssembly] ??= {}).ballastToPistonValve = 'closed'
+            (this.command[legAssembly] ??= {}).ballastToPistonValve = 'closed'
         }
         if (
             this.systemState[legAssembly].ballastPressurePsi >
             this.ballastTankMaxPressure
         ) {
-            ;(this.command[legAssembly] ??= {}).ballastIntakeValve = 'closed'
+            (this.command[legAssembly] ??= {}).ballastIntakeValve = 'closed'
         }
     }
 
