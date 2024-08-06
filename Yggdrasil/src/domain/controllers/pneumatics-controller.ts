@@ -625,6 +625,42 @@ export class PneumaticsPatternController {
     }
 
     private initializePatterns() {
+        this.patterns.set("inPort", {
+            name: "inPort",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStarboard', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        });
+        this.patterns.set("setOutOnAdventure", {
+            name: "setOutOnAdventure",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStarboard', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        });
+        this.patterns.set("intoTheUnknown", {
+            name: "intoTheUnknown",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStarboard', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        });
+        this.patterns.set("risingStorm", {
+            name: "risingStorm",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStarboard', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        });
         this.patterns.set("stormySeas", {
             name: "stormySeas",
             main: async (controller) => {
@@ -644,6 +680,24 @@ export class PneumaticsPatternController {
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 if (this.stopRequested) return;
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        });
+        this.patterns.set("meetTheGods", {
+            name: "meetTheGods",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStarboard', sendTime: new Date().toLocaleString() });
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        });
+        this.patterns.set("arrivingHome", {
+            name: "arrivingHome",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStarboard', sendTime: new Date().toLocaleString() });
                 if (this.stopRequested) return;
                 await new Promise(resolve => setTimeout(resolve, 2000));
             }

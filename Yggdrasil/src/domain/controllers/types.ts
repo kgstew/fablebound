@@ -153,7 +153,14 @@ const PneumaticsCommandLibrary = {
   
 
     const PneumaticsPatternLibrary = {
+    inPort: 'inPort',
+    setOutOnAdventure: 'setOutOnAdventure',
+    intoTheUnknown: "intoTheUnknown",
+    risingStorm: "risingStorm",
     stormySeas: 'stormySeas',
+    meetTheGods: "meetTheGods",
+    trickstersPromise: "trickstersPromise",
+    arrivingHome: "arrivingHome",
     upDownUpDown: 'upDownUpDown',
     ventEverything: 'ventEverything',
     closeAllValves: 'closeAllValves',
