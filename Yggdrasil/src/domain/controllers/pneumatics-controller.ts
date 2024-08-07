@@ -53,6 +53,7 @@ export class PneumaticsController {
     public ballastTankMaxPressure = 30
     public maxPistonPressure = 50
     public minPistonPressure = 10
+    private pressureTargets: Map<string, number> = new Map();
 
     public defaultPressureSettings: PressureSettings = {
         ballastTankMaxPressure: 30,
@@ -127,8 +128,64 @@ export class PneumaticsController {
         this.updatePressureSettings(this.defaultPressureSettings);
     }
 
+    
+    public setPressureTarget(
+        legAssembly: 'bowStarboard' | 'bowPort' | 'sternPort' | 'sternStarboard',
+        targetPressure: number,
+        unit: 'psi' | 'percent'
+    ): void {
+        let actualTargetPressure: number;
+
+        if (unit === 'percent') {
+            if (targetPressure < 0 || targetPressure > 100) {
+                console.warn(`Invalid percentage ${targetPressure}%. Must be between 0 and 100. Ignoring.`);
+                return;
+            }
+            actualTargetPressure = this.minPistonPressure + (targetPressure / 100) * (this.maxPistonPressure - this.minPistonPressure);
+        } else {
+            actualTargetPressure = targetPressure;
+        }
+
+        if (actualTargetPressure < this.minPistonPressure || actualTargetPressure > this.maxPistonPressure) {
+            console.warn(`Target pressure ${actualTargetPressure} PSI is out of bounds (${this.minPistonPressure}-${this.maxPistonPressure} PSI). Ignoring.`);
+            return;
+        }
+
+        console.log(`Setting pressure set point for ${legAssembly} to ${actualTargetPressure} PSI`);
+        this.pressureTargets.set(legAssembly, actualTargetPressure);
+    }
+
+    public clearPressureTarget(legAssembly: 'bowStarboard' | 'bowPort' | 'sternPort' | 'sternStarboard'): void {
+        this.pressureTargets.delete(legAssembly);
+        console.log(`Cleared pressure set point for ${legAssembly}`);
+    }
+
+    public clearAllPressureTargets(): void {
+        this.pressureTargets.clear();
+        console.log("Cleared all pressure set points");
+    }
+
+    public updatePressureTargets(): void {
+        for (const [legAssembly, targetPressure] of this.pressureTargets.entries()) {
+            const currentPressure = this.systemState[legAssembly].pistonPressurePsi;
+            
+            if (Math.abs(currentPressure - targetPressure) <= 1) {
+                console.log(`Target pressure reached for ${legAssembly}`);
+                this.command[legAssembly] = this.valveCommandsHold;
+                this.clearPressureTarget(legAssembly as any);
+                continue;
+            }
+            if (currentPressure < targetPressure) {
+                this.command[legAssembly] = this.valveCommandsRaise;
+            } else {
+                this.command[legAssembly] = this.valveCommandsLower;
+            }
+        }
+    }
+    
     private maintainBaseline() {
         if (this.lastCommand !== 'ventAll' && this.lastCommand !== 'closeAllValves') {
+            this.updatePressureTargets();
             this.opportunisticBallastFill();
             this.preventOverfill();
             this.keepPistonsALilFull();
