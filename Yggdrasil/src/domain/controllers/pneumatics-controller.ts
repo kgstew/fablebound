@@ -1,5 +1,5 @@
 import { LegCommandGranular, PneumaticsCommandGranular, PneumaticsCommandGranularBowOrStern as PneumaticsCommandGranularBowOrStern, PneumaticsCommandGranularCombined } from "api/web/handlers/pneumatics-command-granular-handler/pneumatics-command-granular"
-import { FrontendCommandGranularMessage, ReadingsData, SystemState, PneumaticsCommandText, PneumaticsCommandTextMessage, BowOrSternReadingsData, PneumaticsCommandPattern, PneumaticsCommandPatternName, PneumaticsCommandPatternMap } from "./types"
+import { FrontendCommandGranularMessage, ReadingsData, SystemState, PneumaticsCommandText, PneumaticsCommandTextMessage, BowOrSternReadingsData, PneumaticsCommandPattern, PneumaticsCommandPatternName, PneumaticsCommandPatternMap, PressureSettings } from "./types"
 import { Valve } from "domain/models"
 import { PneumaticsCommandGranularHandler } from "api"
 import { webSocketConnections } from "app/websocket/server/open-socket"
@@ -50,12 +50,15 @@ export class PneumaticsController {
     private lastCommand: PneumaticsCommandText = 'none';
     private maintenanceInterval: NodeJS.Timeout | null = null;
 
-
-    public bigAssMainTankMinPressure = 0
-    public bigAssMainTankMaxPressure = 25000
     public ballastTankMaxPressure = 30
     public maxPistonPressure = 50
     public minPistonPressure = 10
+
+    public defaultPressureSettings: PressureSettings = {
+        ballastTankMaxPressure: 30,
+        maxPistonPressure: 30,
+        minPistonPressure: 10,
+    }
 
     public valveCommandsLower = {
         ballastIntakeValve: 'closed',
@@ -101,6 +104,28 @@ export class PneumaticsController {
         }, 200); // Run every 200ms (5 times per second)
     }
 
+
+    public updatePressureSettings(settings: Partial<PressureSettings>): void {
+        if (settings.ballastTankMaxPressure !== undefined) {
+            this.ballastTankMaxPressure = settings.ballastTankMaxPressure;
+        }
+        if (settings.maxPistonPressure !== undefined) {
+            this.maxPistonPressure = settings.maxPistonPressure;
+        }
+        if (settings.minPistonPressure !== undefined) {
+            this.minPistonPressure = settings.minPistonPressure;
+        }
+
+        console.log('Pressure settings updated:', {
+            ballastTankMaxPressure: this.ballastTankMaxPressure,
+            maxPistonPressure: this.maxPistonPressure,
+            minPistonPressure: this.minPistonPressure
+        });
+    }
+
+    public restoreDefaultPressureSettings(): void {
+        this.updatePressureSettings(this.defaultPressureSettings);
+    }
 
     private maintainBaseline() {
         if (this.lastCommand !== 'ventAll' && this.lastCommand !== 'closeAllValves') {
@@ -756,6 +781,11 @@ export class PneumaticsPatternController {
     public setPattern(patternName: PneumaticsCommandPatternName) {
         const pattern = this.patterns.get(patternName);
         if (pattern) {
+            if (pattern.pressureSettings) {
+                this.pneumaticsController.updatePressureSettings(pattern.pressureSettings);
+            } else {
+                this.pneumaticsController.restoreDefaultPressureSettings();
+            }
             this.currentPattern = pattern;
             if (this.isRunning) {
                 this.patternSwitchRequested = true;

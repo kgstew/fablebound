@@ -172,10 +172,17 @@ const PneumaticsCommandLibrary = {
  export interface PneumaticsCommandPattern {
     name: PneumaticsCommandPatternName;
     main: (controller: PneumaticsController) => void;
+    pressureSettings?: Partial<PressureSettings>;
 }
 
 export type PneumaticsCommandPatternName = typeof PneumaticsPatternLibrary[keyof typeof PneumaticsPatternLibrary];  
 export type PneumaticsCommandPatternMap = Map<PneumaticsCommandPatternName, PneumaticsCommandPattern>;
+
+export type PressureSettings = {
+    ballastTankMaxPressure?: number;
+    maxPistonPressure?: number;
+    minPistonPressure?: number;
+};
 
 export function isValidPneumaticsCommand(command: string): command is PneumaticsCommandText {
     return command in PneumaticsCommandLibrary;
