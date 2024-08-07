@@ -101,7 +101,11 @@ export class PneumaticsController {
 
     private startBaselineMaintain() {
         this.maintenanceInterval = setInterval(() => {
-            this.maintainBaseline();
+            try {
+                this.maintainBaseline();
+            } catch {
+                console.error('Error in maintainBaseline');
+            }
         }, 200); // Run every 200ms (5 times per second)
     }
 
@@ -164,21 +168,26 @@ export class PneumaticsController {
         this.pressureTargets.clear();
         console.log("Cleared all pressure set points");
     }
-
+    
     public updatePressureTargets(): void {
         for (const [legAssembly, targetPressure] of this.pressureTargets.entries()) {
-            const currentPressure = this.systemState[legAssembly].pistonPressurePsi;
+            const pistonPressure = this.systemState[legAssembly].pistonPressurePsi;
+            const ballastPressure = this.systemState[legAssembly].ballastPressurePsi;
             
-            if (Math.abs(currentPressure - targetPressure) <= 1) {
+            if (Math.abs(pistonPressure - targetPressure) <= 1) {
                 console.log(`Target pressure reached for ${legAssembly}`);
                 this.command[legAssembly] = this.valveCommandsHold;
                 this.clearPressureTarget(legAssembly as any);
                 continue;
             }
-            if (currentPressure < targetPressure) {
+            if (pistonPressure < targetPressure && ballastPressure > pistonPressure) {
                 this.command[legAssembly] = this.valveCommandsRaise;
-            } else {
+            } else if (pistonPressure > targetPressure) {
                 this.command[legAssembly] = this.valveCommandsLower;
+            } else {
+                // Can't raise piston pressure due to insufficient ballast pressure
+                console.log(`Insufficient ballast pressure for ${legAssembly}`);
+                this.command[legAssembly] = this.valveCommandsHold;
             }
         }
     }
@@ -186,9 +195,9 @@ export class PneumaticsController {
     private maintainBaseline() {
         if (this.lastCommand !== 'ventAll' && this.lastCommand !== 'closeAllValves') {
             this.updatePressureTargets();
-            this.opportunisticBallastFill();
             this.preventOverfill();
             this.keepPistonsALilFull();
+            this.opportunisticBallastFill();
             // Discharge the command if any changes were made
             if (this.command && Object.keys(this.command).length > 2) { // Check if command has more than just type and sendTime
                 this.dischargeCommand();
@@ -995,7 +1004,7 @@ export class PneumaticsPatternController {
     }
 
     public stopPattern() {
-        this.setPattern("maintainBaseline");
+        this.stopRequested = true;
     }
     public isPatternRunning(): boolean {
         return this.isRunning;
