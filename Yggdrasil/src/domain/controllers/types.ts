@@ -165,6 +165,15 @@ const PneumaticsCommandLibrary = {
     ventEverything: 'ventEverything',
     closeAllValves: 'closeAllValves',
     maintainBaseline: 'maintainBaseline',
+    setPressure10: 'setPressure10',
+    setPressure12: 'setPressure12',
+    setPressure15: 'setPressure15',
+    setPressure17: 'setPressure17',
+    setPressure20: 'setPressure20',
+    setPressure22: 'setPressure22',
+    setPressure25: 'setPressure25',
+    setPressure27: 'setPressure27',
+    setPressure30: 'setPressure30',
   } as const;
 
  export type PneumaticsCommandText = typeof PneumaticsCommandLibrary[keyof typeof PneumaticsCommandLibrary];

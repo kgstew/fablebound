@@ -6,8 +6,12 @@ export var CURRENT_SEGMENT
 export var PREVIOUS_SEGMENT
 export var FADE_IN_PROGRESS = 0
 export var FADE_PERCENT
+
 var SEGMENT_TRIGGER_TIMER
 var ONE_MINUS_FADE_PERCENT
+
+var PIXELS_PER_SHIELD = 25
+
 export var hsv1 = array(3)
 export var hsv2 = array(3)
 export var blendHsv = array(3)

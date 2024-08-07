@@ -831,6 +831,114 @@ export class PneumaticsPatternController {
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
             },
         });
+        this.patterns.set("setPressure10", {
+            name: "setPressure10",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.setPressureTarget('bowStarboard', 10, 'psi');
+                await controller.setPressureTarget('bowPort', 10, 'psi');
+                await controller.setPressureTarget('sternPort', 10, 'psi');
+                await controller.setPressureTarget('sternStarboard', 10, 'psi');
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
+        this.patterns.set("setPressure12", {
+            name: "setPressure12",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.setPressureTarget('bowStarboard', 12, 'psi');
+                await controller.setPressureTarget('bowPort', 12, 'psi');
+                await controller.setPressureTarget('sternPort', 12, 'psi');
+                await controller.setPressureTarget('sternStarboard', 12, 'psi');
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
+        this.patterns.set("setPressure15", {
+            name: "setPressure15",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.setPressureTarget('bowStarboard', 15, 'psi');
+                await controller.setPressureTarget('bowPort', 15, 'psi');
+                await controller.setPressureTarget('sternPort', 15, 'psi');
+                await controller.setPressureTarget('sternStarboard', 15, 'psi');
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
+        this.patterns.set("setPressure17", {
+            name: "setPressure17",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.setPressureTarget('bowStarboard', 17, 'psi');
+                await controller.setPressureTarget('bowPort', 17, 'psi');
+                await controller.setPressureTarget('sternPort', 17, 'psi');
+                await controller.setPressureTarget('sternStarboard', 17, 'psi');
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
+        this.patterns.set("setPressure20", {
+            name: "setPressure20",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.setPressureTarget('bowStarboard', 20, 'psi');
+                await controller.setPressureTarget('bowPort', 20, 'psi');
+                await controller.setPressureTarget('sternPort', 20, 'psi');
+                await controller.setPressureTarget('sternStarboard', 20, 'psi');
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
+        this.patterns.set("setPressure22", {
+            name: "setPressure22",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.setPressureTarget('bowStarboard', 22, 'psi');
+                await controller.setPressureTarget('bowPort', 22, 'psi');
+                await controller.setPressureTarget('sternPort', 22, 'psi');
+                await controller.setPressureTarget('sternStarboard', 22, 'psi');
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
+        this.patterns.set("setPressure25", {
+            name: "setPressure25",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.setPressureTarget('bowStarboard', 25, 'psi');
+                await controller.setPressureTarget('bowPort', 25, 'psi');
+                await controller.setPressureTarget('sternPort', 25, 'psi');
+                await controller.setPressureTarget('sternStarboard', 25, 'psi');
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
+        this.patterns.set("setPressure27", {
+            name: "setPressure27",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.setPressureTarget('bowStarboard', 27, 'psi');
+                await controller.setPressureTarget('bowPort', 27, 'psi');
+                await controller.setPressureTarget('sternPort', 27, 'psi');
+                await controller.setPressureTarget('sternStarboard', 27, 'psi');
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
+        this.patterns.set("setPressure30", {
+            name: "setPressure30",
+            main: async (controller) => {
+                if (this.stopRequested) return;
+                await controller.setPressureTarget('bowStarboard', 30, 'psi');
+                await controller.setPressureTarget('bowPort', 30, 'psi');
+                await controller.setPressureTarget('sternPort', 30, 'psi');
+                await controller.setPressureTarget('sternStarboard', 30, 'psi');
+                if (this.stopRequested) return;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+            },
+        });
 
         // Add more patterns here
     }
