@@ -50,14 +50,14 @@ export class PneumaticsController {
     private lastCommand: PneumaticsCommandText = 'none';
     private maintenanceInterval: NodeJS.Timeout | null = null;
 
-    public ballastTankMaxPressure = 30
-    public maxPistonPressure = 50
-    public minPistonPressure = 10
+    public ballastTankMaxPressure!: number
+    public maxPistonPressure!: number
+    public minPistonPressure!: number
     private pressureTargets: Map<string, number> = new Map();
 
     public defaultPressureSettings: PressureSettings = {
-        ballastTankMaxPressure: 30,
-        maxPistonPressure: 30,
+        ballastTankMaxPressure: 40,
+        maxPistonPressure: 35,
         minPistonPressure: 10,
     }
 
@@ -95,7 +95,8 @@ export class PneumaticsController {
     public constructor(
         systemStateReadings: ReadingsData = defaultSystemState
     ) {
-        this.initializeSystemState(systemStateReadings)        
+        this.restoreDefaultPressureSettings()    
+        this.initializeSystemState(systemStateReadings)    
         this.startBaselineMaintain();
     }
 
@@ -321,7 +322,7 @@ export class PneumaticsController {
             this.systemState[legAssembly].pistonPressurePsi < this.minPistonPressure && 
             this.systemState[legAssembly].pistonPressurePsi < this.systemState[legAssembly].ballastPressurePsi
         ) {
-            (this.command[legAssembly] ??= {}).pistonReleaseValve = 'closed'
+            this.setPressureTarget(legAssembly, this.minPistonPressure+2, 'psi')
         }
     }
 
