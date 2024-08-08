@@ -3,6 +3,7 @@ import { FrontendCommandGranularMessage, ReadingsData, SystemState, PneumaticsCo
 import { Valve } from "domain/models"
 import { PneumaticsCommandGranularHandler } from "api"
 import { webSocketConnections } from "app/websocket/server/open-socket"
+import { randomInt } from "crypto"
 
 
 export const defaultSystemState: ReadingsData = {
@@ -293,11 +294,11 @@ export class PneumaticsController {
     private checkAndOpportunisticallyFillBallast(
         legAssembly: 'bowStarboard' | 'bowPort' | 'sternPort' | 'sternStarboard'
     ) {
-        if (
+        if ((
             this.command &&
             this.command[legAssembly] &&
             this.command[legAssembly]!.ballastToPistonValve === 'closed'
-        ) {
+        ) || ((Object.keys(this.command).length <= 2) && this.systemState[legAssembly].ballastToPistonValve === 'closed' ) ) {
             if (
                 this.systemState[legAssembly].ballastPressurePsi <
                 this.ballastTankMaxPressure
@@ -719,11 +720,25 @@ export class PneumaticsPatternController {
     private initializePatterns() {
         this.patterns.set("inPort", {
             name: "inPort",
+            pressureSettings: {
+                ballastTankMaxPressure: 25,
+                maxPistonPressure: 18,
+                minPistonPressure: 14,
+            },
             main: async (controller) => {
                 if (this.stopRequested) return;
-                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStarboard', sendTime: new Date().toLocaleString() });
+                await controller.setPressureTarget('bowStarboard', 70, 'percent');
+                await controller.setPressureTarget('sternStarboard', 70, 'percent');
+                await controller.setPressureTarget('bowPort', 30, 'percent');
+                await controller.setPressureTarget('sternPort', 30, 'percent');
+                await new Promise(resolve => setTimeout(resolve, randomInt(700,1400)));                
                 if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await controller.setPressureTarget('bowStarboard', 30, 'percent');
+                await controller.setPressureTarget('sternStarboard', 30, 'percent');
+                await controller.setPressureTarget('bowPort', 70, 'percent');
+                await controller.setPressureTarget('sternPort', 70, 'percent');
+                await new Promise(resolve => setTimeout(resolve, randomInt(700,1400)));
+                if (this.stopRequested) return;
             }
         });
         this.patterns.set("setOutOnAdventure", {
