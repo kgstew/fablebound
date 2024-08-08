@@ -1066,7 +1066,7 @@ export class PneumaticsPatternController {
                 await this.allPistonsToLowestPoint(controller);   
                 if (this.stopRequested) return;                 
                 await new Promise(resolve => setTimeout(resolve, 500)); // Small delay to prevent excessive CPU usage
-                await this.allPistonsToHighestPoint(controller);   
+                await this.allPistonsToHighestPoint(controller);
                 if (this.stopRequested) return;
                 await new Promise(resolve => setTimeout(resolve, 500)); // Small delay to prevent excessive CPU usage
             }
