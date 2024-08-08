@@ -7,25 +7,60 @@
         <p class="text-center no-select">{{ patterns[0] }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
-        (touchstart)="buttonPress($event,patterns[1])" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,patterns[1])" (mouseup)="buttonRelease($event, '')"
+        (touchstart)="buttonPress($event,'inPort')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'inPort')" (mouseup)="buttonRelease($event, '')"
         >
-        <p class="text-center no-select">{{ patterns[1] }}</p>
+        <p class="text-center no-select">{{ 'inPort' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
-        (touchstart)="buttonPress($event,patterns[2])" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,patterns[2])" (mouseup)="buttonRelease($event, '')"
+        (touchstart)="buttonPress($event,'setOutOnAdventure')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'setOutOnAdventure')" (mouseup)="buttonRelease($event, '')"
         >
-        <p class="text-center no-select">{{ patterns[2] }}</p>
+        <p class="text-center no-select">{{'setOutOnAdventure' }}</p>
     </div>
 </div>
 <div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
-        (touchstart)="buttonPress($event,patterns[3])" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,patterns[3])" (mouseup)="buttonRelease($event, '')"
+        (touchstart)="buttonPress($event,'intoTheUnknown')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'intoTheUnknown')" (mouseup)="buttonRelease($event, '')"
         >
-        <p class="text-center no-select">{{ patterns[3] }}</p>
+        <p class="text-center no-select">{{ 'intoTheUnknown' }}</p>
     </div>
+    <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
+        (touchstart)="buttonPress($event,'risingStorm')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'risingStorm')" (mouseup)="buttonRelease($event, '')"
+        >
+        <p class="text-center no-select">{{ 'risingStorm' }}</p>
+    </div>
+    <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
+        (touchstart)="buttonPress($event,'stormySeas')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'stormySeas')" (mouseup)="buttonRelease($event, '')"
+        >
+        <p class="text-center no-select">{{ 'stormySeas' }}</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
+        (touchstart)="buttonPress($event,'meetTheGods')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'meetTheGods')" (mouseup)="buttonRelease($event, '')"
+        >
+        <p class="text-center no-select">{{ 'meetTheGods' }}</p>
+    </div>
+    <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
+        (touchstart)="buttonPress($event,'trickstersPromise')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'trickstersPromise')" (mouseup)="buttonRelease($event, '')"
+        >
+        <p class="text-center no-select">{{ 'trickstersPromise' }}</p>
+    </div>
+    <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
+        (touchstart)="buttonPress($event,'arrivingHome')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'arrivingHome')" (mouseup)="buttonRelease($event, '')"
+        >
+        <p class="text-center no-select">{{ 'arrivingHome' }}</p>
+    </div>
+</div>
+<div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'maintainBaseline')" (touchend)="buttonRelease($event, '')"
         (mousedown)="buttonPress($event,'maintainBaseline')" (mouseup)="buttonRelease($event, '')"
@@ -38,29 +73,13 @@
         >
         <p class="text-center no-select">{{ 'closeAllValves' }}</p>
     </div>
-</div>
-
-<div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'ventEverything')" (touchend)="buttonRelease($event, '')"
         (mousedown)="buttonPress($event,'ventEverything')" (mouseup)="buttonRelease($event, '')"
         >
         <p class="text-center no-select">{{ 'ventEverything' }}</p>
     </div>
-    <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
-        (touchstart)="buttonPress($event,'upDownUpDown')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'upDownUpDown')" (mouseup)="buttonRelease($event, '')"
-        >
-        <p class="text-center no-select">{{ 'upDownUpDown' }}</p>
-    </div>
-    <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
-        (touchstart)="buttonPress($event,'stormySeas')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'stormySeas')" (mouseup)="buttonRelease($event, '')"
-        >
-        <p class="text-center no-select">{{ 'stormySeas' }}</p>
-    </div>
 </div>
-
 <div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'setPressure10')" (touchend)="buttonRelease($event, '')"
@@ -129,3 +148,17 @@
     <input type="text" class="form-control" placeholder="Pattern Name" (keydown.enter)="savePattern()"
         [(ngModel)]="patternName">
 </div>
+
+
+
+
+
+
+inPort: 'inPort',
+setOutOnAdventure: 'setOutOnAdventure',
+intoTheUnknown: "intoTheUnknown",
+risingStorm: "risingStorm",
+stormySeas: 'stormySeas',
+meetTheGods: "meetTheGods",
+trickstersPromise: "trickstersPromise",
+arrivingHome: "arrivingHome",
