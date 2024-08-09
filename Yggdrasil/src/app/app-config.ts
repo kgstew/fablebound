@@ -3,6 +3,8 @@ const appConfig = {
     sockets: {
         //charlie: 8080,
         frontend: 8078,
+        frontend2: 8090,
+        frontend3: 8091,
         esp32bow: 8071,
         esp32stern: 8072,
        // pixelBlaze1: 8081,
