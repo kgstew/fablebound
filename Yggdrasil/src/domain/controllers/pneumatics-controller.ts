@@ -757,13 +757,13 @@ export class PneumaticsPatternController {
                 await controller.setPressureTarget('sternStarboard', 70, 'percent');
                 await controller.setPressureTarget('bowPort', 30, 'percent');
                 await controller.setPressureTarget('sternPort', 30, 'percent');
-                await new Promise(resolve => setTimeout(resolve, randomInt(700,1400)));                
+                await new Promise(resolve => setTimeout(resolve, randomInt(2400,6000)));                
                 if (this.stopRequested) return;
                 await controller.setPressureTarget('bowStarboard', 30, 'percent');
                 await controller.setPressureTarget('sternStarboard', 30, 'percent');
                 await controller.setPressureTarget('bowPort', 70, 'percent');
                 await controller.setPressureTarget('sternPort', 70, 'percent');
-                await new Promise(resolve => setTimeout(resolve, randomInt(700,1400)));
+                await new Promise(resolve => setTimeout(resolve, randomInt(2400,6000)));
                 if (this.stopRequested) return;
             }
         });
@@ -1433,7 +1433,7 @@ export class PneumaticsPatternController {
             this.currentPatternExecution = null;
         }
     }
-    
+
     public stopPattern() {
         this.stopRequested = true;
     }
