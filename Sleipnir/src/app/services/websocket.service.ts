@@ -1,13 +1,49 @@
+// import { Injectable } from '@angular/core';
+
+// @Injectable({
+//   providedIn: 'root'
+// })
+// export class WebsocketService {
+//   private socket: WebSocket;
+
+//   constructor() {
+//     this.socket = new WebSocket('ws://0.0.0.0:8078');
+
+//     this.socket.onopen = () => {
+//       console.log('WebSocket connection established');
+//     };
+
+//     this.socket.onmessage = (event) => {
+//       console.log('Message received:', event.data);
+//       console.log(event.data['Blob']);
+//     };
+
+//     this.socket.onclose = () => {
+//       console.log('WebSocket connection closed');
+//     };
+
+//     this.socket.onerror = (error) => {
+//       console.error('WebSocket error:', error);
+//     };
+//   }
+  
+//     public sendMessage(message: string): void {
+//       const messageToSend = JSON.stringify({ message });
+//       this.socket.send(messageToSend);
+//    }
+// }
+
+
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
-export class WebSocketService {
+export class WebsocketService {
   private socket: WebSocket | null = null;
   private messageSubject = new BehaviorSubject<any>(null);
-  private ports = [8078, 8090, 8091];
+  private ports = [8078, 8079, 8080];
   private currentPortIndex = 0;
   private reconnectDelay = 1000; // 1 second delay between connection attempts
 
@@ -38,6 +74,13 @@ export class WebSocketService {
       this.socket?.close();
     };
   }
+
+    public sendMessage(message: string): void {
+      const messageToSend = JSON.stringify({ message });
+      if (this.socket) { 
+       this.socket.send(messageToSend);
+      }
+   }
 
   private scheduleReconnect(): void {
     setTimeout(() => {
