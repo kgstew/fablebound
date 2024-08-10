@@ -3,55 +3,48 @@
   <div class="col">
       <ul class="list-group list-group-flush">
         <li class="list-group-item">
-          <div class="btn btn-secondary control-button" 
-            (mousedown)="valveControl('ballastIntakeValve', 'bowPort', 'open')"
-            (touchstart)="valveControl('ballastIntakeValve', 'bowPort', 'open')"
-            (mouseup)="valveControl('ballastIntakeValve', 'bowPort', 'closed')"
-            (touchend)="valveControl('ballastIntakeValve', 'bowPort', 'closed')">Ballast
-          </div><span class="pressure-left">{{ bowPortBallastValue }}</span></li>
+          Ballast
+          <span class="pressure-left">{{ bowPortBallastValue }}</span></li>
         <li class="list-group-item">
-          <div class="btn btn-secondary control-button"
-            (mousedown)="valveControl('ballastToPistonValve', 'bowPort', 'open')"
-            (touchstart)="valveControl('ballastToPistonValve', 'bowPort', 'open')"
-            (mouseup)="valveControl('ballastToPistonValve', 'bowPort', 'closed')"
-            (touchend)="valveControl('ballastToPistonValve', 'bowPort', 'closed')">Piston
-          </div><span class="pressure-left">100</span></li>
+          Piston
+          <span class="pressure-left">{{ bowPortPistonValue }}</span>
+        </li>
         <li class="list-group-item">
-          <div class="btn btn-secondary control-button"
-            (mousedown)="valveControl('pistonReleaseValve', 'bowPort', 'open')"
-            (touchstart)="valveControl('pistonReleaseValve', 'bowPort', 'open')"
-            (mouseup)="valveControl('pistonReleaseValve', 'bowPort', 'closed')"
-            (touchend)="valveControl('pistonReleaseValve', 'bowPort', 'closed')">Vent
-        </div></li>
+          Ballast In
+          <span class="pressure-left">{{ bowPortValveBallastIn }}</span>
+        </li>
+        <li class="list-group-item">
+          Ballast Out
+          <span class="pressure-left">{{ bowPortValveBallastOut }}</span>
+        </li>
+        <li class="list-group-item">
+          Release
+          <span class="pressure-left">{{ bowPortValveRelease }}</span>
+        </li>
       </ul>
   </div>
   <div class="col">
-    <ul class="list-group list-group-flush text-end">
-      <li class="list-group-item"><span class="pressure-right">100</span>
-        <div class="btn btn-secondary control-button"
-          (mousedown)="valveControl('ballastIntakeValve', 'bowStarboard', 'open')"
-          (touchstart)="valveControl('ballastIntakeValve', 'bowStarboard', 'open')"
-          (mouseup)="valveControl('ballastIntakeValve', 'bowStarboard', 'closed')"
-          (touchend)="valveControl('ballastIntakeValve', 'bowStarboard', 'closed')">Ballast
-        </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        Ballast
+        <span class="pressure-left">{{ bowStarboardBallastValue }}</span></li>
+      <li class="list-group-item">
+        Piston
+        <span class="pressure-left">{{ bowStarboardPistonValue }}</span>
       </li>
-        <li class="list-group-item"><span class="pressure-right">100</span>
-          <div class="btn btn-secondary control-button"
-            (mousedown)="valveControl('ballastToPistonValve', 'bowStarboard', 'open')"
-            (touchstart)="valveControl('ballastToPistonValve', 'bowStarboard', 'open')"
-            (mouseup)="valveControl('ballastToPistonValve', 'bowStarboard', 'closed')"
-            (touchend)="valveControl('ballastToPistonValve', 'bowStarboard', 'closed')">Piston
-          </div>
-        </li>
-        <li class="list-group-item">
-          <div class="btn btn-secondary control-button"
-            (mousedown)="valveControl('pistonReleaseValve', 'bowStarboard', 'open')"
-            (touchstart)="valveControl('pistonReleaseValve', 'bowStarboard', 'open')"
-            (mouseup)="valveControl('pistonReleaseValve', 'bowStarboard', 'closed')"
-            (touchend)="valveControl('pistonReleaseValve', 'bowStarboard', 'closed')">Vent
-          </div>
-        </li>
-      </ul>
+      <li class="list-group-item">
+        Ballast In
+        <span class="pressure-left">{{ bowStarboardValveBallastIn }}</span>
+      </li>
+      <li class="list-group-item">
+        Ballast Out
+        <span class="pressure-left">{{ bowStarboardValveBallastOut }}</span>
+      </li>
+      <li class="list-group-item">
+        Release
+        <span class="pressure-left">{{ bowStarboardValveRelease }}</span>
+      </li>
+    </ul>
     </div>
   </div>
   <hr class="pt-5" />
@@ -59,56 +52,46 @@
     <div class="col">
       <ul class="list-group list-group-flush">
         <li class="list-group-item">
-          <div class="btn btn-secondary control-button"
-            (mousedown)="valveControl('ballastIntakeValve', 'sternPort', 'open')"
-            (touchstart)="valveControl('ballastIntakeValve', 'sternPort', 'open')"
-            (mouseup)="valveControl('ballastIntakeValve', 'sternPort', 'closed')"
-            (touchend)="valveControl('ballastIntakeValve', 'sternPort', 'closed')">Ballast
-          </div><span class="pressure-left">100</span>
+          Ballast
+          <span class="pressure-left">{{ sternPortBallastValue }}</span></li>
+        <li class="list-group-item">
+          Piston
+          <span class="pressure-left">{{ sternPortPistonValue }}</span>
         </li>
         <li class="list-group-item">
-          <div class="btn btn-secondary control-button"
-            (mousedown)="valveControl('ballastToPistonValve', 'sternPort', 'open')"
-            (touchstart)="valveControl('ballastToPistonValve', 'sternPort', 'open')"
-            (mouseup)="valveControl('ballastToPistonValve', 'sternPort', 'closed')"
-            (touchend)="valveControl('ballastToPistonValve', 'sternPort', 'closed')">Piston
-          </div><span class="pressure-left">100</span>
+          Ballast In
+          <span class="pressure-left">{{ sternPortValveBallastIn }}</span>
         </li>
         <li class="list-group-item">
-          <div class="btn btn-secondary control-button"
-            (mousedown)="valveControl('pistonReleaseValve', 'sternPort', 'open')"
-            (touchstart)="valveControl('pistonReleaseValve', 'sternPort', 'open')"
-            (mouseup)="valveControl('pistonReleaseValve', 'sternPort', 'closed')"
-            (touchend)="valveControl('pistonReleaseValve', 'sternPort', 'closed')">Vent
-          </div>
+          Ballast Out
+          <span class="pressure-left">{{ sternPortValveBallastOut }}</span>
+        </li>
+        <li class="list-group-item">
+          Release
+          <span class="pressure-left">{{ sternPortValveRelease }}</span>
         </li>
       </ul>
   </div>
   <div class="col">
-    <ul class="list-group list-group-flush text-end">
-      <li class="list-group-item"><span class="pressure-right">100</span>
-        <div class="btn btn-secondary control-button"
-          (mousedown)="valveControl('ballastIntakeValve', 'sternStarboard', 'open')"
-          (touchstart)="valveControl('ballastIntakeValve', 'sternStarboard', 'open')"
-          (mouseup)="valveControl('ballastIntakeValve', 'sternStarboard', 'closed')"
-          (touchend)="valveControl('ballastIntakeValve', 'sternStarboard', 'closed')">Ballast
-        </div>
-      </li>
-      <li class="list-group-item"><span class="pressure-right">100</span>
-        <div class="btn btn-secondary control-button"
-          (mousedown)="valveControl('ballastToPistonValve', 'sternStarboard', 'open')"
-          (touchstart)="valveControl('ballastToPistonValve', 'sternStarboard', 'open')"
-          (mouseup)="valveControl('ballastToPistonValve', 'sternStarboard', 'closed')"
-          (touchend)="valveControl('ballastToPistonValve', 'sternStarboard', 'closed')">Piston
-        </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        Ballast
+        <span class="pressure-left">{{ sternStarboardBallastValue }}</span></li>
+      <li class="list-group-item">
+        Piston
+        <span class="pressure-left">{{ sternStarboardPistonValue }}</span>
       </li>
       <li class="list-group-item">
-        <div class="btn btn-secondary control-button"
-          (mousedown)="valveControl('pistonReleaseValve', 'sternStarboard', 'open')"
-          (touchstart)="valveControl('pistonReleaseValve', 'sternStarboard', 'open')"
-          (mouseup)="valveControl('pistonReleaseValve', 'sternStarboard', 'closed')"
-          (touchend)="valveControl('pistonReleaseValve', 'sternStarboard', 'closed')">Vent
-        </div>
+        Ballast In
+        <span class="pressure-left">{{ sternStarboardValveBallastIn }}</span>
+      </li>
+      <li class="list-group-item">
+        Ballast Out
+        <span class="pressure-left">{{ sternStarboardValveBallastOut }}</span>
+      </li>
+      <li class="list-group-item">
+        Release
+        <span class="pressure-left">{{ sternStarboardValveRelease }}</span>
       </li>
     </ul>
   </div>

@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WebsocketService {
   private socket: WebSocket;
+  private messageSubject: Subject<any> = new Subject<any>();
+  public messages$: Observable<any> = this.messageSubject.asObservable();
 
   constructor() {
     this.socket = new WebSocket('ws://192.168.0.101:8078');
@@ -15,7 +18,7 @@ export class WebsocketService {
 
     this.socket.onmessage = (event) => {
       console.log('Message received:', event.data);
-      console.log(event.data['Blob']);
+      this.messageSubject.next(event.data);
     };
 
     this.socket.onclose = () => {

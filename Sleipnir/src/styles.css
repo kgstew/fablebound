@@ -2,6 +2,7 @@ body {
   background-color: #333;
   --bs-body-bg: #333;
   font-family: "Ubuntu", sans-serif;
+  color: #ccc;
 }
 
 p {
@@ -14,6 +15,7 @@ h3 {
 
 /* Disabling text selection */
 * {
+  --bs-list-group-color: #ccc;
   user-select: none; /* Standard syntax */
   -webkit-user-select: none; /* WebKit (Safari, Chrome) */
   -moz-user-select: none; /* Firefox */
