@@ -10,15 +10,20 @@ export class WebsocketService {
   public messages$: Observable<any> = this.messageSubject.asObservable();
 
   constructor() {
-    this.socket = new WebSocket('ws://192.168.0.101:8078');
+    this.socket = new WebSocket('ws://192.168.1.172:8078');
 
     this.socket.onopen = () => {
       console.log('WebSocket connection established');
     };
 
     this.socket.onmessage = (event) => {
-      console.log('Message received:', event.data);
-      this.messageSubject.next(event.data);
+      try {
+        console.log('Message received:', event.data);
+        const message = JSON.parse(event.data);
+        this.messageSubject.next(message);
+      } catch (error) {
+        console.log("Error parsing message: ", error);
+      }
     };
 
     this.socket.onclose = () => {
