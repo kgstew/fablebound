@@ -26,7 +26,9 @@ for (let i = 0; i < portCount; i++) {
 }
 
 // Open the first available input port.
-input.openPort(0);
+if (input.getPortCount()) {
+  input.openPort(0);
+}
 
 
 function signalPixelblaze(note: number) {

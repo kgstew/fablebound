@@ -47,7 +47,34 @@ export class PressureComponent {
 
   private handleIncomingMessage(message: any): void {
     console.log('Message from server:', message);
-    
+    if (Object.hasOwn(message, 'bowPort')) {
+      this.bowPortBallastValue = message.bowPort.bowPortBallastValue ?? 'unknown';
+      this.bowPortPistonValue = message.bowPort.bowPortPistonValue ?? 'unknown';
+      this.bowPortValveBallastIn = message.bowPort.bowPortValveBallastIn ?? 'unknown';
+      this.bowPortValveBallastOut = message.bowPort.bowPortValveBallastOut ?? 'unknown';
+      this.bowPortValveRelease = message.bowPort.bowPortValveRelease ?? 'unknown';
+    }
+    if (Object.hasOwn(message, 'bowStarboard')) {
+      this.bowStarboardBallastValue = message.bowStarboard.bowStarboardBallastValue ?? 'unknown';
+      this.bowStarboardPistonValue = message.bowStarboard.bowStarboardPistonValue ?? 'unknown';
+      this.bowStarboardValveBallastIn = message.bowStarboard.bowStarboardValveBallastIn ?? 'unknown';
+      this.bowStarboardValveBallastOut = message.bowStarboard.bowStarboardValveBallastOut ?? 'unknown';
+      this.bowStarboardValveRelease = message.bowStarboard.bowStarboardValveRelease ?? 'unknown';
+    }
+    if (Object.hasOwn(message, 'sternPort')) {
+      this.sternPortBallastValue = message.sternPort.sternPortBallastValue ?? 'unknown';
+      this.sternPortPistonValue = message.sternPort.sternPortPistonValue ?? 'unknown';
+      this.sternPortValveBallastIn = message.sternPort.sternPortValveBallastIn ?? 'unknown';
+      this.sternPortValveBallastOut = message.sternPort.sternPortValveBallastOut ?? 'unknown';
+      this.sternPortValveRelease = message.sternPort.sternPortValveRelease ?? 'unknown';
+    }
+    if (Object.hasOwn(message, 'sternStarboard')) {
+      this.sternStarboardBallastValue = message.sternStarboard.sternStarboardBallastValue ?? 'unknown';
+      this.sternStarboardPistonValue = message.sternStarboard.sternStarboardPistonValue ?? 'unknown';
+      this.sternStarboardValveBallastIn = message.sternStarboard.sternStarboardValveBallastIn ?? 'unknown';
+      this.sternStarboardValveBallastOut = message.sternStarboard.sternStarboardValveBallastOut ?? 'unknown';
+      this.sternStarboardValveRelease = message.sternStarboard.sternStarboardValveRelease ?? 'unknown';
+    }
   }
   
   public valveControl(unit: string, location: string, action: string): void {
