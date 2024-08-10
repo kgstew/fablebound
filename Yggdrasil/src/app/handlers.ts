@@ -1,4 +1,4 @@
-import { Handler, PneumaticsCommandGranularHandler, PneumaticsCommandTextHandler, ReadingsHandlerBow, ReadingsHandlerStern } from 'api'
+import { Handler, PneumaticsCommandGranularHandler, PneumaticsCommandTextHandler, PneumaticsCommandPatternHandler, ReadingsHandlerBow, ReadingsHandlerStern } from 'api'
 import { appConfig } from './app-config'
 import { services } from './services'
 
@@ -9,6 +9,7 @@ const handlers: Handlers = {
     espToServerSystemStateStern: new ReadingsHandlerStern(services.pneumaticsSystemService),
     pneumaticsCommandGranular: new PneumaticsCommandGranularHandler(services.pneumaticsSystemService),
     pneumaticsCommandText: new PneumaticsCommandTextHandler(services.pneumaticsSystemService),
+    pneumaticsCommandPattern: new PneumaticsCommandPatternHandler(services.pneumaticsSystemService),
 }
 
 export { Handlers, handlers }

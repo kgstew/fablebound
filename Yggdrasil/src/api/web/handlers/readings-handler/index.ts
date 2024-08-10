@@ -82,6 +82,7 @@ abstract class ReadingsHandlerBase implements Handler<BowOrSternReadingsData> {
         console.log("Failed to send data: 'frontend' connection does not exist.");
     }
 
+        console.log("Processed Readings:", validatedData);
     }
 }
 

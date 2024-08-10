@@ -19,11 +19,11 @@ Leg* LegPort = nullptr;
 
 
 // Replace with your network credentials
-const char* ssid = "Whitesands";
-const char* password = "alllowercasenocaps";
+const char* ssid = "VikingRadio";
+const char* password = "vikinglongship";
 
 // WebSocket server address and port
-const char* websocket_server = "192.168.0.38";
+const char* websocket_server = "192.168.0.101";
 
 // Websocket server port
 // CHANGE THIS TO CHANGE BOW VS STERN
@@ -31,12 +31,12 @@ const char* websocket_server = "192.168.0.38";
 // STERN: 8072 and espToServerSystemStateStern
 
 // UNCOMMENT THIS FOR BOW 
-// const uint16_t websocket_port = 8071;
-// const char* messageType = "espToServerSystemStateBow";
+const uint16_t websocket_port = 8071;
+const char* messageType = "espToServerSystemStateBow";
 
 // UNCOMMENT THIS FOR STERN
-const uint16_t websocket_port = 8072;
-const char* messageType = "espToServerSystemStateStern";
+// const uint16_t websocket_port = 8072;
+// const char* messageType = "espToServerSystemStateStern";
 
 // init Json data object
 json system_state = { { "type", messageType }, { "sendTime", "notime" },
@@ -135,7 +135,7 @@ void setup()
     // Set up WebSocket client
     webSocket.begin(websocket_server, websocket_port, "/");
     webSocket.onEvent(webSocketEvent);
-    updateTicker.attach(10, sendStateJson);
+    updateTicker.attach(.2, sendStateJson);
 }
 
 // {

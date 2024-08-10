@@ -1,12 +1,16 @@
 import { PneumaticsSystemService, Valve } from 'domain/'
 import { Handler } from '../handler'
 import { webSocketConnections } from 'app/websocket/server/open-socket';
-import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller';
+import { PneumaticsModelSingleton, PneumaticsPatternController } from 'domain/controllers/pneumatics-controller';
 import { PneumaticsCommandText, PneumaticsCommandTextMessage, isValidPneumaticsCommand } from 'domain/controllers/types';
 
  
-class PneumaticsCommandTextHandler implements Handler<PneumaticsCommandTextMessage> {
-    constructor(private pneumaticSystemService: PneumaticsSystemService) {}
+class PneumaticsCommandTextHandler implements Handler<PneumaticsCommandTextMessage> {    
+    private pneumaticsModelSingleton: PneumaticsModelSingleton;
+
+    constructor(private pneumaticSystemService: PneumaticsSystemService) {
+        this.pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
+    }
 
     validate(data: unknown): PneumaticsCommandTextMessage {
         if (!data) {
@@ -32,30 +36,18 @@ class PneumaticsCommandTextHandler implements Handler<PneumaticsCommandTextMessa
 
     async handle(data: unknown): Promise<void> {
         console.log("Received data:", data);
-
+        // Stop any live patterns
+        try {
+            await this.pneumaticsModelSingleton.patternController.stopPattern();
+        } catch (error) {
+            console.error("Error running pattern:", error);
+        }
         const validatedFrontendCommand = this.validate(data) as PneumaticsCommandTextMessage;
 
-        const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
-        const outgoingCommand = pneumaticsModelSingleton.model.handleCommand(validatedFrontendCommand);
-        const outgoingCommandBow = outgoingCommand.bow
-        const outgoingCommandStern = outgoingCommand.stern
-        const outgoingCommandBowStringified = JSON.stringify(outgoingCommandBow)
-        const outgoingCommandSternStringified = JSON.stringify(outgoingCommandStern)
+        const outgoingCommand = this.pneumaticsModelSingleton.model.handleCommand(validatedFrontendCommand);
 
         console.log("Processed Command:", validatedFrontendCommand);
 
-    if ('esp32bow' in webSocketConnections) {
-        webSocketConnections['esp32bow'].send(outgoingCommandBowStringified);
-        console.log("Data sent to esp32.");
-    } else {
-        console.log("Failed to send data: 'esp32' connection does not exist.");
-    }
-    if ('esp32stern' in webSocketConnections) {
-        webSocketConnections['esp32stern'].send(outgoingCommandSternStringified);
-        console.log("Data sent to esp32.");
-    } else {
-        console.log("Failed to send data: 'esp32' connection does not exist.");
-    }
     }
 }
 

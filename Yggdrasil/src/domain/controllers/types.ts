@@ -1,4 +1,5 @@
 import { Valve } from "domain/models"
+import { PneumaticsController } from "./pneumatics-controller"
 
 
 interface LegAssemblyReadings {
@@ -42,7 +43,6 @@ export type ReadingsData= {
     sternStarboard: LegAssemblyReadings;
     sendTime: string;
 }
-
 
 export type PneumaticsCommandGranular = {
     type: string,
@@ -101,6 +101,13 @@ export interface PneumaticsCommandTextMessage {
     sendTime: string
 }
 
+
+export interface PneumaticsCommandPatternMessage {
+    type: 'pneumaticsCommandPattern'
+    pattern: PneumaticsCommandPatternName
+    sendTime: string
+}
+
 const PneumaticsCommandLibrary = {
     raiseBow: 'raiseBow',
     lowerBow: 'lowerBow',
@@ -140,10 +147,56 @@ const PneumaticsCommandLibrary = {
     holdPortBow: 'holdPortBow',
     holdPosition: 'holdPosition',
     ventAll: 'ventAll',
+    closeAllValves: 'closeAllValves',
+    none: 'none',
   } as const;
   
+
+    const PneumaticsPatternLibrary = {
+    inPort: 'inPort',
+    setOutOnAdventure: 'setOutOnAdventure',
+    intoTheUnknown: "intoTheUnknown",
+    risingStorm: "risingStorm",
+    stormySeas: 'stormySeas',
+    meetTheGods: "meetTheGods",
+    trickstersPromise: "trickstersPromise",
+    arrivingHome: "arrivingHome",
+    upDownUpDown: 'upDownUpDown',
+    ventEverything: 'ventEverything',
+    closeAllValves: 'closeAllValves',
+    maintainBaseline: 'maintainBaseline',
+    setPressure10: 'setPressure10',
+    setPressure12: 'setPressure12',
+    setPressure15: 'setPressure15',
+    setPressure17: 'setPressure17',
+    setPressure20: 'setPressure20',
+    setPressure22: 'setPressure22',
+    setPressure25: 'setPressure25',
+    setPressure27: 'setPressure27',
+    setPressure30: 'setPressure30',
+  } as const;
+
  export type PneumaticsCommandText = typeof PneumaticsCommandLibrary[keyof typeof PneumaticsCommandLibrary];
   
- export function isValidPneumaticsCommand(command: string): command is PneumaticsCommandText {
+ export interface PneumaticsCommandPattern {
+    name: PneumaticsCommandPatternName;
+    main: (controller: PneumaticsController) => void;
+    pressureSettings?: Partial<PressureSettings>;
+}
+
+export type PneumaticsCommandPatternName = typeof PneumaticsPatternLibrary[keyof typeof PneumaticsPatternLibrary];  
+export type PneumaticsCommandPatternMap = Map<PneumaticsCommandPatternName, PneumaticsCommandPattern>;
+
+export type PressureSettings = {
+    ballastTankMaxPressure?: number;
+    maxPistonPressure?: number;
+    minPistonPressure?: number;
+};
+
+export function isValidPneumaticsCommand(command: string): command is PneumaticsCommandText {
     return command in PneumaticsCommandLibrary;
+  }
+
+export function isValidPneumaticsPattern(pattern: string): pattern is PneumaticsCommandPatternName {
+    return pattern in PneumaticsPatternLibrary;
   }

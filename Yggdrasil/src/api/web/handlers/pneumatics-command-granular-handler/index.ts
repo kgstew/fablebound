@@ -1,7 +1,7 @@
 import { PneumaticsSystemService, Valve } from 'domain/'
 import { Handler } from '../handler'
 import { webSocketConnections } from 'app/websocket/server/open-socket';
-import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller';
+import { PneumaticsModelSingleton, PneumaticsPatternController } from 'domain/controllers/pneumatics-controller';
 import { FrontendCommandGranularMessage, LegCommandGranular, PneumaticsCommandGranular, PneumaticsCommandGranularBowOrStern, PneumaticsCommandGranularCombined } from 'domain/controllers/types';
 
  
@@ -48,7 +48,11 @@ const sampleReadingsData = {
 const sampleReadingsDataString = JSON.stringify(sampleReadingsData);
 
 class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranular> {
-    constructor(private pneumaticSystemService: PneumaticsSystemService) {}
+    private pneumaticsModelSingleton: PneumaticsModelSingleton;
+
+    constructor(private pneumaticSystemService: PneumaticsSystemService) {
+        this.pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
+    }
 
     validate(data: unknown): FrontendCommandGranularMessage {
         if (!data) {
@@ -73,35 +77,20 @@ class PneumaticsCommandGranularHandler implements Handler<PneumaticsCommandGranu
     async handle(data: unknown): Promise<void> {
         console.log("Received data:", data);
 
+        // Stop any live patterns
+        try {
+            await this.pneumaticsModelSingleton.patternController.stopPattern();
+        } catch (error) {
+            console.error("Error running pattern:", error);
+        }
+
         const validatedFrontendCommand = this.validate(data) as FrontendCommandGranularMessage;
 
-        const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
-        const outgoingCommand = pneumaticsModelSingleton.model.handleCommandGranular(validatedFrontendCommand);
-        const outgoingCommandBow = outgoingCommand.bow
-        const outgoingCommandStern = outgoingCommand.stern
-        const outgoingCommandBowStringified = JSON.stringify(outgoingCommandBow)
-        const outgoingCommandSternStringified = JSON.stringify(outgoingCommandStern)
+        const outgoingCommand = this.pneumaticsModelSingleton.model.handleCommandGranular(validatedFrontendCommand);
+
 
         console.log("Processed Command:", validatedFrontendCommand);
 
-    if ('esp32bow' in webSocketConnections) {
-        webSocketConnections['esp32bow'].send(outgoingCommandBowStringified);
-        console.log("Data sent to esp32.");
-    } else {
-        console.log("Failed to send data: 'esp32' connection does not exist.");
-    }
-    if ('esp32stern' in webSocketConnections) {
-        webSocketConnections['esp32stern'].send(outgoingCommandSternStringified);
-        console.log("Data sent to esp32.");
-    } else {
-        console.log("Failed to send data: 'esp32' connection does not exist.");
-    }
-    if ('frontend' in webSocketConnections) {
-        webSocketConnections['frontend'].send(sampleReadingsDataString);
-        console.log("Sample data sent to frontend.");
-    } else {
-        console.log("Dang man we're not connected to the frontend either??? wtf")
-    }
     }
 
     createValve(valveName: keyof LegCommandGranular, state: Valve): LegCommandGranular {
