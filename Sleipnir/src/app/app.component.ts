@@ -19,7 +19,7 @@ import { FormsModule } from '@angular/forms';
 export class AppComponent {
   title = 'Sleipnir';
 
-  selectedMenuItem: string = 'movement';
+  selectedMenuItem: string = 'pressure';
 
   public menuSelected(menuItem: string): void {
     this.selectedMenuItem = menuItem;
