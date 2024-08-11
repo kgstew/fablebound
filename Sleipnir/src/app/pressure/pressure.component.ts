@@ -13,6 +13,8 @@ import { state } from '@angular/animations';
 
 export class PressureComponent {
   
+  public currentPattern: any = 'unknown';
+
   public bowPortBallastValue: any = 'unknown';
   public bowPortPistonValue: any = 'unknown';
   public bowPortValveBallastIn: any = 'unknown';
@@ -47,72 +49,75 @@ export class PressureComponent {
 
   private handleIncomingMessage(message: any): void {
     console.log('Message from server:', message);
+    if (Object.prototype.hasOwnProperty.call(message, 'currentPattern')) {
+      this.currentPattern = message.currentPattern;
+    }
     if (Object.prototype.hasOwnProperty.call(message, 'bowPort')) {
-      if (message.bowPort.bowPortBallastValue !== undefined) {
-        this.bowPortBallastValue = message.bowPort.bowPortBallastValue;
+      if (message.bowPort.ballastPressurePsi !== undefined) {
+        this.bowPortBallastValue = message.bowPort.ballastPressurePsi;
       }
-      if (message.bowPort.bowPortPistonValue !== undefined) {
-        this.bowPortPistonValue = message.bowPort.bowPortPistonValue;
+      if (message.bowPort.pistonPressurePsi !== undefined) {
+        this.bowPortPistonValue = message.bowPort.pistonPressurePsi;
       }
-      if (message.bowPort.bowPortValveBallastIn !== undefined) {
-        this.bowPortValveBallastIn = message.bowPort.bowPortValveBallastIn;
+      if (message.bowPort.ballastIntakeValve !== undefined) {
+        this.bowPortValveBallastIn = message.bowPort.ballastIntakeValve;
       }
-      if (message.bowPort.bowPortValveBallastOut !== undefined) {
-        this.bowPortValveBallastOut = message.bowPort.bowPortValveBallastOut;
+      if (message.bowPort.ballastToPistonValve !== undefined) {
+        this.bowPortValveBallastOut = message.bowPort.ballastToPistonValve;
       }
-      if (message.bowPort.bowPortValveRelease !== undefined) {
-        this.bowPortValveRelease = message.bowPort.bowPortValveRelease;
+      if (message.bowPort.pistonReleaseValve !== undefined) {
+        this.bowPortValveRelease = message.bowPort.pistonReleaseValve;
       }
     }
     if (Object.prototype.hasOwnProperty.call(message, 'bowStarboard')) {
-      if (message.bowStarboard.bowStarboardBallastValue !== undefined) {
-        this.bowStarboardBallastValue = message.bowStarboard.bowStarboardBallastValue;
+      if (message.bowStarboard.ballastPressurePsi !== undefined) {
+        this.bowStarboardBallastValue = message.bowStarboard.ballastPressurePsi;
       }
-      if (message.bowStarboard.bowStarboardPistonValue !== undefined) {
-        this.bowStarboardPistonValue = message.bowStarboard.bowStarboardPistonValue;
+      if (message.bowStarboard.pistonPressurePsi !== undefined) {
+        this.bowStarboardPistonValue = message.bowStarboard.pistonPressurePsi;
       }
-      if (message.bowStarboard.bowStarboardValveBallastIn !== undefined) {
-        this.bowStarboardValveBallastIn = message.bowStarboard.bowStarboardValveBallastIn;
+      if (message.bowStarboard.ballastIntakeValve !== undefined) {
+        this.bowStarboardValveBallastIn = message.bowStarboard.ballastIntakeValve;
       }
-      if (message.bowStarboard.bowStarboardValveBallastOut !== undefined) {
-        this.bowStarboardValveBallastOut = message.bowStarboard.bowStarboardValveBallastOut;
+      if (message.bowStarboard.ballastToPistonValve !== undefined) {
+        this.bowStarboardValveBallastOut = message.bowStarboard.ballastToPistonValve;
       }
-      if (message.bowStarboard.bowStarboardValveRelease !== undefined) {
-        this.bowStarboardValveRelease = message.bowStarboard.bowStarboardValveRelease;
+      if (message.bowStarboard.pistonReleaseValve !== undefined) {
+        this.bowStarboardValveRelease = message.bowStarboard.pistonReleaseValve;
       }
     }
     if (Object.prototype.hasOwnProperty.call(message, 'sternPort')) {
-      if (message.sternPort.sternPortBallastValue !== undefined) {
-        this.sternPortBallastValue = message.sternPort.sternPortBallastValue;
+      if (message.sternPort.ballastPressurePsi !== undefined) {
+        this.sternPortBallastValue = message.sternPort.ballastPressurePsi;
       }
-      if (message.sternPort.sternPortPistonValue !== undefined) {
-        this.sternPortPistonValue = message.sternPort.sternPortPistonValue;
+      if (message.sternPort.pistonPressurePsi !== undefined) {
+        this.sternPortPistonValue = message.sternPort.pistonPressurePsi;
       }
-      if (message.sternPort.sternPortValveBallastIn !== undefined) {
-        this.sternPortValveBallastIn = message.sternPort.sternPortValveBallastIn;
+      if (message.sternPort.ballastIntakeValve !== undefined) {
+        this.sternPortValveBallastIn = message.sternPort.ballastIntakeValve;
       }
-      if (message.sternPort.sternPortValveBallastOut !== undefined) {
-        this.sternPortValveBallastOut = message.sternPort.sternPortValveBallastOut;
+      if (message.sternPort.ballastToPistonValve !== undefined) {
+        this.sternPortValveBallastOut = message.sternPort.ballastToPistonValve;
       }
-      if (message.sternPort.sternPortValveRelease !== undefined) {
-        this.sternPortValveRelease = message.sternPort.sternPortValveRelease;
+      if (message.sternPort.pistonReleaseValve !== undefined) {
+        this.sternPortValveRelease = message.sternPort.pistonReleaseValve;
       }
     }
     if (Object.prototype.hasOwnProperty.call(message, 'sternStarboard')) {
-      if (message.sternStarboard.sternStarboardBallastValue !== undefined) {
-        this.sternStarboardBallastValue = message.sternStarboard.sternStarboardBallastValue;
+      if (message.sternStarboard.ballastPressurePsi !== undefined) {
+        this.sternStarboardBallastValue = message.sternStarboard.ballastPressurePsi;
       }
-      if (message.sternStarboard.sternStarboardPistonValue !== undefined) {
-        this.sternStarboardPistonValue = message.sternStarboard.sternStarboardPistonValue;
+      if (message.sternStarboard.pistonPressurePsi !== undefined) {
+        this.sternStarboardPistonValue = message.sternStarboard.pistonPressurePsi;
       }
-      if (message.sternStarboard.sternStarboardValveBallastIn !== undefined) {
-        this.sternStarboardValveBallastIn = message.sternStarboard.sternStarboardValveBallastIn;
+      if (message.sternStarboard.ballastIntakeValve !== undefined) {
+        this.sternStarboardValveBallastIn = message.sternStarboard.ballastIntakeValve;
       }
-      if (message.sternStarboard.sternStarboardValveBallastOut !== undefined) {
-        this.sternStarboardValveBallastOut = message.sternStarboard.sternStarboardValveBallastOut;
+      if (message.sternStarboard.ballastToPistonValve !== undefined) {
+        this.sternStarboardValveBallastOut = message.sternStarboard.ballastToPistonValve;
       }
-      if (message.sternStarboard.sternStarboardValveRelease !== undefined) {
-        this.sternStarboardValveRelease = message.sternStarboard.sternStarboardValveRelease;
+      if (message.sternStarboard.pistonReleaseValve !== undefined) {
+        this.sternStarboardValveRelease = message.sternStarboard.pistonReleaseValve;
       }
     }
   }

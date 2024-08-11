@@ -10,7 +10,7 @@ export class WebsocketService {
   public messages$: Observable<any> = this.messageSubject.asObservable();
 
   constructor() {
-    this.socket = new WebSocket('ws://192.168.1.172:8078');
+    this.socket = new WebSocket('ws://192.168.0.101:8078');
 
     this.socket.onopen = () => {
       console.log('WebSocket connection established');

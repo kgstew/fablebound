@@ -112,6 +112,11 @@ export class PneumaticsController {
         }, 334); // Run every 334ms (3 times per second)
     }
 
+    public updateCurrentPattern(patternName: PneumaticsCommandPatternName | null) {
+        if (this.systemState) {
+            this.systemState.currentPattern = patternName;
+        }
+    }
 
     public updatePressureSettings(settings: Partial<PressureSettings>): void {
         if (settings.ballastTankMaxPressure !== undefined) {
@@ -199,6 +204,8 @@ export class PneumaticsController {
         if (!this.systemState) {
             console.log("System state not initialized. Skipping baseline maintenance.");
             return;
+        } else {
+            this.updateSystemStateFromReadings()
         }
         if (this.lastCommand !== 'ventAll' && this.lastCommand !== 'closeAllValves') {
             this.updatePressureTargets();
@@ -255,6 +262,7 @@ export class PneumaticsController {
 
     public initializeSystemState(systemStateReadings: ReadingsData) {
         this.systemState = {
+            currentPattern: null,
             bigAssMainTank: systemStateReadings.bigAssMainTank,
             bowStarboard: systemStateReadings.bowStarboard,
             bowPort: systemStateReadings.bowPort,
@@ -265,18 +273,26 @@ export class PneumaticsController {
         this.updateSystemStateLogs
     }
 
-    public updateSystemStateFromReadings(systemStateReadings: BowOrSternReadingsData) {
-        if (systemStateReadings.type == 'espToServerSystemStateBow') {
-            this.systemState.bowStarboard = systemStateReadings.starboard
-            this.systemState.bowPort = systemStateReadings.port
-        } else if (systemStateReadings.type == 'espToServerSystemStateStern') {
-            this.systemState.sternStarboard = systemStateReadings.starboard
-            this.systemState.sternPort = systemStateReadings.port
+    public updateSystemStateFromReadings(systemStateReadings?: BowOrSternReadingsData) {
+        if (systemStateReadings) {
+            if (systemStateReadings.type == 'espToServerSystemStateBow') {
+                this.systemState.bowStarboard = systemStateReadings.starboard
+                this.systemState.bowPort = systemStateReadings.port
+            } else if (systemStateReadings.type == 'espToServerSystemStateStern') {
+                this.systemState.sternStarboard = systemStateReadings.starboard
+                this.systemState.sternPort = systemStateReadings.port
+            }
+            this.systemState.lastReadingsReceived = new Date(systemStateReadings.sendTime)
         }
-        this.systemState.lastReadingsReceived = new Date(systemStateReadings.sendTime)
-        console.log("SYSTEM STATE")
-        console.log(this.systemState)
-        console.log("END SYSTEM STATE")
+       // console.log("SYSTEM STATE")
+        //console.log(this.systemState)
+        //console.log("END SYSTEM STATE")
+        if ('frontend' in webSocketConnections) {
+            webSocketConnections['frontend'].send(JSON.stringify(this.systemState));
+            console.log("Data sent to frontend.");
+        } else {
+            console.log("Failed to send data: 'frontend' connection does not exist.");
+        }
         this.updateSystemStateLogs()
 
         return this.systemState
@@ -730,7 +746,7 @@ export class PneumaticsController {
 
 export class PneumaticsPatternController {
     private pneumaticsController: PneumaticsController;
-    private currentPattern: PneumaticsCommandPattern | null = null;
+    public currentPattern: PneumaticsCommandPattern | null = null;
     private patterns: PneumaticsCommandPatternMap = new Map();
     private isRunning: boolean = false;
     private stopRequested: boolean = false;
@@ -743,6 +759,10 @@ export class PneumaticsPatternController {
     constructor(pneumaticsController: PneumaticsController) {
         this.pneumaticsController = pneumaticsController;
         this.initializePatterns();
+    }
+
+    public notifyPatternChange(patternName: PneumaticsCommandPatternName | null) {
+        // This method is implemented in PneumaticsModelSingleton
     }
 
     private initializePatterns() {
@@ -1356,6 +1376,7 @@ export class PneumaticsPatternController {
                 this.pneumaticsController.restoreDefaultPressureSettings();
             }
             this.currentPattern = pattern;
+            this.notifyPatternChange(patternName); // Notify about the new pattern
             this.startPattern();
         } else {
             throw new Error(`Pattern '${patternName}' not found`);
@@ -1406,12 +1427,11 @@ export class PneumaticsPatternController {
         if (this.currentPatternExecution) {
             await this.currentPatternExecution;
             this.currentPatternExecution = null;
-        }
+        }        
+        this.notifyPatternChange(null); // Notify that no pattern is running
+
     }
 
-    public stopPattern() {
-        this.stopRequested = true;
-    }
     public isPatternRunning(): boolean {
         return this.isRunning;
     }
@@ -1433,6 +1453,11 @@ export class PneumaticsModelSingleton {
     private constructor() {
         this.model = new PneumaticsController();
         this.patternController = new PneumaticsPatternController(this.model);
+
+        // Implement the notifyPatternChange method
+        this.patternController.notifyPatternChange = (patternName: PneumaticsCommandPatternName | null) => {
+            this.model.updateCurrentPattern(patternName);
+        };
     }
 
     public static getInstance(): PneumaticsModelSingleton {

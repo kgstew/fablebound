@@ -23,7 +23,7 @@ const char* ssid = "VikingRadio";
 const char* password = "vikinglongship";
 
 // WebSocket server address and port
-const char* websocket_server = "192.168.0.101";
+const char* websocket_server = "0.0.0.0";
 
 // Websocket server port
 // CHANGE THIS TO CHANGE BOW VS STERN

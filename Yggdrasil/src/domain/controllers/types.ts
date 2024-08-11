@@ -17,6 +17,7 @@ interface BigAssMainTankReadings {
 
 
 export interface SystemState {
+    currentPattern: PneumaticsCommandPatternName | null
     bigAssMainTank: BigAssMainTankReadings
     bowStarboard: LegAssemblyReadings
     bowPort: LegAssemblyReadings

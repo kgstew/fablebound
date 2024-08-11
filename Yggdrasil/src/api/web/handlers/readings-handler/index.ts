@@ -74,13 +74,12 @@ abstract class ReadingsHandlerBase implements Handler<BowOrSternReadingsData> {
         const pneumaticsModelSingleton = PneumaticsModelSingleton.getInstance();
         pneumaticsModelSingleton.model.updateSystemStateFromReadings(validatedData);
  
-        
-    if ('frontend' in webSocketConnections) {
-        webSocketConnections['frontend'].send(stringifiedValidatedData);
-        console.log("Data sent to frontend.");
-    } else {
-        console.log("Failed to send data: 'frontend' connection does not exist.");
-    }
+        if ('frontend' in webSocketConnections) {
+            webSocketConnections['frontend'].send(stringifiedValidatedData);
+            console.log("Data sent to frontend.");
+        } else {
+            console.log("Failed to send data: 'frontend' connection does not exist.");
+        }
 
         console.log("Processed Readings:", validatedData);
     }
