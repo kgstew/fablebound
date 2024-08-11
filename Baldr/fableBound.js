@@ -25,6 +25,7 @@ numPixelblazes = 4
 numSegmentsPerPixelblaze = 8
 segmentHSVs = array(numPixelblazes)
 segmentPatterns = array(numPixelblazes)
+// preRender runs once at the beginning of each animation
 preRenders = array(numPixelblazes)
 
 for (i = 0; i < numPixelblazes; i++) {
@@ -46,6 +47,13 @@ var wavesColors = [
   0.6, 0.7, 0.8, 0.88, 0.91,   
   0.66, 0.74, 0.93, 0.83, 0.77
 ]
+
+var flamesHeat = array(pixelCount + 1);
+// flamesHeat[0] is our heat source. It drives the whole simulation. 1 is the hottest value,
+// corresponding to white.
+flamesHeat[0] = 0.95;  // Default 0.95
+var flamesMidpoint = floor(pixelCount / 2);
+var flamesFrameTimer = 0;
 
 timebase = 0;
 var tx
@@ -143,7 +151,7 @@ export function segment0_3(index) {
 // Pixelblaze 0 - Rails and uplighting
 // Segment 4 - Right Accent
 export function preRender0_4(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 0, Segment 4
   }
   
 export function segment0_4(index) {
@@ -156,7 +164,7 @@ export function segment0_4(index) {
 // Pixelblaze 0 - Rails and uplighting
 // Segment 5 - Left Detail
 export function preRender0_5(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 0, Segment 5
   }
   
 export function segment0_5(index) {
@@ -169,7 +177,7 @@ export function segment0_5(index) {
 // Pixelblaze 0 - Rails and uplighting
 // Segment 6 - Right Detail
 export function preRender0_6(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 0, Segment 6
   }
   
 export function segment0_6(index) {
@@ -182,7 +190,7 @@ export function segment0_6(index) {
 // Pixelblaze 0 - Rails and uplighting
 // Segment 7 - Base
 export function preRender0_7(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 0, Segment 7
   }
   
 export function segment0_7(index) {
@@ -192,38 +200,102 @@ export function segment0_7(index) {
     return true
 }
 
+function preRenderFlames(delta) {
+    // Newfire - Doomfire in 1D!
+    // MIT License
+    // 12/19/23 ZRanger1
+
+    // Configuration
+    var cooling = 0.1;  // How quickly the flame cools, default 0.1
+    var variability = 0.5;  // How much flickering there is, default 0.5
+    var msPerFrame = 40;
+
+    timebase = (timebase + delta / 1000) % 3600;
+    // control the simulation rate so the fire moves at
+    // a more-or-less realistic speed. This is independent
+    // of the actual LED frame rate, which will likely be
+    // much higher.
+    flamesFrameTimer += delta;
+    if (flamesFrameTimer < msPerFrame) {
+        return;
+    }
+    flamesFrameTimer = 0;
+
+    var i;
+    var r;
+    var k;
+    // move heat up the flame column. Instead of 2D DoomFire's
+    // regular convolution kernel + wind, we sample hotter pixels
+    // below us at slightly randomized distances.  This
+    // gives us a less predictable fire than simply looking
+    // at the pixel below the current one.
+    for (i = pixelCount; i >= 1; i--) {
+        r = random(cooling);
+        k = max(0, i - (1 + random(1)));
+        flamesHeat[i] = max(0, flamesHeat[k] - r);
+    }
+
+    // Borrowed and extended the spark concept from the
+    // Sparkfire library pattern
+    // This one can make dark spots as well as sparks, for
+    // a more interesting look.
+    if (random(1) <= variability) {
+        i = ceil(random(pixelCount / 8));
+        flamesHeat[i] = min(flamesHeat[i] + (random(2) - 0.5), max(0.575, flamesHeat[0]));
+    }
+}
+
 // Pixelblaze 1 - Shields
 // Segment 0 - Front Center
 export function preRender1_0(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
-  }
+    preRenderFlames(delta);
+}
   
-export function segment1_0(index) {
-    segmentHSVs[1][0][0] = 0.2
-    segmentHSVs[1][0][1] = 1
-    segmentHSVs[1][0][2] = 1
-    return true
+/**
+ * Shield flame pattern
+ * @param hue base hue, 0 = red, .33 = green ,.67 = blue
+ */
+function segmentFlamePattern(index, hue) {
+    // Newfire - Doomfire in 1D!
+    // MIT License
+    // 12/19/23 ZRanger1
+
+    // Configuration
+    var saturation = 1.75;  // Default 1.75
+    var brightness = 1;  // Default 1
+
+    // Use this middle index to mirror it vertically, so the flames look like they're going up
+    // equally on each side
+    var mirroredIndex = 2 * (index < flamesMidpoint) ? abs(flamesMidpoint - index) : index - flamesMidpoint;
+    // map temperature to display pixel, gamma correct and display  
+    var k = flamesHeat[mirroredIndex];
+    k = k * k * k;
+    hsv(hue + (0.1 * k), saturation - k, brightness * k);
+
+    return false;
 }
 
+export function segment1_0(index) {
+    // Red
+    return segmentFlamePattern(index, 0.0);
+}
 
 
 // Pixelblaze 1 - Shields
 // Segment 1 - Left Shield
 export function preRender1_1(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
-  }
+    preRenderFlames(delta);
+}
   
 export function segment1_1(index) {
-    segmentHSVs[0][1][0] = 0.5
-    segmentHSVs[0][1][1] = 1
-    segmentHSVs[0][1][2] = 1
-    return true
+    // Blue
+    return segmentFlamePattern(index, 0.67);
 }
 
 // Pixelblaze 1 - Shields
 // Segment 2 - Right Shield
 export function preRender1_2(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 1, Segment 2
   }
   
 export function segment1_2(index) {
@@ -236,7 +308,7 @@ export function segment1_2(index) {
 // Pixelblaze 1 - Shields
 // Segment 3 - Left Accent
 export function preRender1_3(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 1, Segment 3
   }
   
 export function segment1_3(index) {
@@ -249,7 +321,7 @@ export function segment1_3(index) {
 // Pixelblaze 1 - Shields
 // Segment 4 - Right Accent
 export function preRender1_4(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 1, Segment 4
   }
   
 export function segment1_4(index) {
@@ -262,7 +334,7 @@ export function segment1_4(index) {
 // Pixelblaze 1 - Shields
 // Segment 5 - Left Detail
 export function preRender1_5(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 1, Segment 5
   }
   
 export function segment1_5(index) {
@@ -275,7 +347,7 @@ export function segment1_5(index) {
 // Pixelblaze 1 - Shields
 // Segment 6 - Right Detail
 export function preRender1_6(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 1, Segment 6
   }
   
 export function segment1_6(index) {
@@ -288,7 +360,7 @@ export function segment1_6(index) {
 // Pixelblaze 1 - Shields
 // Segment 7 - Base
 export function preRender1_7(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 1, Segment 7
   }
   
 export function segment1_7(index) {
@@ -302,7 +374,7 @@ export function segment1_7(index) {
 // Pixelblaze 2 - Rail UV and Rail RGB
 // Segment 0 - Portal
 export function preRender2_0(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 2, Segment 0
   }
   
 export function segment2_0(index) {
@@ -315,7 +387,7 @@ export function segment2_0(index) {
 // Pixelblaze 2 - Rail RGB and Misc
 // Segment 1 - Left Shield
 export function preRender2_1(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 2, Segment 1
   }
   
 export function segment2_1(index) {
@@ -328,7 +400,7 @@ export function segment2_1(index) {
 // Pixelblaze 2 - Rail RGB and Misc
 // Segment 2 - Right Shield
 export function preRender2_2(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 2, Segment 2
   }
   
 export function segment2_2(index) {
@@ -341,7 +413,7 @@ export function segment2_2(index) {
 // Pixelblaze 2 - Rail RGB and Misc
 // Segment 3 - Left Accent
 export function preRender2_3(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 2, Segment 3
   }
   
 export function segment2_3(index) {
@@ -354,7 +426,7 @@ export function segment2_3(index) {
 // Pixelblaze 2 - Rail RGB and Misc
 // Segment 4 - Right Accent
 export function preRender2_4(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 2, Segment 4
   }
   
 export function segment2_4(index) {
@@ -367,7 +439,7 @@ export function segment2_4(index) {
 // Pixelblaze 2 - Rail RGB and Misc
 // Segment 5 - Left Detail
 export function preRender2_5(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 2, Segment 5
   }
   
 export function segment2_5(index) {
@@ -380,7 +452,7 @@ export function segment2_5(index) {
 // Pixelblaze 2 - Rail RGB and Misc
 // Segment 6 - Right Detail
 export function preRender2_6(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 2, Segment 6
   }
   
 export function segment2_6(index) {
@@ -393,7 +465,7 @@ export function segment2_6(index) {
 // Pixelblaze 2 - Rail RGB and Misc
 // Segment 7 - Base
 export function preRender2_7(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 0
+    // Blank preRender function for Pixelblaze 2, Segment 7
   }
   
 export function segment2_7(index) {
