@@ -16,6 +16,10 @@ var PIXELS_PER_SHIELD = 25
 var PIXELS_PER_WWA_HULL = 74
 var PIXELS_PER_WWA_SIDE = 74
 var PIXELS_PER_RGB_SIDE = 147
+var PIXELS_PER_SPIRAL = 109
+var PIXELS_PER_LANTERN = 20
+var PIXELS_PER_MAST = 109
+var PIXELS_PER_NAV_CONSOLE = 20
 
 export var hsv1 = array(3)
 export var hsv2 = array(3)

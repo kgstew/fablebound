@@ -110,8 +110,9 @@ function startPneumaticsPattern(patternName: PneumaticsCommandPatternName) {
             startPneumaticsPattern("arrivingHome");
             signalPixelblaze(note);
             break;
-        case 65:
-          signalPixelblaze(note);
+        case 65:            
+            startPneumaticsPattern("closeAllValves");
+            signalPixelblaze(note);
           break;
         case 70:
           signalPixelblaze(note);

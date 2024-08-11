@@ -193,6 +193,10 @@ export type PressureSettings = {
     minPistonPressure?: number;
 };
 
+export type PressureSettingsOverTime = {
+    [timeElapsed: number]: PressureSettings;
+}
+
 export function isValidPneumaticsCommand(command: string): command is PneumaticsCommandText {
     return command in PneumaticsCommandLibrary;
   }
