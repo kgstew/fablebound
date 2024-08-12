@@ -31,18 +31,27 @@ if (input.getPortCount()) {
 }
 
 
-function signalPixelblaze(note: number) {
+function signalPixelblaze(pixelBlazeNumber: number, newSegment: number) {
     const params = {
+      PIXELBLAZE_NUMBER: pixelBlazeNumber,
       TRIGGER_SEGMENT_CHANGE: 1,
-      MIDI_NOTE: note
+      NEW_SEGMENT: newSegment
     };
-    pixelblazeClients.forEach(client => {
-      if (client.isConnected()) {
-        client.sendVars(params);
+    // Find the specific Pixelblaze client
+
+    // Check if the Pixelblaze exists in the array
+    if (pixelBlazeNumber >= 0 && pixelBlazeNumber < pixelblazeClients.length) {
+      const targetClient = pixelblazeClients[pixelBlazeNumber];
+      
+      if (targetClient.isConnected()) {
+          targetClient.sendVars(params);
+          console.log(`Sent pattern to Pixelblaze ${pixelBlazeNumber}`);
       } else {
-        console.log(`Cannot send pattern to ${client.name}: not connected`);
+          console.log(`Cannot send pattern to Pixelblaze ${pixelBlazeNumber}: not connected`);
       }
-    });
+  } else {
+      console.log(`Pixelblaze ${pixelBlazeNumber} not found in the client list`);
+  }
   }
 
 
@@ -64,58 +73,69 @@ function startPneumaticsPattern(patternName: PneumaticsCommandPatternName) {
       switch(note) {
         case 0:
           startPneumaticsPattern("inPort");
-          signalPixelblaze(note);
+          signalPixelblaze(0,0);
+          signalPixelblaze(1,2);
           break;
         case 5:
-          signalPixelblaze(note);
           break;
         case 10:
-          signalPixelblaze(note);
           break;
         case 15:
-          signalPixelblaze(note);
           break;
         case 20:
           startPneumaticsPattern("inPort");
-          signalPixelblaze(note);
+          signalPixelblaze(0,0);
+          signalPixelblaze(1,2);
+          signalPixelblaze(2,0);
           break;
         case 25:
             startPneumaticsPattern("setOutOnAdventure");
-          signalPixelblaze(note);
+            signalPixelblaze(0,1);
+            signalPixelblaze(1,1);
+            signalPixelblaze(2,0);
           break;
         case 30:
             startPneumaticsPattern("intoTheUnknown");
-          signalPixelblaze(note);
+            signalPixelblaze(0,2);
+            signalPixelblaze(1,1);
+            signalPixelblaze(2,0);
           break;
         case 35:
             startPneumaticsPattern("risingStorm");
-          signalPixelblaze(note);
+            signalPixelblaze(0,3);
+            signalPixelblaze(1,1);
+            signalPixelblaze(2,0);
           break;
         case 40:
             startPneumaticsPattern("stormySeas");
-          signalPixelblaze(note);
+            signalPixelblaze(0,3);
+            signalPixelblaze(1,1);
+            signalPixelblaze(2,0);
           break;
         case 45:
             startPneumaticsPattern("meetTheGods");
-          signalPixelblaze(note);
+            signalPixelblaze(0,5);
+            signalPixelblaze(1,1);
+            signalPixelblaze(2,1);
           break;
         case 51:
           startPneumaticsPattern("trickstersPromise");
-          signalPixelblaze(note);
           break;
         case 55:
-            signalPixelblaze(note);
             break;
         case 60:
             startPneumaticsPattern("arrivingHome");
-            signalPixelblaze(note);
+            signalPixelblaze(0,4);
+            signalPixelblaze(1,1);
+            signalPixelblaze(2,2);
             break;
         case 65:            
-            startPneumaticsPattern("closeAllValves");
-            signalPixelblaze(note);
           break;
         case 70:
-          signalPixelblaze(note);
+          startPneumaticsPattern("closeAllValves");
+          signalPixelblaze(0,0);
+          signalPixelblaze(1,1);
+          signalPixelblaze(2,0);
           break;
         default:
           console.log(`Unhandled MIDI note: ${note}`);
@@ -124,7 +144,6 @@ function startPneumaticsPattern(patternName: PneumaticsCommandPatternName) {
       // Note Off message or Note On with velocity 0 (treated as Note Off)
       patternController.stopPattern();
       console.log("Stopped current pattern");
-      signalPixelblaze(note); // Signal Pixelblaze for Note Off as well
     }
   });
 

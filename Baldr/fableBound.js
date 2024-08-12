@@ -15,6 +15,7 @@ var PIXELS_PER_SHIELD = 25
 var PIXELS_PER_WWA_HULL = 74
 var PIXELS_PER_ALL_WWA_HULL = 4 * PIXELS_PER_ALL_WWA_HULL
 var PIXELS_PER_WWA_SIDE = 74
+var PIXELS_PER_ALL_WWA_SIDE = 4 * PIXELS_PER_WWA_SIDE
 var PIXELS_PER_RGB_SIDE = 147
 var PIXELS_PER_ALL_RGB_SIDES = PIXELS_PER_RGB_SIDE * 4
 var PIXELS_PER_SPIRAL = 0//109
@@ -108,7 +109,33 @@ export function preRender0_0(delta) {
   }
 
 export function segment0_0(index) {
-    render2D(index,index/pixelCount,0.25, 0);
+    if (index < PIXELS_PER_ALL_WWA_SIDE) {
+        // We're in the WWA strips territory
+        var stripIndex = floor(index / PIXELS_PER_WWA_SIDE);
+        var localIndex = index % PIXELS_PER_WWA_SIDE;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_SIDE - localIndex;
+        }
+
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_SIDE + localIndex) ;
+
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 0);
+    } else {
+        // We're in the WWA strips territory
+        var stripIndex = floor((index - PIXELS_PER_ALL_WWA_SIDE) / PIXELS_PER_WWA_HULL);
+        var localIndex = index % PIXELS_PER_WWA_HULL;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_HULL - localIndex;
+        }
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_HULL + localIndex);
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 0);
+    }
 }
 
 
@@ -124,7 +151,33 @@ export function preRender0_1(delta) {
   }
   
 export function segment0_1(index) {
-    render2D(index,index/pixelCount,0.25, 1);
+    if (index < PIXELS_PER_ALL_WWA_SIDE) {
+        // We're in the WWA strips territory
+        var stripIndex = floor(index / PIXELS_PER_WWA_SIDE);
+        var localIndex = index % PIXELS_PER_WWA_SIDE;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_SIDE - localIndex;
+        }
+
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_SIDE + localIndex) ;
+
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 1);
+    } else {
+        // We're in the WWA strips territory
+        var stripIndex = floor((index - PIXELS_PER_ALL_WWA_SIDE) / PIXELS_PER_WWA_HULL);
+        var localIndex = index % PIXELS_PER_WWA_HULL;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_HULL - localIndex;
+        }
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_HULL + localIndex);
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 1);
+    }
 }
 
 // Pixelblaze 0 - Rails and uplighting
@@ -138,7 +191,33 @@ export function preRender0_2(delta) {
   }
   
 export function segment0_2(index) {
-    render2D(index,index/pixelCount,0.25, 2);
+    if (index < PIXELS_PER_ALL_WWA_SIDE) {
+        // We're in the WWA strips territory
+        var stripIndex = floor(index / PIXELS_PER_WWA_SIDE);
+        var localIndex = index % PIXELS_PER_WWA_SIDE;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_SIDE - localIndex;
+        }
+
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_SIDE + localIndex) ;
+
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 2);
+    } else {
+        // We're in the WWA strips territory
+        var stripIndex = floor((index - PIXELS_PER_ALL_WWA_SIDE) / PIXELS_PER_WWA_HULL);
+        var localIndex = index % PIXELS_PER_WWA_HULL;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_HULL - localIndex;
+        }
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_HULL + localIndex);
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 2);
+    }
 }
 
 // Pixelblaze 0 - Rails and uplighting
@@ -152,7 +231,33 @@ export function preRender0_3(delta) {
   }
   
 export function segment0_3(index) {
-    render2D(index,index/pixelCount,0.25, 3);
+    if (index < PIXELS_PER_ALL_WWA_SIDE) {
+        // We're in the WWA strips territory
+        var stripIndex = floor(index / PIXELS_PER_WWA_SIDE);
+        var localIndex = index % PIXELS_PER_WWA_SIDE;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_SIDE - localIndex;
+        }
+
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_SIDE + localIndex) ;
+
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 3);
+    } else {
+        // We're in the WWA strips territory
+        var stripIndex = floor((index - PIXELS_PER_ALL_WWA_SIDE) / PIXELS_PER_WWA_HULL);
+        var localIndex = index % PIXELS_PER_WWA_HULL;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_HULL - localIndex;
+        }
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_HULL + localIndex);
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 3);
+    }
 }
 
 // Pixelblaze 0 - Rails and uplighting
@@ -169,7 +274,33 @@ export function segment0_4(index) {
   if (index < PIXELS_PER_ALL_WWA_HULL) {
     hsv(0,0,0)
   } else {
-    render2D(index,index/pixelCount,0.25, 4);
+    if (index < PIXELS_PER_ALL_WWA_SIDE) {
+        // We're in the WWA strips territory
+        var stripIndex = floor(index / PIXELS_PER_WWA_SIDE);
+        var localIndex = index % PIXELS_PER_WWA_SIDE;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_SIDE - localIndex;
+        }
+
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_SIDE + localIndex) ;
+
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 4);
+    } else {
+        // We're in the WWA strips territory
+        var stripIndex = floor((index - PIXELS_PER_ALL_WWA_SIDE) / PIXELS_PER_WWA_HULL);
+        var localIndex = index % PIXELS_PER_WWA_HULL;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_HULL - localIndex;
+        }
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_HULL + localIndex);
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 4);
+    }
   }
   }
 
@@ -187,7 +318,33 @@ export function segment0_5(index) {
   if (index < PIXELS_PER_ALL_WWA_HULL) {
     hsv(0,0,0)
   } else {
-    render2D(index,index/pixelCount,0.25,5);
+    if (index < PIXELS_PER_ALL_WWA_SIDE) {
+        // We're in the WWA strips territory
+        var stripIndex = floor(index / PIXELS_PER_WWA_SIDE);
+        var localIndex = index % PIXELS_PER_WWA_SIDE;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_SIDE - localIndex;
+        }
+
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_SIDE + localIndex) ;
+
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 5);
+    } else {
+        // We're in the WWA strips territory
+        var stripIndex = floor((index - PIXELS_PER_ALL_WWA_SIDE) / PIXELS_PER_WWA_HULL);
+        var localIndex = index % PIXELS_PER_WWA_HULL;
+        
+        // Reverse every other strip
+        if (stripIndex % 2 === 1) {
+            localIndex = PIXELS_PER_WWA_HULL - localIndex;
+        }
+        // Calculate the overall progress along all WWA strips
+        var directionCorrectedIndex = (stripIndex * PIXELS_PER_WWA_HULL + localIndex);
+        render2D(directionCorrectedIndex,directionCorrectedIndex/pixelCount,0.25, 5);
+    }
   }
   }
 
@@ -773,19 +930,19 @@ export function resetVariables() {
 
 }
 
-PIXELBLAZE_NUMBER=2
+PIXELBLAZE_NUMBER=0
 CURRENT_SEGMENT=0
 PREVIOUS_SEGMENT=0
 FADE_IN_PROGRESS=1
 
 export function beforeRender(delta) {
 
-  //uncomment this block to randomly switch pattenrs to test
-//   SEGMENT_TRIGGER_TIMER = time(0.14)
-//   if (SEGMENT_TRIGGER_TIMER < 0.01 && FADE_IN_PROGRESS == 0) {
-//     TRIGGER_SEGMENT_CHANGE = 1
-//     NEW_SEGMENT = random(3)
-//   }
+  // uncomment this block to randomly switch pattenrs to test
+  SEGMENT_TRIGGER_TIMER = time(0.14)
+  if (SEGMENT_TRIGGER_TIMER < 0.01 && FADE_IN_PROGRESS == 0) {
+    TRIGGER_SEGMENT_CHANGE = 1
+    NEW_SEGMENT = 0//random(3)
+  }
   if (TRIGGER_SEGMENT_CHANGE == 1) {
     changeSegments()
   }
