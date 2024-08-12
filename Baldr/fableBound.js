@@ -48,11 +48,12 @@ var wavesColors = [
   0.66, 0.74, 0.93, 0.83, 0.77
 ]
 
-var flamesHeat = array(pixelCount + 1);
+// We're repeating the flame pattern every 25 LEDs. Otherwise this would be pixelCount+1
+var ledsPerShield = 25;
+var flamesHeat = array(ledsPerShield + 1);
 // flamesHeat[0] is our heat source. It drives the whole simulation. 1 is the hottest value,
 // corresponding to white.
-flamesHeat[0] = 0.95;  // Default 0.95
-var flamesMidpoint = floor(pixelCount / 2);
+flamesHeat[0] = 0.9;  // Default 0.9
 var flamesFrameTimer = 0;
 
 timebase = 0;
@@ -206,8 +207,8 @@ function preRenderFlames(delta) {
     // 12/19/23 ZRanger1
 
     // Configuration
-    var cooling = 0.1;  // How quickly the flame cools, default 0.1
-    var variability = 0.5;  // How much flickering there is, default 0.5
+    var cooling = 0.3;  // How quickly the flame cools, default 0.3
+    var variability = 0.1;  // How much flickering there is, default 0.1
     var msPerFrame = 40;
 
     timebase = (timebase + delta / 1000) % 3600;
@@ -229,7 +230,7 @@ function preRenderFlames(delta) {
     // below us at slightly randomized distances.  This
     // gives us a less predictable fire than simply looking
     // at the pixel below the current one.
-    for (i = pixelCount; i >= 1; i--) {
+    for (i = ledsPerShield; i >= 1; i--) {
         r = random(cooling);
         k = max(0, i - (1 + random(1)));
         flamesHeat[i] = max(0, flamesHeat[k] - r);
@@ -264,11 +265,14 @@ function segmentFlamePattern(index, hue) {
     var saturation = 1.75;  // Default 1.75
     var brightness = 1;  // Default 1
 
+    var shieldOffset = floor(index / ledsPerShield) * ledsPerShield;
+    var midpointOffset = floor(ledsPerShield / 2);
     // Use this middle index to mirror it vertically, so the flames look like they're going up
     // equally on each side
+    var flamesMidpoint = shieldOffset + midpointOffset;
     var mirroredIndex = 2 * (index < flamesMidpoint) ? abs(flamesMidpoint - index) : index - flamesMidpoint;
     // map temperature to display pixel, gamma correct and display  
-    var k = flamesHeat[mirroredIndex];
+    var k = flamesHeat[mirroredIndex % ledsPerShield];
     k = k * k * k;
     hsv(hue + (0.1 * k), saturation - k, brightness * k);
 
