@@ -2,6 +2,7 @@
 
 export var PIXELBLAZE_NUMBER = 0
 export var TRIGGER_SEGMENT_CHANGE
+export var NEW_SEGMENT
 export var CURRENT_SEGMENT
 export var PREVIOUS_SEGMENT
 export var FADE_IN_PROGRESS = 0
@@ -10,14 +11,13 @@ export var FADE_PERCENT
 var SEGMENT_TRIGGER_TIMER
 var ONE_MINUS_FADE_PERCENT
 
-export var SHOULD_RENDER_HSV
-
 var PIXELS_PER_SHIELD = 25
 var PIXELS_PER_WWA_HULL = 74
+var PIXELS_PER_ALL_WWA_HULL = 4 * PIXELS_PER_ALL_WWA_HULL
 var PIXELS_PER_WWA_SIDE = 74
-var PIXELS_PER_RGB_SIDE = 0//147
+var PIXELS_PER_RGB_SIDE = 147
 var PIXELS_PER_ALL_RGB_SIDES = PIXELS_PER_RGB_SIDE * 4
-var PIXELS_PER_SPIRAL = 109
+var PIXELS_PER_SPIRAL = 0//109
 var PIXELS_PER_LANTERN = 20
 var PIXELS_PER_SPIRAL_AND_LANTERN = PIXELS_PER_SPIRAL + PIXELS_PER_LANTERN
 var PIXELS_BEFORE_MAST = PIXELS_PER_ALL_RGB_SIDES + 2 * PIXELS_PER_SPIRAL_AND_LANTERN
@@ -58,8 +58,7 @@ var wavesColors = [
 ]
 
 // We're repeating the flame pattern every 25 LEDs. Otherwise this would be pixelCount+1
-var ledsPerShield = 25;
-var flamesHeat = array(ledsPerShield + 1);
+var flamesHeat = array(PIXELS_PER_SHIELD + 1);
 // flamesHeat[0] is our heat source. It drives the whole simulation. 1 is the hottest value,
 // corresponding to white.
 flamesHeat[0] = 0.9;  // Default 0.9
@@ -73,7 +72,7 @@ var y_0_0
 var h_0_0
 var t_0_0 = 0
 
-export function render2D(index,x_0_0,y_0_0) {
+export function render2D(index,x_0_0,y_0_0, segment) {
     // distort y coord with perlin noise to vary width of individual columns
     // (constant multipliers are hand-tuned)
     y_0_0 -= 0.3 * perlin(x_0_0 * 2, y_0_0 * 2, ty, 1.618) 
@@ -92,12 +91,14 @@ export function render2D(index,x_0_0,y_0_0) {
     // calculate the final column color, adjust brightness
     // gradient bit and display the pixel
     h_0_0 = mod(h_0_0, nColumns) //constrain h to values between 0 and nColumns-1 by wrapping
-    hsv(wavesColors[h_0_0],0.9,pow(v_0_0,1.25))
+    segmentHSVs[PIXELBLAZE_NUMBER][segment][0] = wavesColors[h_0_0]
+    segmentHSVs[PIXELBLAZE_NUMBER][segment][1] = 0.9
+    segmentHSVs[PIXELBLAZE_NUMBER][segment][2] = pow(v_0_0,1.25)
   }
   
   
 // Pixelblaze 0 - Rails and uplighting
-// Segment 0 - Portal
+// Segment 0 - port waves
 export function preRender0_0(delta) {
     timebase = (timebase + delta / 1000) % 3600
     t_0_0 = t_0_0 + 0.0000
@@ -107,14 +108,13 @@ export function preRender0_0(delta) {
   }
 
 export function segment0_0(index) {
-    render2D(index,index/pixelCount,0.25);
-    return false
+    render2D(index,index/pixelCount,0.25, 0);
 }
 
 
 
 // Pixelblaze 0 - Rails and uplighting
-// Segment 1 - Left Shield
+// Segment 1 - moving slowly ish
 export function preRender0_1(delta) {
     timebase = (timebase + delta / 1000) % 3600
     t_0_0 = t_0_0 + 0.0005
@@ -124,12 +124,11 @@ export function preRender0_1(delta) {
   }
   
 export function segment0_1(index) {
-    segment0_0(index)
-    return false
+    render2D(index,index/pixelCount,0.25, 1);
 }
 
 // Pixelblaze 0 - Rails and uplighting
-// Segment 2 - Right Shield
+// Segment 2 - medium velocity
 export function preRender0_2(delta) {
     timebase = (timebase + delta / 1000) % 3600
     t_0_0 = t_0_0 + 0.0008
@@ -139,12 +138,11 @@ export function preRender0_2(delta) {
   }
   
 export function segment0_2(index) {
-    segment0_0(index)
-    return false
+    render2D(index,index/pixelCount,0.25, 2);
 }
 
 // Pixelblaze 0 - Rails and uplighting
-// Segment 3 - Left Accent
+// Segment 3 - high velocity
 export function preRender0_3(delta) {
     timebase = (timebase + delta / 1000) % 3600
     t_0_0 = t_0_0 + 0.0012
@@ -154,35 +152,44 @@ export function preRender0_3(delta) {
   }
   
 export function segment0_3(index) {
-    segment0_0(index)
-    return false
+    render2D(index,index/pixelCount,0.25, 3);
 }
 
 // Pixelblaze 0 - Rails and uplighting
-// Segment 4 - Right Accent
+// Segment 4 - no velocity, no rail lights
 export function preRender0_4(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 4
+    timebase = (timebase + delta / 1000) % 3600
+    t_0_0 = t_0_0 + 0
+  
+    tx = -timebase / 4    // speed of x axis movement
+    ty = timebase / 2    // speed of y axis movement
   }
   
 export function segment0_4(index) {
-    segmentHSVs[0][4][0] = 0.1
-    segmentHSVs[0][4][1] = 1
-    segmentHSVs[0][4][2] = 1
-    return true
-}
+  if (index < PIXELS_PER_ALL_WWA_HULL) {
+    hsv(0,0,0)
+  } else {
+    render2D(index,index/pixelCount,0.25, 4);
+  }
+  }
 
 // Pixelblaze 0 - Rails and uplighting
-// Segment 5 - Left Detail
+// Segment 5 - high velocity, no rail lights
 export function preRender0_5(delta) {
-    // Blank preRender function for Pixelblaze 0, Segment 5
+    timebase = (timebase + delta / 1000) % 3600
+    t_0_0 = t_0_0 + 0.0012
+  
+    tx = -timebase / 4    // speed of x axis movement
+    ty = timebase / 2    // speed of y axis movement
   }
   
 export function segment0_5(index) {
-    segmentHSVs[0][5][0] = 0.6
-    segmentHSVs[0][5][1] = 1
-    segmentHSVs[0][5][2] = 1
-    return true
-}
+  if (index < PIXELS_PER_ALL_WWA_HULL) {
+    hsv(0,0,0)
+  } else {
+    render2D(index,index/pixelCount,0.25,5);
+  }
+  }
 
 // Pixelblaze 0 - Rails and uplighting
 // Segment 6 - Right Detail
@@ -239,7 +246,7 @@ function preRenderFlames(delta) {
     // below us at slightly randomized distances.  This
     // gives us a less predictable fire than simply looking
     // at the pixel below the current one.
-    for (i = ledsPerShield; i >= 1; i--) {
+    for (i = PIXELS_PER_SHIELD; i >= 1; i--) {
         r = random(cooling);
         k = max(0, i - (1 + random(1)));
         flamesHeat[i] = max(0, flamesHeat[k] - r);
@@ -265,7 +272,7 @@ export function preRender1_0(delta) {
  * Shield flame pattern
  * @param hue base hue, 0 = red, .33 = green ,.67 = blue
  */
-function segmentFlamePattern(index, hue) {
+function segmentFlamePattern(index, hue, segment) {
     // Newfire - Doomfire in 1D!
     // MIT License
     // 12/19/23 ZRanger1
@@ -274,23 +281,23 @@ function segmentFlamePattern(index, hue) {
     var saturation = 1.75;  // Default 1.75
     var brightness = 1;  // Default 1
 
-    var shieldOffset = floor(index / ledsPerShield) * ledsPerShield;
-    var midpointOffset = floor(ledsPerShield / 2);
+    var shieldOffset = floor(index / PIXELS_PER_SHIELD) * PIXELS_PER_SHIELD;
+    var midpointOffset = floor(PIXELS_PER_SHIELD / 2);
     // Use this middle index to mirror it vertically, so the flames look like they're going up
     // equally on each side
     var flamesMidpoint = shieldOffset + midpointOffset;
     var mirroredIndex = 2 * (index < flamesMidpoint) ? abs(flamesMidpoint - index) : index - flamesMidpoint;
     // map temperature to display pixel, gamma correct and display  
-    var k = flamesHeat[mirroredIndex % ledsPerShield];
+    var k = flamesHeat[mirroredIndex % PIXELS_PER_SHIELD];
     k = k * k * k;
-    hsv(hue + (0.1 * k), saturation - k, brightness * k);
-
-    return false;
+    segmentHSVs[PIXELBLAZE_NUMBER][segment][0] = hue + (0.1 * k)
+    segmentHSVs[PIXELBLAZE_NUMBER][segment][1] = saturation - k
+    segmentHSVs[PIXELBLAZE_NUMBER][segment][2] = brightness * k
 }
 
 export function segment1_0(index) {
     // Red
-    return segmentFlamePattern(index, 0.0);
+    segmentFlamePattern(index, 0.0,0);
 }
 
 
@@ -302,20 +309,23 @@ export function preRender1_1(delta) {
   
 export function segment1_1(index) {
     // Blue
-    return segmentFlamePattern(index, 0.67);
+    segmentFlamePattern(index, 0.67,1);
 }
 
+var t_1_2 = 0
+var shieldsBrightness = 0
 // Pixelblaze 1 - Shields
 // Segment 2 - Right Shield
 export function preRender1_2(delta) {
-    // Blank preRender function for Pixelblaze 1, Segment 2
+    t_1_2 = (t_1_2 + 0.0005) % 1
+    shieldsBrightness = 1 - abs(0.5 - (t_1_2))
+    shieldsBrightness = shieldsBrightness * shieldsBrightness * shieldsBrightness
   }
   
 export function segment1_2(index) {
-    segmentHSVs[0][2][0] = 0.25
+    segmentHSVs[0][2][0] = 0.6
     segmentHSVs[0][2][1] = 1
-    segmentHSVs[0][2][2] = 1
-    return true
+    segmentHSVs[0][2][2] = shieldsBrightness
 }
 
 // Pixelblaze 1 - Shields
@@ -383,45 +393,117 @@ export function segment1_7(index) {
     return true
 }
 
+
+
+function preRenderFlamesLantern(delta) {
+    // Newfire - Doomfire in 1D!
+    // MIT License
+    // 12/19/23 ZRanger1
+
+    // Configuration
+    var cooling = 0.3;  // How quickly the flame cools, default 0.3
+    var variability = 0.1;  // How much flickering there is, default 0.1
+    var msPerFrame = 40;
+
+    timebase = (timebase + delta / 1000) % 3600;
+    // control the simulation rate so the fire moves at
+    // a more-or-less realistic speed. This is independent
+    // of the actual LED frame rate, which will likely be
+    // much higher.
+    flamesFrameTimer += delta;
+    if (flamesFrameTimer < msPerFrame) {
+        return;
+    }
+    flamesFrameTimer = 0;
+
+    var i;
+    var r;
+    var k;
+    // move heat up the flame column. Instead of 2D DoomFire's
+    // regular convolution kernel + wind, we sample hotter pixels
+    // below us at slightly randomized distances.  This
+    // gives us a less predictable fire than simply looking
+    // at the pixel below the current one.
+    for (i = PIXELS_PER_LANTERN; i >= 1; i--) {
+        r = random(cooling);
+        k = max(0, i - (1 + random(1)));
+        flamesHeat[i] = max(0, flamesHeat[k] - r);
+    }
+
+    // Borrowed and extended the spark concept from the
+    // Sparkfire library pattern
+    // This one can make dark spots as well as sparks, for
+    // a more interesting look.
+    if (random(1) <= variability) {
+        i = ceil(random(PIXELS_PER_LANTERN / 8));
+        flamesHeat[i] = min(flamesHeat[i] + (random(2) - 0.5), max(0.575, flamesHeat[0]));
+    }
+}
+
+
+/**
+ * Shield flame pattern
+ * @param hue base hue, 0 = red, .33 = green ,.67 = blue
+ */
+function segmentFlamePatternLantern(index, hue, segment) {
+    // Newfire - Doomfire in 1D!
+    // MIT License
+    // 12/19/23 ZRanger1
+
+    // Configuration
+    var saturation = 1.75;  // Default 1.75
+    var brightness = 1;  // Default 1
+
+    var shieldOffset = floor(index / PIXELS_PER_LANTERN) * PIXELS_PER_LANTERN;
+    var midpointOffset = floor(PIXELS_PER_LANTERN / 2);
+    // Use this middle index to mirror it vertically, so the flames look like they're going up
+    // equally on each side
+    var flamesMidpoint = shieldOffset + midpointOffset;
+    var mirroredIndex = 2 * (index < flamesMidpoint) ? abs(flamesMidpoint - index) : index - flamesMidpoint;
+    // map temperature to display pixel, gamma correct and display  
+    var k = flamesHeat[mirroredIndex % PIXELS_PER_LANTERN];
+    k = k * k * k;
+    segmentHSVs[PIXELBLAZE_NUMBER][segment][0] = hue + (0.1 * k)
+    segmentHSVs[PIXELBLAZE_NUMBER][segment][1] = saturation - k
+    segmentHSVs[PIXELBLAZE_NUMBER][segment][2] = brightness * k
+}
+
 var t_2_0 = 0
 var spiralBrightness = 0
 // Pixelblaze 2 - Rail UV and Rail RGB
 // Segment 0 - Portal
 export function preRender2_0(delta) {
-    t_2_0 = (t_2_0 + delta) % 1
+    t_2_0 = (t_2_0 + 0.0005) % 1
     spiralBrightness = max(0.05, 1 - abs(0.5 - (t_2_0)))
     spiralBrightness = spiralBrightness * spiralBrightness
+    preRenderFlamesLantern(delta)
 }
   
 export function segment2_0(index) {
     if (index < PIXELS_PER_ALL_RGB_SIDES) {
+        segmentHSVs[PIXELBLAZE_NUMBER][0][0] = 0
+        segmentHSVs[PIXELBLAZE_NUMBER][0][1] = 0
+        segmentHSVs[PIXELBLAZE_NUMBER][0][2] = 0
     } else if ( index => (PIXELS_PER_ALL_RGB_SIDES) && index < PIXELS_BEFORE_MAST) {
         local_index = index - PIXELS_PER_ALL_RGB_SIDES % (PIXELS_PER_SPIRAL_AND_LANTERN)
         if (local_index < PIXELS_PER_SPIRAL) {
             //spiral
-            h = 0.7
-            s = 0.8
-            v = spiralBrightness
-            hsv(h, s, v)
+            segmentHSVs[PIXELBLAZE_NUMBER][0][0] = 0.7
+            segmentHSVs[PIXELBLAZE_NUMBER][0][1] = 0.8
+            segmentHSVs[PIXELBLAZE_NUMBER][0][2] = spiralBrightness
         } else {
-            //lantern
-            h = 0.2
-            s = 0.7
-            v = 1
-            hsv(h, s, v)
+            segmentFlamePatternLantern(index, 0.0, 0);
         }
     } else if (index < (PIXELS_BEFORE_SUNSTONE)) {
         //mast
-        h = 0.7
-        s = 1
-        v = 1
-        hsv(h, s, v)
+        segmentHSVs[PIXELBLAZE_NUMBER][0][0] = 0.7
+        segmentHSVs[PIXELBLAZE_NUMBER][0][1] = 1
+        segmentHSVs[PIXELBLAZE_NUMBER][0][2] = 1
     } else {
         //sunstone
-        h = 0.2
-        s = 0.9
-        v = 1
-        hsv(h, s, v)
+        segmentHSVs[PIXELBLAZE_NUMBER][0][0] = 0.0
+        segmentHSVs[PIXELBLAZE_NUMBER][0][1] = 0.9
+        segmentHSVs[PIXELBLAZE_NUMBER][0][2] = 1
     }
     return false
 }
@@ -430,7 +512,6 @@ export function segment2_0(index) {
 var rbSpeedRange = 0.2 // this scales the milliseconds back to a usable range. shown here, the max rate is 1Hz
 export var rbSpeed = rbSpeedRange // controlled by slider
 var t1_2_1
-var local_index 
 
 export function sliderSpeed(s) {
     speed = s*s * rbSpeedRange // square it to give better control at lower values, then scale it
@@ -446,6 +527,7 @@ export function preRender2_1(delta) {
     t_2_0 = (t_2_0 + 0.0005) % 1
     spiralBrightness = max(0.05, 1 - abs(0.5 - (t_2_0)))
     spiralBrightness = spiralBrightness * spiralBrightness
+    preRenderFlamesLantern(delta)
 }
   
 export function segment2_1(index) {
@@ -455,36 +537,29 @@ export function segment2_1(index) {
         } else {
             h = t1_2_1 - (index % PIXELS_PER_RGB_SIDE)/PIXELS_PER_RGB_SIDE
         }
-        s = 1
-        v = 1
-        hsv(h, s, v) 
+        segmentHSVs[PIXELBLAZE_NUMBER][1][0] = h
+        segmentHSVs[PIXELBLAZE_NUMBER][1][1] = 1
+        segmentHSVs[PIXELBLAZE_NUMBER][1][2] = 1
     } else if ( index >= (PIXELS_PER_ALL_RGB_SIDES) && index < PIXELS_BEFORE_MAST) {
         local_index = index - PIXELS_PER_ALL_RGB_SIDES % (PIXELS_PER_SPIRAL_AND_LANTERN)
         if (local_index < PIXELS_PER_SPIRAL) {
             //spiral
-            h = 0.6
-            s = 1
-            v = spiralBrightness
-            hsv(h, s, v)
+            segmentHSVs[PIXELBLAZE_NUMBER][1][0] = 0.7
+            segmentHSVs[PIXELBLAZE_NUMBER][1][1] = 0.8
+            segmentHSVs[PIXELBLAZE_NUMBER][1][2] = spiralBrightness
         } else {
-            //lantern
-            h = 0.2
-            s = 0.7
-            v = 1
-            hsv(h, s, v)
+            segmentFlamePatternLantern(index, 0.0,1);
         }
     } else if (index < (PIXELS_BEFORE_SUNSTONE)) {
         //mast
-        h = 0.7
-        s = 1
-        v = 1
-        hsv(h, s, v)
+        segmentHSVs[PIXELBLAZE_NUMBER][1][0] = 0.7
+        segmentHSVs[PIXELBLAZE_NUMBER][1][1] = 1
+        segmentHSVs[PIXELBLAZE_NUMBER][1][2] = 1
     } else {
         //sunstone
-        h = 0.2
-        s = 0.9
-        v = 1
-        hsv(h, s, v)
+        segmentHSVs[PIXELBLAZE_NUMBER][1][0] = 0.0
+        segmentHSVs[PIXELBLAZE_NUMBER][1][1] = 0.9
+        segmentHSVs[PIXELBLAZE_NUMBER][1][2] = 1
     }
     return false
 }
@@ -492,14 +567,45 @@ export function segment2_1(index) {
 // Pixelblaze 2 - Rail RGB and Misc
 // Segment 2 - Right Shield
 export function preRender2_2(delta) {
-    // Blank preRender function for Pixelblaze 2, Segment 2
+    t1_2_1 = (t1_2_1 + 0.002) % 1 // accumulate time in t1, and wrap it using modulus math to keep it between 0-1
+    t_2_0 = (t_2_0 + 0.0005) % 1
+    spiralBrightness = max(0.05, 1 - abs(0.5 - (t_2_0)))
+    spiralBrightness = spiralBrightness * spiralBrightness
+    preRenderFlamesLantern(delta)
   }
   
 export function segment2_2(index) {
-    segmentHSVs[0][2][0] = 0.25
-    segmentHSVs[0][2][1] = 1
-    segmentHSVs[0][2][2] = 1
-    return true
+    if (index < PIXELS_PER_ALL_RGB_SIDES) {
+        if ((index / PIXELS_PER_RGB_SIDE) % 2 == 0) {
+            h = t1_2_1
+        } else {
+            h = t1_2_1
+        }
+        segmentHSVs[PIXELBLAZE_NUMBER][2][0] = h
+        segmentHSVs[PIXELBLAZE_NUMBER][2][1] = 1
+        segmentHSVs[PIXELBLAZE_NUMBER][2][2] = 1
+    } else if ( index >= (PIXELS_PER_ALL_RGB_SIDES) && index < PIXELS_BEFORE_MAST) {
+        local_index = index - PIXELS_PER_ALL_RGB_SIDES % (PIXELS_PER_SPIRAL_AND_LANTERN)
+        if (local_index < PIXELS_PER_SPIRAL) {
+            //spiral
+            segmentHSVs[PIXELBLAZE_NUMBER][2][0] = 0.6
+            segmentHSVs[PIXELBLAZE_NUMBER][2][1] = 1
+            segmentHSVs[PIXELBLAZE_NUMBER][2][2] = spiralBrightness
+        } else {
+            segmentFlamePatternLantern(index, 0.0,2);
+        }
+    } else if (index < (PIXELS_BEFORE_SUNSTONE)) {
+        //mast
+        segmentHSVs[PIXELBLAZE_NUMBER][2][0] = 0.7
+        segmentHSVs[PIXELBLAZE_NUMBER][2][1] = 1
+        segmentHSVs[PIXELBLAZE_NUMBER][2][2] = 1
+    } else {
+        //sunstone
+        segmentHSVs[PIXELBLAZE_NUMBER][2][0] = 0.0
+        segmentHSVs[PIXELBLAZE_NUMBER][2][1] = 0.9
+        segmentHSVs[PIXELBLAZE_NUMBER][2][2] = 1
+    
+    }
 }
 
 // Pixelblaze 2 - Rail RGB and Misc
@@ -637,13 +743,15 @@ export function blendSegments(pattern1, pattern2) {
 export function fadeBlackBetweenSegments(pattern1, pattern2) {
   FADE_PERCENT = FADE_PERCENT + 0.00005
   ONE_MINUS_FADE_PERCENT = 1 - FADE_PERCENT
-  v = (segmentHSVs[PIXELBLAZE_NUMBER][pattern1][2] * ONE_MINUS_FADE_PERCENT + segmentHSVs[PIXELBLAZE_NUMBER][pattern2][2] * FADE_PERCENT) * abs(0.5 - FADE_PERCENT)
+  //v = (segmentHSVs[PIXELBLAZE_NUMBER][pattern1][2] * ONE_MINUS_FADE_PERCENT + segmentHSVs[PIXELBLAZE_NUMBER][pattern2][2] * FADE_PERCENT)
   if (FADE_PERCENT < 0.5) {
     h = segmentHSVs[PIXELBLAZE_NUMBER][pattern1][0]
     s = segmentHSVs[PIXELBLAZE_NUMBER][pattern1][1]
+    v = segmentHSVs[PIXELBLAZE_NUMBER][pattern1][2] * abs(0.5 - FADE_PERCENT)
   } else {
     h = segmentHSVs[PIXELBLAZE_NUMBER][pattern2][0]
     s = segmentHSVs[PIXELBLAZE_NUMBER][pattern2][1]
+    v = segmentHSVs[PIXELBLAZE_NUMBER][pattern2][2] * abs(0.5 - FADE_PERCENT)
   }
   
   blendHsv[0] = h
@@ -652,46 +760,52 @@ export function fadeBlackBetweenSegments(pattern1, pattern2) {
 }
 
 export function changeSegments() {
-  if (CURRENT_SEGMENT == 1) {
-    CURRENT_SEGMENT = 0
-    PREVIOUS_SEGMENT = 1
-  } else {
-    CURRENT_SEGMENT = 1
-    PREVIOUS_SEGMENT = 0
-  }
+    resetVariables()
+    PREVIOUS_SEGMENT = CURRENT_SEGMENT
+    CURRENT_SEGMENT = NEW_SEGMENT
+    FADE_PERCENT = 0
+    FADE_IN_PROGRESS = 1
+    TRIGGER_SEGMENT_CHANGE = 0
+}
+
+export function resetVariables() {
+  rbSpeed = rbSpeedRange // controlled by slider
+
 }
 
 PIXELBLAZE_NUMBER=2
-CURRENT_SEGMENT=1
-FADE_IN_PROGRESS=0
+CURRENT_SEGMENT=0
+PREVIOUS_SEGMENT=0
+FADE_IN_PROGRESS=1
 
 export function beforeRender(delta) {
+
+  //uncomment this block to randomly switch pattenrs to test
 //   SEGMENT_TRIGGER_TIMER = time(0.14)
 //   if (SEGMENT_TRIGGER_TIMER < 0.01 && FADE_IN_PROGRESS == 0) {
 //     TRIGGER_SEGMENT_CHANGE = 1
+//     NEW_SEGMENT = random(3)
 //   }
-//   if (TRIGGER_SEGMENT_CHANGE == 1) {
-//     changeSegments()
-//     TRIGGER_SEGMENT_CHANGE = 0
-//     FADE_PERCENT = 0
-//     FADE_IN_PROGRESS = 1
-//   }
-//   if (FADE_PERCENT >= 1) {
-//     FADE_IN_PROGRESS = 0
-//   }
+  if (TRIGGER_SEGMENT_CHANGE == 1) {
+    changeSegments()
+  }
+  if (FADE_PERCENT >= 1) {
+    FADE_IN_PROGRESS = 0
+  }
+  if (FADE_IN_PROGRESS) {
+    preRenders[PIXELBLAZE_NUMBER][PREVIOUS_SEGMENT](delta)
+  }
   preRenders[PIXELBLAZE_NUMBER][CURRENT_SEGMENT](delta)
 }
 
 export function render(index) {
-  // if (FADE_IN_PROGRESS == 1) {
-  //   segmentPatterns[PIXELBLAZE_NUMBER][PREVIOUS_SEGMENT]()
-  //   segmentPatterns[PIXELBLAZE_NUMBER][CURRENT_SEGMENT]()
-  //   fadeBlackBetweenSegments(PREVIOUS_SEGMENT, CURRENT_SEGMENT)
-  //   hsv(blendHsv[0], blendHsv[1], blendHsv[2])
-  // } else {
-    SHOULD_RENDER_HSV = segmentPatterns[PIXELBLAZE_NUMBER][CURRENT_SEGMENT](index)
-    if (SHOULD_RENDER_HSV) {
-        hsv(segmentHSVs[PIXELBLAZE_NUMBER][CURRENT_SEGMENT][0], segmentHSVs[PIXELBLAZE_NUMBER][CURRENT_SEGMENT][1], segmentHSVs[PIXELBLAZE_NUMBER][CURRENT_SEGMENT][2])
-    // }
-    }
+  if (FADE_IN_PROGRESS == 1) {
+    segmentPatterns[PIXELBLAZE_NUMBER][PREVIOUS_SEGMENT](index)
+    segmentPatterns[PIXELBLAZE_NUMBER][CURRENT_SEGMENT](index)
+    fadeBlackBetweenSegments(PREVIOUS_SEGMENT, CURRENT_SEGMENT)
+    hsv(blendHsv[0], blendHsv[1], blendHsv[2])
+  } else {
+    segmentPatterns[PIXELBLAZE_NUMBER][CURRENT_SEGMENT](index)
+    hsv(segmentHSVs[PIXELBLAZE_NUMBER][CURRENT_SEGMENT][0], segmentHSVs[PIXELBLAZE_NUMBER][CURRENT_SEGMENT][1], segmentHSVs[PIXELBLAZE_NUMBER][CURRENT_SEGMENT][2])
+  }   
 }
