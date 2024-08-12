@@ -15,11 +15,16 @@ export var SHOULD_RENDER_HSV
 var PIXELS_PER_SHIELD = 25
 var PIXELS_PER_WWA_HULL = 74
 var PIXELS_PER_WWA_SIDE = 74
-var PIXELS_PER_RGB_SIDE = 147
+var PIXELS_PER_RGB_SIDE = 0//147
+var PIXELS_PER_ALL_RGB_SIDES = PIXELS_PER_RGB_SIDE * 4
 var PIXELS_PER_SPIRAL = 109
 var PIXELS_PER_LANTERN = 20
+var PIXELS_PER_SPIRAL_AND_LANTERN = PIXELS_PER_SPIRAL + PIXELS_PER_LANTERN
+var PIXELS_BEFORE_MAST = PIXELS_PER_ALL_RGB_SIDES + 2 * PIXELS_PER_SPIRAL_AND_LANTERN
+var PIXELS_BEFORE_SUNSTONE = PIXELS_BEFORE_MAST + PIXELS_PER_MAST
 var PIXELS_PER_MAST = 109
-var PIXELS_PER_NAV_CONSOLE = 20
+var PIXELS_PER_SUNSTONE= 20
+
 
 export var hsv1 = array(3)
 export var hsv2 = array(3)
@@ -374,31 +379,110 @@ export function segment1_7(index) {
     return true
 }
 
-
+var t_2_0 = 0
+var spiralBrightness = 0
 // Pixelblaze 2 - Rail UV and Rail RGB
 // Segment 0 - Portal
 export function preRender2_0(delta) {
-    // Blank preRender function for Pixelblaze 2, Segment 0
-  }
+    t_2_0 = (t_2_0 + delta) % 1
+    spiralBrightness = max(0.05, 1 - abs(0.5 - (t_2_0)))
+    spiralBrightness = spiralBrightness * spiralBrightness
+}
   
 export function segment2_0(index) {
-    segmentHSVs[0][0][0] = 1
-    segmentHSVs[0][0][1] = 1
-    segmentHSVs[0][0][2] = 1
-    return true
+    if (index < PIXELS_PER_ALL_RGB_SIDES) {
+    } else if ( index => (PIXELS_PER_ALL_RGB_SIDES) && index < PIXELS_BEFORE_MAST) {
+        local_index = index - PIXELS_PER_ALL_RGB_SIDES % (PIXELS_PER_SPIRAL_AND_LANTERN)
+        if (local_index < PIXELS_PER_SPIRAL) {
+            //spiral
+            h = 0.7
+            s = 0.8
+            v = spiralBrightness
+            hsv(h, s, v)
+        } else {
+            //lantern
+            h = 0.2
+            s = 0.7
+            v = 1
+            hsv(h, s, v)
+        }
+    } else if (index < (PIXELS_BEFORE_SUNSTONE)) {
+        //mast
+        h = 0.7
+        s = 1
+        v = 1
+        hsv(h, s, v)
+    } else {
+        //sunstone
+        h = 0.2
+        s = 0.9
+        v = 1
+        hsv(h, s, v)
+    }
+    return false
 }
 
-// Pixelblaze 2 - Rail RGB and Misc
-// Segment 1 - Left Shield
-export function preRender2_1(delta) {
-    // Blank preRender function for Pixelblaze 2, Segment 1
+
+var rbSpeedRange = 0.2 // this scales the milliseconds back to a usable range. shown here, the max rate is 1Hz
+export var rbSpeed = rbSpeedRange // controlled by slider
+var t1_2_1
+var local_index 
+
+export function sliderSpeed(s) {
+    speed = s*s * rbSpeedRange // square it to give better control at lower values, then scale it
   }
+
+// Pixelblaze 2 - Rail RGB and Misc
+// Segment 1 - Rainbow Bridge
+export function preRender2_1(delta) {
+    t1_2_1 = (t1_2_1 + 0.001 * rbSpeed) % 1 // accumulate time in t1, and wrap it using modulus math to keep it between 0-1
+    if (rbSpeed < 6) {
+        rbSpeed = rbSpeed + 0.0002
+    }
+    t_2_0 = (t_2_0 + 0.0005) % 1
+    spiralBrightness = max(0.05, 1 - abs(0.5 - (t_2_0)))
+    spiralBrightness = spiralBrightness * spiralBrightness
+}
   
 export function segment2_1(index) {
-    segmentHSVs[0][1][0] = 0.5
-    segmentHSVs[0][1][1] = 1
-    segmentHSVs[0][1][2] = 1
-    return true
+    if (index < PIXELS_PER_ALL_RGB_SIDES) {
+        if ((index / PIXELS_PER_RGB_SIDE) % 2 == 0) {
+            h = t1_2_1 + (index % PIXELS_PER_RGB_SIDE)/PIXELS_PER_RGB_SIDE
+        } else {
+            h = t1_2_1 - (index % PIXELS_PER_RGB_SIDE)/PIXELS_PER_RGB_SIDE
+        }
+        s = 1
+        v = 1
+        hsv(h, s, v) 
+    } else if ( index >= (PIXELS_PER_ALL_RGB_SIDES) && index < PIXELS_BEFORE_MAST) {
+        local_index = index - PIXELS_PER_ALL_RGB_SIDES % (PIXELS_PER_SPIRAL_AND_LANTERN)
+        if (local_index < PIXELS_PER_SPIRAL) {
+            //spiral
+            h = 0.6
+            s = 1
+            v = spiralBrightness
+            hsv(h, s, v)
+        } else {
+            //lantern
+            h = 0.2
+            s = 0.7
+            v = 1
+            hsv(h, s, v)
+        }
+    } else if (index < (PIXELS_BEFORE_SUNSTONE)) {
+        //mast
+        h = 0.7
+        s = 1
+        v = 1
+        hsv(h, s, v)
+    } else {
+        //sunstone
+        h = 0.2
+        s = 0.9
+        v = 1
+        hsv(h, s, v)
+    }
+    return false
 }
 
 // Pixelblaze 2 - Rail RGB and Misc
@@ -573,8 +657,8 @@ export function changeSegments() {
   }
 }
 
-PIXELBLAZE_NUMBER=0
-CURRENT_SEGMENT=0
+PIXELBLAZE_NUMBER=2
+CURRENT_SEGMENT=1
 FADE_IN_PROGRESS=0
 
 export function beforeRender(delta) {
