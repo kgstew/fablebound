@@ -1,0 +1,85 @@
+To create a LaunchAgent that starts and stops a script at specific times on macOS, you'll need to create two property list (plist) files: one for starting the script and another for stopping it. Here's how you can set this up:
+
+1. First, create the start script plist file:
+
+```bash
+nano ~/Library/LaunchAgents/com.fablebound.boot.start.plist
+```
+
+2. Add the following content to the file:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.fablebound.boot.start</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/sh</string>
+        <string>/Users/fablebound/fablebound/boot.sh</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>20</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+</dict>
+</plist>
+```
+
+3. Now, create the stop script plist file:
+
+```bash
+nano ~/Library/LaunchAgents/com.fablebound.boot.stop.plist
+```
+
+4. Add the following content to the file:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.fablebound.boot.stop</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/pkill</string>
+        <string>-f</string>
+        <string>/Users/fablebound/fablebound/boot.sh</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>7</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+</dict>
+</plist>
+```
+
+5. Load the LaunchAgents:
+
+```bash
+launchctl load ~/Library/LaunchAgents/com.fablebound.boot.start.plist
+launchctl load ~/Library/LaunchAgents/com.fablebound.boot.stop.plist
+```
+
+These LaunchAgents will:
+- Start the boot.sh script at 8:00 PM (20:00) every day
+- Stop the boot.sh script at 7:00 AM (07:00) every day
+
+Notes:
+- Make sure boot.sh is executable: `chmod +x /Users/fablebound/fablebound/boot.sh`
+- The stop script uses `pkill` to find and terminate the process. If your script launches other processes that should also be terminated, you might need a more complex stop mechanism.
+- These LaunchAgents will run only when the user is logged in. If you need them to run regardless of user login status, you'll need to place them in `/Library/LaunchDaemons/` instead and ensure proper permissions.
+- Remember to unload the LaunchAgents if you need to make changes:
+  ```bash
+  launchctl unload ~/Library/LaunchAgents/com.fablebound.boot.start.plist
+  launchctl unload ~/Library/LaunchAgents/com.fablebound.boot.stop.plist
+  ```
