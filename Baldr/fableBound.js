@@ -927,13 +927,7 @@ export function changeSegments() {
 
 export function resetVariables() {
   rbSpeed = rbSpeedRange // controlled by slider
-
 }
-
-PIXELBLAZE_NUMBER=0
-CURRENT_SEGMENT=0
-PREVIOUS_SEGMENT=0
-FADE_IN_PROGRESS=1
 
 export function beforeRender(delta) {
 
