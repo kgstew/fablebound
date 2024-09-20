@@ -30,7 +30,7 @@ class PneumaticsCommandPatternHandler implements Handler<PneumaticsCommandPatter
     }
 
     async handle(data: unknown): Promise<void> {
-        console.log("Received data:", data);
+       // console.log("Received data:", data);
 
         const validatedCommand = this.validate(data);
 

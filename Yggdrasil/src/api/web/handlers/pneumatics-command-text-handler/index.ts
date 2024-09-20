@@ -35,7 +35,7 @@ class PneumaticsCommandTextHandler implements Handler<PneumaticsCommandTextMessa
 
 
     async handle(data: unknown): Promise<void> {
-        console.log("Received data:", data);
+      //  console.log("Received data:", data);
         // Stop any live patterns
         try {
             await this.pneumaticsModelSingleton.patternController.stopPattern();

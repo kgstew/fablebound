@@ -38,7 +38,7 @@ const openSocket = async (
             resolve(ws)
 
             ws.on('message', (message) => {
-                console.log(`📩 Received message on ${socketName} => ${message}`);
+             //   console.log(`📩 Received message on ${socketName} => ${message}`);
                 connectionStatus[socketName].lastReceived = new Date().toLocaleString();
             
                 const stringMessage = message.toString();
@@ -48,9 +48,9 @@ const openSocket = async (
 
                     parsed = parseJsonMessage(stringMessage, parsed);
             
-                console.log(
-                    `📩 Received message on ${socketName} => ${parsed}`
-                )
+            //    console.log(
+              //      `📩 Received message on ${socketName} => ${parsed}`
+               // )
                 connectionStatus[socketName].lastReceived =
                     new Date().toLocaleString()
                 

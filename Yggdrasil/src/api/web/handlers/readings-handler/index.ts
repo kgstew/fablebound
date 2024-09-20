@@ -36,7 +36,7 @@ abstract class ReadingsHandlerBase implements Handler<BowOrSternReadingsData> {
         }
 
         const cmd = data as Partial<BowOrSternReadingsData>; // Use Partial to handle optional properties
-        console.log(cmd)
+       // console.log(cmd)
         if ((cmd.type !== 'espToServerSystemStateBow' && cmd.type !== 'espToServerSystemStateStern') || typeof cmd.sendTime !== 'string') {
             throw new Error('Missing or invalid required fields: type or sendTime');
         }
@@ -66,7 +66,7 @@ abstract class ReadingsHandlerBase implements Handler<BowOrSternReadingsData> {
     }
 
     async handle(data: unknown): Promise<void> {
-        console.log("Received data:", data);
+       // console.log("Received data:", data);
 
         const validatedData = this.validate(data);
         const stringifiedValidatedData = JSON.stringify(validatedData)
@@ -76,12 +76,12 @@ abstract class ReadingsHandlerBase implements Handler<BowOrSternReadingsData> {
  
         if ('frontend' in webSocketConnections) {
             webSocketConnections['frontend'].send(stringifiedValidatedData);
-            console.log("Data sent to frontend.");
+            //console.log("Data sent to frontend.");
         } else {
-            console.log("Failed to send data: 'frontend' connection does not exist.");
+          //  console.log("Failed to send data: 'frontend' connection does not exist.");
         }
 
-        console.log("Processed Readings:", validatedData);
+       // console.log("Processed Readings:", validatedData);
     }
 }
 

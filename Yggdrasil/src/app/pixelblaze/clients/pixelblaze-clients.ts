@@ -76,7 +76,7 @@ export class PixelblazeClient {
         }
 
         const delay = Math.min(
-            30000, // Max delay of 30 seconds
+            10000, // Max delay of 30 seconds
             this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts)
         );
 

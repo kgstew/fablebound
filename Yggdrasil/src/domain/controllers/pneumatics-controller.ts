@@ -109,7 +109,7 @@ export class PneumaticsController {
                 console.error(e)
                 console.error('Error in maintainBaseline');
             }
-        }, 334); // Run every 334ms (3 times per second)
+        }, 125); // Run every 334ms (3 times per second)
     }
 
     public updateCurrentPattern(patternName: PneumaticsCommandPatternName | null) {
@@ -159,17 +159,17 @@ export class PneumaticsController {
         }
 
         if (actualTargetPressure < this.minPistonPressure || actualTargetPressure > this.maxPistonPressure) {
-            console.warn(`Target pressure ${actualTargetPressure} PSI is out of bounds (${this.minPistonPressure}-${this.maxPistonPressure} PSI). Ignoring.`);
+       //     console.warn(`Target pressure ${actualTargetPressure} PSI is out of bounds (${this.minPistonPressure}-${this.maxPistonPressure} PSI). Ignoring.`);
             return;
         }
 
-        console.log(`Setting pressure set point for ${legAssembly} to ${actualTargetPressure} PSI`);
+        //console.log(`Setting pressure set point for ${legAssembly} to ${actualTargetPressure} PSI`);
         this.pressureTargets.set(legAssembly, actualTargetPressure);
     }
 
     public clearPressureTarget(legAssembly: 'bowStarboard' | 'bowPort' | 'sternPort' | 'sternStarboard'): void {
         this.pressureTargets.delete(legAssembly);
-        console.log(`Cleared pressure set point for ${legAssembly}`);
+      //  console.log(`Cleared pressure set point for ${legAssembly}`);
     }
 
     public clearAllPressureTargets(): void {
@@ -182,8 +182,8 @@ export class PneumaticsController {
             const pistonPressure = this.systemState[legAssembly].pistonPressurePsi;
             const ballastPressure = this.systemState[legAssembly].ballastPressurePsi;
             
-            if (Math.abs(pistonPressure - targetPressure) <= 1) {
-                console.log(`Target pressure reached for ${legAssembly}`);
+            if (Math.abs(pistonPressure - targetPressure) <= 2) {
+             //   console.log(`Target pressure reached for ${legAssembly}`);
                 this.command[legAssembly] = this.valveCommandsHold;
                 this.clearPressureTarget(legAssembly as any);
                 continue;
@@ -194,7 +194,7 @@ export class PneumaticsController {
                 this.command[legAssembly] = this.valveCommandsLower;
             } else {
                 // Can't raise piston pressure due to insufficient ballast pressure
-                console.log(`Insufficient ballast pressure for ${legAssembly}`);
+             //   console.log(`Insufficient ballast pressure for ${legAssembly}`);
                 this.command[legAssembly] = this.valveCommandsHold;
             }
         }
@@ -223,15 +223,15 @@ export class PneumaticsController {
         const outgoingCommand = this.splitOutgoingCommand()
         if ('esp32bow' in webSocketConnections) {
             webSocketConnections['esp32bow'].send(JSON.stringify(outgoingCommand.bow));
-            console.log("Data sent to esp32.");
+        //    console.log("Data sent to esp32.");
         } else {
-            console.log("Failed to send data: 'esp32' connection does not exist.");
+        //    console.log("Failed to send data: 'esp32' connection does not exist.");
         }
         if ('esp32stern' in webSocketConnections) {
             webSocketConnections['esp32stern'].send(JSON.stringify(outgoingCommand.stern));
-            console.log("Data sent to esp32.");
+        //    console.log("Data sent to esp32.");
         } else {
-            console.log("Failed to send data: 'esp32' connection does not exist.");
+          //  console.log("Failed to send data: 'esp32' connection does not exist.");
         }
         this.command = {
             type: 'pneumaticsCommandGranular',
@@ -289,9 +289,9 @@ export class PneumaticsController {
         //console.log("END SYSTEM STATE")
         if ('frontend' in webSocketConnections) {
             webSocketConnections['frontend'].send(JSON.stringify(this.systemState));
-            console.log("Data sent to frontend.");
+            //console.log("Data sent to frontend.");
         } else {
-            console.log("Failed to send data: 'frontend' connection does not exist.");
+          //  console.log("Failed to send data: 'frontend' connection does not exist.");
         }
         this.updateSystemStateLogs()
 
@@ -334,15 +334,15 @@ export class PneumaticsController {
                         ...this.command[legAssembly],
                         ballastIntakeValve: 'open'
                     };
-                    console.log(`Opportunistically filling ballast for ${legAssembly}. Current pressure: ${currentPressure}, Max pressure: ${this.ballastTankMaxPressure}`);
+                  //  console.log(`Opportunistically filling ballast for ${legAssembly}. Current pressure: ${currentPressure}, Max pressure: ${this.ballastTankMaxPressure}`);
                 } else {
-                    console.log(`Not filling ballast for ${legAssembly}. Current pressure (${currentPressure}) not below max (${this.ballastTankMaxPressure})`);
+                  //  console.log(`Not filling ballast for ${legAssembly}. Current pressure (${currentPressure}) not below max (${this.ballastTankMaxPressure})`);
                 }
             } else {
-                console.log(`Skipping ballast fill for ${legAssembly}. Pressure data unavailable.`);
+               // console.log(`Skipping ballast fill for ${legAssembly}. Pressure data unavailable.`);
             }
         } else {
-            console.log(`Not filling ballast for ${legAssembly}. Piston valve is not closed or there's an existing command.`);
+            //console.log(`Not filling ballast for ${legAssembly}. Piston valve is not closed or there's an existing command.`);
         }
     }
     
@@ -363,7 +363,7 @@ export class PneumaticsController {
             this.systemState[legAssembly].pistonPressurePsi < this.minPistonPressure && 
             this.systemState[legAssembly].pistonPressurePsi < this.systemState[legAssembly].ballastPressurePsi
         ) {
-            this.setPressureTarget(legAssembly, this.minPistonPressure+2, 'psi')
+            this.setPressureTarget(legAssembly, this.minPistonPressure+1, 'psi')
         }
     }
 
@@ -769,45 +769,47 @@ export class PneumaticsPatternController {
         this.patterns.set("inPort", {
             name: "inPort",
             pressureSettings: {
-                ballastTankMaxPressure: 45,
-                maxPistonPressure: 22,
-                minPistonPressure: 18,
+                ballastTankMaxPressure: 34,
+                maxPistonPressure: 25,
+                minPistonPressure: 22,
             },
             main: async (controller) => {
-                if (this.stopRequested) return;
-                await controller.setPressureTarget('bowStarboard', 90, 'percent');
-                await controller.setPressureTarget('sternStarboard', 90, 'percent');
-                await controller.setPressureTarget('bowPort', 10, 'percent');
-                await controller.setPressureTarget('sternPort', 10, 'percent');
-                await new Promise(resolve => setTimeout(resolve, randomInt(2000,3000)));                
-                if (this.stopRequested) return;
-                await controller.setPressureTarget('bowStarboard', 90, 'percent');
-                await controller.setPressureTarget('sternStarboard', 90, 'percent');
-                await controller.setPressureTarget('bowPort', 10, 'percent');
-                await controller.setPressureTarget('sternPort', 10, 'percent');
-                await new Promise(resolve => setTimeout(resolve, randomInt(2000,3000)));
-                if (this.stopRequested) return;
+                while (true) {
+                    if (this.stopRequested) return;
+                    await controller.setPressureTarget('bowStarboard', 100, 'percent');
+                    await controller.setPressureTarget('sternStarboard', 100, 'percent');
+                    await controller.setPressureTarget('bowPort', 0, 'percent');
+                    await controller.setPressureTarget('sternPort', 0, 'percent');
+                    await new Promise(resolve => setTimeout(resolve, randomInt(2000,3000)));                
+                    if (this.stopRequested) return;
+                    await controller.setPressureTarget('bowStarboard', 0, 'percent');
+                    await controller.setPressureTarget('sternStarboard', 0, 'percent');
+                    await controller.setPressureTarget('bowPort', 100, 'percent');
+                    await controller.setPressureTarget('sternPort', 100, 'percent');
+                    await new Promise(resolve => setTimeout(resolve, randomInt(2000,3000)));
+                    if (this.stopRequested) return;
+                }
             }
         });
         this.patterns.set("setOutOnAdventure", {
             name: "setOutOnAdventure",
             pressureSettings: {
-                ballastTankMaxPressure: 45,
-                maxPistonPressure: 26,
-                minPistonPressure: 19,
+                ballastTankMaxPressure: 38,
+                maxPistonPressure: 27,
+                minPistonPressure: 22,
             },
             main: async (controller) => {
                 if (this.stopRequested) return;
-                await controller.setPressureTarget('bowStarboard', 90, 'percent');
-                await controller.setPressureTarget('bowPort', 10, 'percent');
-                await controller.setPressureTarget('sternStarboard', 90, 'percent');
-                await controller.setPressureTarget('sternPort', 10, 'percent');
+                await controller.setPressureTarget('bowStarboard', 100, 'percent');
+                await controller.setPressureTarget('bowPort', 0, 'percent');
+                await controller.setPressureTarget('sternStarboard', 100, 'percent');
+                await controller.setPressureTarget('sternPort', 0, 'percent');
                 await new Promise(resolve => setTimeout(resolve, randomInt(3000,4000)));                
                 if (this.stopRequested) return;
-                await controller.setPressureTarget('bowStarboard', 90, 'percent');
-                await controller.setPressureTarget('bowPort', 90, 'percent');
-                await controller.setPressureTarget('sternStarboard', 10, 'percent');
-                await controller.setPressureTarget('sternPort', 10, 'percent');
+                await controller.setPressureTarget('bowStarboard', 0, 'percent');
+                await controller.setPressureTarget('bowPort', 100, 'percent');
+                await controller.setPressureTarget('sternStarboard', 0, 'percent');
+                await controller.setPressureTarget('sternPort', 100, 'percent');
                 await new Promise(resolve => setTimeout(resolve, randomInt(3000,4000)));
                 if (this.stopRequested) return;
             }
@@ -815,9 +817,9 @@ export class PneumaticsPatternController {
         this.patterns.set("intoTheUnknown", {
             name: "intoTheUnknown",
             pressureSettings: {
-                ballastTankMaxPressure: 60,
+                ballastTankMaxPressure: 44,
                 maxPistonPressure: 28,
-                minPistonPressure: 20,
+                minPistonPressure: 22,
             },
             main: async (controller) => {
                 await this.starboardWave(controller)
@@ -827,17 +829,17 @@ export class PneumaticsPatternController {
         this.patterns.set("risingStorm", {
             name: "risingStorm",
             pressureSettings: {
-                ballastTankMaxPressure: 60,
-                maxPistonPressure: 26,
-                minPistonPressure: 20,
+                ballastTankMaxPressure: 50,
+                maxPistonPressure: 29,
+                minPistonPressure: 22,
             },
             main: async (controller) => {                
                 this.patternStartTime = Date.now();
                 const pressureIncreases: PressureSettingsOverTime = {
-                    0: {ballastTankMaxPressure: 60, maxPistonPressure: 26, minPistonPressure: 20},
-                    30000: {ballastTankMaxPressure: 60, maxPistonPressure: 28, minPistonPressure: 20},
-                    60000: {ballastTankMaxPressure: 65, maxPistonPressure: 28, minPistonPressure: 18},
-                    90000: {ballastTankMaxPressure: 65, maxPistonPressure: 30, minPistonPressure: 18},
+                    0: {ballastTankMaxPressure: 60, maxPistonPressure: 29, minPistonPressure: 22},
+                    30000: {ballastTankMaxPressure: 60, maxPistonPressure: 30, minPistonPressure: 22},
+                    60000: {ballastTankMaxPressure: 65, maxPistonPressure: 31, minPistonPressure: 22},
+                    90000: {ballastTankMaxPressure: 65, maxPistonPressure: 32, minPistonPressure: 22},
                 }
                 while (!this.stopRequested) {
                     const side = this.chooseRandomSide();
@@ -859,20 +861,21 @@ export class PneumaticsPatternController {
         this.patterns.set("stormySeas", {
             name: "stormySeas",
             pressureSettings: {
-                ballastTankMaxPressure: 70,
-                maxPistonPressure: 30,
-                minPistonPressure: 16,
+                ballastTankMaxPressure: 65,
+                maxPistonPressure: 32,
+                minPistonPressure: 22,
             },
             main: async (controller) => {
                 this.patternStartTime = Date.now();
                 this.inPatternTimeMarker = 110000;
                 const pressureIncreases: PressureSettingsOverTime = {
-                    0: {ballastTankMaxPressure: 70, maxPistonPressure: 30, minPistonPressure: 18},
-                    30000: {ballastTankMaxPressure: 70, maxPistonPressure: 30, minPistonPressure: 18},
-                    60000: {ballastTankMaxPressure: 70, maxPistonPressure: 32, minPistonPressure: 16},
-                    90000: {ballastTankMaxPressure: 70, maxPistonPressure: 32, minPistonPressure: 15},
+                    0: {ballastTankMaxPressure: 70, maxPistonPressure: 32, minPistonPressure: 22},
+                    30000: {ballastTankMaxPressure: 70, maxPistonPressure: 32, minPistonPressure: 22},
+                    60000: {ballastTankMaxPressure: 70, maxPistonPressure: 33, minPistonPressure: 22},
+                    90000: {ballastTankMaxPressure: 70, maxPistonPressure: 33, minPistonPressure: 22},
                 }
                 while (!this.stopRequested && Date.now() - this.patternStartTime < this.inPatternTimeMarker) {
+                    if (this.stopRequested) return;
                     const timeElapsed = Date.now() - this.patternStartTime;
                     if (timeElapsed > 60000) {
                         await this.bigCrashyWave(controller);
@@ -886,7 +889,8 @@ export class PneumaticsPatternController {
                         if (Date.now() - this.patternStartTime > parseInt(timeElapsed)) {
                             newPressureSettings = settings;
                         }
-                    });
+                    });                    
+                    if (this.stopRequested) return;
                     controller.updatePressureSettings(newPressureSettings);
                 }
                 while (!this.stopRequested && (Date.now() - this.patternStartTime) >= this.inPatternTimeMarker) {
@@ -900,9 +904,9 @@ export class PneumaticsPatternController {
         this.patterns.set("meetTheGods", {
             name: "meetTheGods",
             pressureSettings: {
-                ballastTankMaxPressure: 70,
-                maxPistonPressure: 32,
-                minPistonPressure: 18,
+                ballastTankMaxPressure: 50,
+                maxPistonPressure: 33,
+                minPistonPressure: 22,
             },
             main: async (controller) => {
                 let initialSequenceCompleted = false;
@@ -912,18 +916,18 @@ export class PneumaticsPatternController {
                         await new Promise(resolve => setTimeout(resolve, 2000));
 
                         // Raise bow
-                        await controller.setPressureTarget('bowStarboard', 30, 'psi');
-                        await controller.setPressureTarget('bowPort', 30, 'psi');    
-                        await controller.setPressureTarget('sternPort', 18, 'psi');
-                        await controller.setPressureTarget('sternStarboard', 18, 'psi');                    
+                        await controller.setPressureTarget('bowStarboard', 33, 'psi');
+                        await controller.setPressureTarget('bowPort', 33, 'psi');    
+                        await controller.setPressureTarget('sternPort', 22, 'psi');
+                        await controller.setPressureTarget('sternStarboard', 22, 'psi');                    
                         if (this.stopRequested) return;
                         await new Promise(resolve => setTimeout(resolve, 2400));
 
                         // Raise stern
-                        await controller.setPressureTarget('bowStarboard', 30, 'psi');
-                        await controller.setPressureTarget('bowPort', 30, 'psi');
-                        await controller.setPressureTarget('sternPort', 30, 'psi');
-                        await controller.setPressureTarget('sternStarboard', 30, 'psi');                       
+                        await controller.setPressureTarget('bowStarboard', 33, 'psi');
+                        await controller.setPressureTarget('bowPort', 33, 'psi');
+                        await controller.setPressureTarget('sternPort', 33, 'psi');
+                        await controller.setPressureTarget('sternStarboard', 33, 'psi');                       
                         if (this.stopRequested) return;
                         await new Promise(resolve => setTimeout(resolve, 4000));
 
@@ -931,10 +935,10 @@ export class PneumaticsPatternController {
                     }
 
                     // Set and maintain pressure at 30 PSI for all legs
-                    await controller.setPressureTarget('bowStarboard', 30, 'psi');
-                    await controller.setPressureTarget('bowPort', 30, 'psi');
-                    await controller.setPressureTarget('sternPort', 30, 'psi');
-                    await controller.setPressureTarget('sternStarboard', 30, 'psi');
+                    await controller.setPressureTarget('bowStarboard', 33, 'psi');
+                    await controller.setPressureTarget('bowPort', 33, 'psi');
+                    await controller.setPressureTarget('sternPort', 33, 'psi');
+                    await controller.setPressureTarget('sternStarboard', 33, 'psi');
                     if (this.stopRequested) return;
                     await new Promise(resolve => setTimeout(resolve, 5000));
 
@@ -947,9 +951,9 @@ export class PneumaticsPatternController {
         this.patterns.set("trickstersPromise", {
             name: "trickstersPromise",
             pressureSettings: {
-                ballastTankMaxPressure: 60,
-                maxPistonPressure: 30,
-                minPistonPressure: 18,
+                ballastTankMaxPressure: 40,
+                maxPistonPressure: 32,
+                minPistonPressure: 22,
             },
             main: async (controller) => {
                 this.patternStartTime = Date.now();
@@ -1040,27 +1044,25 @@ export class PneumaticsPatternController {
         this.patterns.set("arrivingHome", {
             name: "arrivingHome",
             pressureSettings: {
-                ballastTankMaxPressure: 70,
-                maxPistonPressure: 30,
-                minPistonPressure: 15,
+                ballastTankMaxPressure: 60,
+                maxPistonPressure: 32,
+                minPistonPressure: 22,
             },
             main: async (controller) => {
                 // Drop the boat!!
-                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerBow', sendTime: new Date().toLocaleString() });
-                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerStern', sendTime: new Date().toLocaleString() });
+                //await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerBow', sendTime: new Date().toLocaleString() });
+                //await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerStern', sendTime: new Date().toLocaleString() });
+                await this.allPistonsToLowestPoint(controller);                    
                 if (this.stopRequested) return;
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
                 if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
-                if (this.stopRequested) return;
-                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseBow', sendTime: new Date().toLocaleString() });
-                await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStern', sendTime: new Date().toLocaleString() });
+                await this.allPistonsToHighestPoint(controller);                    
+                //await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseBow', sendTime: new Date().toLocaleString() });
+                //await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStern', sendTime: new Date().toLocaleString() });
                 if (this.stopRequested) return;
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
                 
             },
         });
@@ -1381,23 +1383,24 @@ export class PneumaticsPatternController {
         const pattern = this.patterns.get(patternName);
         if (pattern) {
             await this.stopPattern(); // Ensure the current pattern is fully stopped
+            console.log("1")
             if (pattern.pressureSettings) {
                 this.pneumaticsController.updatePressureSettings(pattern.pressureSettings);
             } else {
                 this.pneumaticsController.restoreDefaultPressureSettings();
             }
+            console.log("2")
             this.currentPattern = pattern;
             this.notifyPatternChange(patternName); // Notify about the new pattern
-            this.startPattern();
+            console.log(`current pattern now: ${this.currentPattern.name}`)
+            await this.startPattern();
+            console.log("started pattern")
         } else {
             throw new Error(`Pattern '${patternName}' not found`);
         }
     }
 
     public async startPattern() {
-        if (this.isRunning) {
-            await this.stopPattern();
-        }
 
         if (!this.currentPattern) {
             console.log("No pattern selected.");
@@ -1436,7 +1439,9 @@ export class PneumaticsPatternController {
     public async stopPattern() {
         this.stopRequested = true;
         if (this.currentPatternExecution) {
+            console.log("waiting for pattern to stop")
             await this.currentPatternExecution;
+            console.log("pattern stopped")
             this.currentPatternExecution = null;
         }        
         this.notifyPatternChange(null); // Notify that no pattern is running

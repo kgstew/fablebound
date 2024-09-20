@@ -119,7 +119,7 @@ list.on('select', (item, index) => {
                 screen.render()
             })
             ws.on('message', (message) => {
-                log.log(`Received message from ${parentKey}: ${message}`)
+             //   log.log(`Received message from ${parentKey}: ${message}`)
                 screen.render()
             })
         }
