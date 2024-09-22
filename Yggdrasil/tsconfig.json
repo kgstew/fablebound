@@ -1,10 +1,11 @@
 {
-    "compilerOptions": {
-        "baseUrl": "./src",
-        "target": "ES2022",
-        "module": "commonjs",
-        "strict": true,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true
-    }
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "target": "ES2022",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true
+  }
 }
