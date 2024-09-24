@@ -773,22 +773,20 @@ export class PneumaticsPatternController {
                 maxPistonPressure: 25,
                 minPistonPressure: 22,
             },
-            main: async (controller) => {
-                while (true) {
-                    if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                    if (shouldStop()) return;
                     await controller.setPressureTarget('bowStarboard', 100, 'percent');
                     await controller.setPressureTarget('sternStarboard', 100, 'percent');
                     await controller.setPressureTarget('bowPort', 0, 'percent');
                     await controller.setPressureTarget('sternPort', 0, 'percent');
-                    await new Promise(resolve => setTimeout(resolve, randomInt(2000,3000)));                
-                    if (this.stopRequested) return;
+                    await this.sleep(randomInt(2000,3000), shouldStop);               
+                    if (shouldStop()) return;
                     await controller.setPressureTarget('bowStarboard', 0, 'percent');
                     await controller.setPressureTarget('sternStarboard', 0, 'percent');
                     await controller.setPressureTarget('bowPort', 100, 'percent');
                     await controller.setPressureTarget('sternPort', 100, 'percent');
-                    await new Promise(resolve => setTimeout(resolve, randomInt(2000,3000)));
-                    if (this.stopRequested) return;
-                }
+                    await this.sleep(randomInt(2000,3000), shouldStop);    
+                    if (shouldStop()) return;
             }
         });
         this.patterns.set("setOutOnAdventure", {
@@ -798,20 +796,20 @@ export class PneumaticsPatternController {
                 maxPistonPressure: 27,
                 minPistonPressure: 22,
             },
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.setPressureTarget('bowStarboard', 100, 'percent');
                 await controller.setPressureTarget('bowPort', 0, 'percent');
                 await controller.setPressureTarget('sternStarboard', 100, 'percent');
                 await controller.setPressureTarget('sternPort', 0, 'percent');
-                await new Promise(resolve => setTimeout(resolve, randomInt(3000,4000)));                
-                if (this.stopRequested) return;
+                await this.sleep(randomInt(3000,4000), shouldStop);                 
+                if (shouldStop()) return;
                 await controller.setPressureTarget('bowStarboard', 0, 'percent');
                 await controller.setPressureTarget('bowPort', 100, 'percent');
                 await controller.setPressureTarget('sternStarboard', 0, 'percent');
                 await controller.setPressureTarget('sternPort', 100, 'percent');
-                await new Promise(resolve => setTimeout(resolve, randomInt(3000,4000)));
-                if (this.stopRequested) return;
+                await this.sleep(randomInt(3000,4000), shouldStop);    
+                if (shouldStop()) return;
             }
         });
         this.patterns.set("intoTheUnknown", {
@@ -821,9 +819,9 @@ export class PneumaticsPatternController {
                 maxPistonPressure: 28,
                 minPistonPressure: 22,
             },
-            main: async (controller) => {
-                await this.starboardWave(controller)
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                await this.starboardWave(controller, shouldStop);
+                if (shouldStop()) return;
             }
         });
         this.patterns.set("risingStorm", {
@@ -833,7 +831,7 @@ export class PneumaticsPatternController {
                 maxPistonPressure: 29,
                 minPistonPressure: 22,
             },
-            main: async (controller) => {                
+            main: async (controller, shouldStop) => {                
                 this.patternStartTime = Date.now();
                 const pressureIncreases: PressureSettingsOverTime = {
                     0: {ballastTankMaxPressure: 60, maxPistonPressure: 29, minPistonPressure: 22},
@@ -841,12 +839,15 @@ export class PneumaticsPatternController {
                     60000: {ballastTankMaxPressure: 65, maxPistonPressure: 31, minPistonPressure: 22},
                     90000: {ballastTankMaxPressure: 65, maxPistonPressure: 32, minPistonPressure: 22},
                 }
-                while (!this.stopRequested) {
+                while (!shouldStop()) {
+                    if (shouldStop()) return;
                     const side = this.chooseRandomSide();
                     if (side === 'starboard') {
-                        await this.starboardWave(controller);
+                        await this.starboardWave(controller, shouldStop);
+                        if (shouldStop()) return;
                     } else {
-                        await this.portWave(controller);
+                        await this.portWave(controller, shouldStop);
+                        if (shouldStop()) return;
                     }
                     let newPressureSettings = pressureIncreases[0];
                     Object.entries(pressureIncreases).forEach(([timeElapsed, settings]) => {
@@ -855,6 +856,7 @@ export class PneumaticsPatternController {
                         }
                     });
                     controller.updatePressureSettings(newPressureSettings);
+                    if (shouldStop()) return;
                 }
             }
         });
@@ -865,7 +867,7 @@ export class PneumaticsPatternController {
                 maxPistonPressure: 32,
                 minPistonPressure: 22,
             },
-            main: async (controller) => {
+            main: async (controller, shouldStop) => {
                 this.patternStartTime = Date.now();
                 this.inPatternTimeMarker = 110000;
                 const pressureIncreases: PressureSettingsOverTime = {
@@ -874,15 +876,18 @@ export class PneumaticsPatternController {
                     60000: {ballastTankMaxPressure: 70, maxPistonPressure: 33, minPistonPressure: 22},
                     90000: {ballastTankMaxPressure: 70, maxPistonPressure: 33, minPistonPressure: 22},
                 }
-                while (!this.stopRequested && Date.now() - this.patternStartTime < this.inPatternTimeMarker) {
-                    if (this.stopRequested) return;
+                while (!this.stopRequested && (Date.now() - this.patternStartTime < this.inPatternTimeMarker)) {
+                    if (shouldStop()) return;
                     const timeElapsed = Date.now() - this.patternStartTime;
                     if (timeElapsed > 60000) {
-                        await this.bigCrashyWave(controller);
+                        await this.bigCrashyWave(controller, shouldStop);
+                        if (shouldStop()) return;
                     } else if (Math.random() < 0.5) {
-                        await this.starboardWave(controller);
+                        await this.starboardWave(controller, shouldStop);
+                        if (shouldStop()) return;
                     } else {
-                        await this.portWave(controller);
+                        await this.portWave(controller, shouldStop);
+                        if (shouldStop()) return;
                     }
                     let newPressureSettings = pressureIncreases[0];
                     Object.entries(pressureIncreases).forEach(([timeElapsed, settings]) => {
@@ -890,13 +895,13 @@ export class PneumaticsPatternController {
                             newPressureSettings = settings;
                         }
                     });                    
-                    if (this.stopRequested) return;
+                    if (shouldStop()) return;
                     controller.updatePressureSettings(newPressureSettings);
                 }
                 while (!this.stopRequested && (Date.now() - this.patternStartTime) >= this.inPatternTimeMarker) {
-                    if (this.stopRequested) return;
+                    if (shouldStop()) return;
                     await this.allPistonsToLowestPoint(controller);
-                    await new Promise(resolve => setTimeout(resolve, randomInt(2000,3200))); // Small delay to prevent excessive CPU usage
+                    await this.sleep(randomInt(2000,3200), shouldStop);     // Small delay to prevent excessive CPU usage
 
                 }
             }
@@ -908,28 +913,28 @@ export class PneumaticsPatternController {
                 maxPistonPressure: 33,
                 minPistonPressure: 22,
             },
-            main: async (controller) => {
+            main: async (controller, shouldStop) => {
                 let initialSequenceCompleted = false;
 
-                while (!this.stopRequested) {
+                while (!shouldStop()) {
                     if (!initialSequenceCompleted) {
-                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        await this.sleep(2000, shouldStop);
 
                         // Raise bow
                         await controller.setPressureTarget('bowStarboard', 33, 'psi');
                         await controller.setPressureTarget('bowPort', 33, 'psi');    
                         await controller.setPressureTarget('sternPort', 22, 'psi');
                         await controller.setPressureTarget('sternStarboard', 22, 'psi');                    
-                        if (this.stopRequested) return;
-                        await new Promise(resolve => setTimeout(resolve, 2400));
+                        if (shouldStop()) return;
+                        await this.sleep(2400, shouldStop);
 
                         // Raise stern
                         await controller.setPressureTarget('bowStarboard', 33, 'psi');
                         await controller.setPressureTarget('bowPort', 33, 'psi');
                         await controller.setPressureTarget('sternPort', 33, 'psi');
                         await controller.setPressureTarget('sternStarboard', 33, 'psi');                       
-                        if (this.stopRequested) return;
-                        await new Promise(resolve => setTimeout(resolve, 4000));
+                        if (shouldStop()) return;
+                        await this.sleep(4000, shouldStop);
 
                         initialSequenceCompleted = true;
                     }
@@ -939,12 +944,12 @@ export class PneumaticsPatternController {
                     await controller.setPressureTarget('bowPort', 33, 'psi');
                     await controller.setPressureTarget('sternPort', 33, 'psi');
                     await controller.setPressureTarget('sternStarboard', 33, 'psi');
-                    if (this.stopRequested) return;
-                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    if (shouldStop()) return;
+                    await this.sleep(5000, shouldStop);
 
                     await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
-                    if (this.stopRequested) return;
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    if (shouldStop()) return;
+                    await this.sleep(1000, shouldStop);
                 }
             }
         });
@@ -955,19 +960,19 @@ export class PneumaticsPatternController {
                 maxPistonPressure: 32,
                 minPistonPressure: 22,
             },
-            main: async (controller) => {
+            main: async (controller, shouldStop) => {
                 this.patternStartTime = Date.now();
                 this.inPatternTimeMarker = 170000
 
-                while (!this.stopRequested && (Date.now() - this.patternStartTime) < this.inPatternTimeMarker) {
+                while (!shouldStop() && (Date.now() - this.patternStartTime) < this.inPatternTimeMarker) {
                     
                     await controller.setPressureTarget('bowStarboard', 70, 'percent');
                     await controller.setPressureTarget('bowPort', 70, 'percent');
                     await controller.setPressureTarget('sternPort', 70, 'percent');
                     await controller.setPressureTarget('sternStarboard', 70, 'percent');                    
-                    if (this.stopRequested) return;            
+                    if (shouldStop()) return;            
                     if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) break;
-                    await new Promise(resolve => setTimeout(resolve, randomInt(2000,3700)));
+                    await this.sleep(randomInt(2000,3700), shouldStop);    
 
                     const randomSelection = randomInt(0, 2);
 
@@ -977,16 +982,16 @@ export class PneumaticsPatternController {
                         await controller.setPressureTarget('bowPort', 80, 'percent');
                         await controller.setPressureTarget('sternPort', 60, 'percent');
                         await controller.setPressureTarget('sternStarboard', 60, 'percent');                  
-                        if (this.stopRequested) return;            
+                        if (shouldStop()) return;            
                         if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) break;
-                        await new Promise(resolve => setTimeout(resolve, randomInt(2000,3200)));
+                        await this.sleep(randomInt(2000,3200), shouldStop);    
                         await controller.setPressureTarget('bowStarboard', 60, 'percent');
                         await controller.setPressureTarget('bowPort', 60, 'percent');
                         await controller.setPressureTarget('sternPort', 80, 'percent');
                         await controller.setPressureTarget('sternStarboard', 80, 'percent');                  
-                        if (this.stopRequested) return;
+                        if (shouldStop()) return;
                         if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) break;
-                        await new Promise(resolve => setTimeout(resolve, randomInt(2000,3200)));
+                        await this.sleep(randomInt(2000,3200), shouldStop);    
                     } 
                     // side to side
                     else if (randomSelection === 1) {
@@ -994,17 +999,17 @@ export class PneumaticsPatternController {
                         await controller.setPressureTarget('bowPort', 60, 'percent');
                         await controller.setPressureTarget('sternPort', 60, 'percent');
                         await controller.setPressureTarget('sternStarboard', 80, 'percent');                  
-                        if (this.stopRequested) return;            
+                        if (shouldStop()) return;            
                         if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) break;
-                        await new Promise(resolve => setTimeout(resolve, randomInt(2000,3200)));
+                        await this.sleep(randomInt(2000,3200), shouldStop);    
 
                         await controller.setPressureTarget('bowStarboard', 60, 'percent');
                         await controller.setPressureTarget('bowPort', 80, 'percent');
                         await controller.setPressureTarget('sternPort', 80, 'percent');
                         await controller.setPressureTarget('sternStarboard', 60, 'percent');                  
-                        if (this.stopRequested) return;      
+                        if (shouldStop()) return;      
                         if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) break;
-                        await new Promise(resolve => setTimeout(resolve, randomInt(2000,3200)));
+                        await this.sleep(randomInt(2000,3200), shouldStop);    
 
                     }
                     // High-intensity fall
@@ -1013,29 +1018,29 @@ export class PneumaticsPatternController {
                         await controller.setPressureTarget('bowPort', 50, 'percent');
                         await controller.setPressureTarget('sternPort', 50, 'percent');
                         await controller.setPressureTarget('sternStarboard', 50, 'percent');                  
-                        if (this.stopRequested) return;      
+                        if (shouldStop()) return;      
                         if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) break;                        
-                        await new Promise(resolve => setTimeout(resolve, randomInt(1000,2000)));
+                        await this.sleep(randomInt(1000,2000), shouldStop);    
 
                         await controller.setPressureTarget('bowStarboard', 80, 'percent');
                         await controller.setPressureTarget('bowPort', 80, 'percent');
                         await controller.setPressureTarget('sternPort', 80, 'percent');
                         await controller.setPressureTarget('sternStarboard', 80, 'percent');                  
-                        if (this.stopRequested) return;      
+                        if (shouldStop()) return;      
                         if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) break;
-                        await new Promise(resolve => setTimeout(resolve, randomInt(2000,3200)));
+                        await this.sleep(randomInt(2000,3200), shouldStop);    
                     }
 
-                    if (this.stopRequested) return;
+                    if (shouldStop()) return;
                     if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) break;
-                    await new Promise(resolve => setTimeout(resolve, randomInt(2000,3200))); // Small delay to prevent excessive CPU usage
+                    await this.sleep(randomInt(2000,3200), shouldStop);    // Small delay to prevent excessive CPU usage
                 }   
 
                 // Finish with all pistons at highest point
                 while (!this.stopRequested && (Date.now() - this.patternStartTime) >= this.inPatternTimeMarker) {
-                    if (this.stopRequested) return;
+                    if (shouldStop()) return;
                     await this.allPistonsToHighestPoint(controller);                    
-                    await new Promise(resolve => setTimeout(resolve, randomInt(2000,3200))); // Small delay to prevent excessive CPU usage
+                    await this.sleep(randomInt(2000,3200), shouldStop);     // Small delay to prevent excessive CPU usage
 
                 }
 
@@ -1048,263 +1053,265 @@ export class PneumaticsPatternController {
                 maxPistonPressure: 32,
                 minPistonPressure: 22,
             },
-            main: async (controller) => {
+            main: async (controller, shouldStop) => {
                 // Drop the boat!!
                 //await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerBow', sendTime: new Date().toLocaleString() });
                 //await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerStern', sendTime: new Date().toLocaleString() });
                 await this.allPistonsToLowestPoint(controller);                    
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
-                if (this.stopRequested) return;
+                if (shouldStop()) return;
                 await this.allPistonsToHighestPoint(controller);                    
                 //await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseBow', sendTime: new Date().toLocaleString() });
                 //await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStern', sendTime: new Date().toLocaleString() });
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
                 
             },
         });
         this.patterns.set("upDownUpDown", {
             name: "upDownUpDown",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseBow', sendTime: new Date().toLocaleString() });
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'raiseStern', sendTime: new Date().toLocaleString() });
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerBow', sendTime: new Date().toLocaleString() });
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'lowerStern', sendTime: new Date().toLocaleString() });
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("ventEverything", {
             name: "ventEverything",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'ventAll', sendTime: new Date().toLocaleString() });
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("closeAllValves", {
             name: "closeAllValves",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'closeAllValves', sendTime: new Date().toLocaleString() });
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("maintainBaseline", {
             name: "maintainBaseline",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.handleCommand({ type: 'pneumaticsCommandText', command: 'none', sendTime: new Date().toLocaleString() });
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("setPressure10", {
             name: "setPressure10",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.setPressureTarget('bowStarboard', 10, 'psi');
                 await controller.setPressureTarget('bowPort', 10, 'psi');
                 await controller.setPressureTarget('sternPort', 10, 'psi');
                 await controller.setPressureTarget('sternStarboard', 10, 'psi');
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("setPressure12", {
             name: "setPressure12",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.setPressureTarget('bowStarboard', 12, 'psi');
                 await controller.setPressureTarget('bowPort', 12, 'psi');
                 await controller.setPressureTarget('sternPort', 12, 'psi');
                 await controller.setPressureTarget('sternStarboard', 12, 'psi');
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("setPressure15", {
             name: "setPressure15",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.setPressureTarget('bowStarboard', 15, 'psi');
                 await controller.setPressureTarget('bowPort', 15, 'psi');
                 await controller.setPressureTarget('sternPort', 15, 'psi');
                 await controller.setPressureTarget('sternStarboard', 15, 'psi');
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("setPressure17", {
             name: "setPressure17",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.setPressureTarget('bowStarboard', 17, 'psi');
                 await controller.setPressureTarget('bowPort', 17, 'psi');
                 await controller.setPressureTarget('sternPort', 17, 'psi');
                 await controller.setPressureTarget('sternStarboard', 17, 'psi');
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("setPressure20", {
             name: "setPressure20",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.setPressureTarget('bowStarboard', 20, 'psi');
                 await controller.setPressureTarget('bowPort', 20, 'psi');
                 await controller.setPressureTarget('sternPort', 20, 'psi');
                 await controller.setPressureTarget('sternStarboard', 20, 'psi');
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("setPressure22", {
             name: "setPressure22",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.setPressureTarget('bowStarboard', 22, 'psi');
                 await controller.setPressureTarget('bowPort', 22, 'psi');
                 await controller.setPressureTarget('sternPort', 22, 'psi');
                 await controller.setPressureTarget('sternStarboard', 22, 'psi');
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("setPressure25", {
             name: "setPressure25",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.setPressureTarget('bowStarboard', 25, 'psi');
                 await controller.setPressureTarget('bowPort', 25, 'psi');
                 await controller.setPressureTarget('sternPort', 25, 'psi');
                 await controller.setPressureTarget('sternStarboard', 25, 'psi');
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("setPressure27", {
             name: "setPressure27",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.setPressureTarget('bowStarboard', 27, 'psi');
                 await controller.setPressureTarget('bowPort', 27, 'psi');
                 await controller.setPressureTarget('sternPort', 27, 'psi');
                 await controller.setPressureTarget('sternStarboard', 27, 'psi');
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
         this.patterns.set("setPressure30", {
             name: "setPressure30",
-            main: async (controller) => {
-                if (this.stopRequested) return;
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return;
                 await controller.setPressureTarget('bowStarboard', 30, 'psi');
                 await controller.setPressureTarget('bowPort', 30, 'psi');
                 await controller.setPressureTarget('sternPort', 30, 'psi');
                 await controller.setPressureTarget('sternStarboard', 30, 'psi');
-                if (this.stopRequested) return;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 2 seconds
+                if (shouldStop()) return;
+                await this.sleep(1000, shouldStop);
             },
         });
 
         // Add more patterns here
     }
 
-    private async starboardWave(controller: PneumaticsController) {
+    private async starboardWave(controller: PneumaticsController, shouldStop: () => boolean) {
+        console.log('starboardWave')
         await controller.setPressureTarget('bowStarboard', 90, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(1000,2400)));                
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(1000,2400), shouldStop);                   
+        if (shouldStop()) return;
 
         // Raise port bow slightly and starboard stern
         await controller.setPressureTarget('bowPort', 60, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(800,1700)));                
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(800,1700), shouldStop);               
+        if (shouldStop()) return;
 
         await controller.setPressureTarget('sternStarboard', 70, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(1000,2400)));                
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(1000,2400), shouldStop);                 
+        if (shouldStop()) return;
 
         // Lower starboard bow, raise port stern
         await controller.setPressureTarget('bowStarboard', 30, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(800,1700)));              
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(800,1700), shouldStop);              
+        if (shouldStop()) return;
            
         await controller.setPressureTarget('sternPort', 80, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(1000,2400)));                
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(1000,2400), shouldStop);                  
+        if (shouldStop()) return;
 
         // Lower port bow and starboard stern
         await controller.setPressureTarget('bowPort', 20, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(800,1700)));              
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(800,1700), shouldStop);                 
+        if (shouldStop()) return;
 
         await controller.setPressureTarget('sternStarboard', 20, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(1000,2400)));                
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(1000,2400), shouldStop);                   
+        if (shouldStop()) return;
 
         // Lower port stern
         await controller.setPressureTarget('sternPort', 20, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(800,1700)));              
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(800,1700), shouldStop);               
+        if (shouldStop()) return;
     }
 
 
-    private async portWave(controller: PneumaticsController) {
+    private async portWave(controller: PneumaticsController, shouldStop: () => boolean) {
+        console.log('portWave')
         await controller.setPressureTarget('bowPort', 90, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(1000,2400)));                
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(1000,2400), shouldStop);                  
+        if (shouldStop()) return;
 
         // Raise port bow slightly and starboard stern
         await controller.setPressureTarget('bowStarboard', 60, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(1000,2000)));                
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(1000,2000), shouldStop);                    
+        if (shouldStop()) return;
 
         await controller.setPressureTarget('sternPort', 70, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(1000,2400)));                
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(1000,2400), shouldStop);                    
+        if (shouldStop()) return;
 
         // Lower starboard bow, raise port stern
         await controller.setPressureTarget('bowPort', 30, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(800,1700)));              
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(800,1700), shouldStop);                  
+        if (shouldStop()) return;
    
         await controller.setPressureTarget('sternStarboard', 80, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(1000,2400)));                
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(1000,2400), shouldStop);                    
+        if (shouldStop()) return;
 
         // Lower port bow and starboard stern
         await controller.setPressureTarget('bowStarboard', 20, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(800,1700)));              
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(800,1700), shouldStop);              
+        if (shouldStop()) return;
   
         await controller.setPressureTarget('sternPort', 20, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(1000,2400)));                
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(1000,2400), shouldStop);                
+        if (shouldStop()) return;
 
         // Lower port stern
         await controller.setPressureTarget('sternStarboard', 20, 'percent');
-        await new Promise(resolve => setTimeout(resolve, randomInt(800,1700)));              
-        if (this.stopRequested) return;
+        await this.sleep(randomInt(800,1700), shouldStop);              
+        if (shouldStop()) return;
     }
 
 
 
-    private async bigCrashyWave(controller: PneumaticsController) {
+    private async bigCrashyWave(controller: PneumaticsController, shouldStop: () => boolean) {
         //raise the bow and drop the stern
         if (Math.random() < 0.5) {
             await controller.setPressureTarget('bowPort', 100, 'percent');
@@ -1316,51 +1323,59 @@ export class PneumaticsPatternController {
                 await controller.setPressureTarget('sternPort', 25, 'percent');
                 await controller.setPressureTarget('sternStarboard', 0, 'percent');
             }
-            if (this.stopRequested) return;
+            if (shouldStop()) return;
             if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) return;
-            await new Promise(resolve => setTimeout(resolve, randomInt(1200,2500)));                
+            await this.sleep(randomInt(1200,2500), shouldStop);                
         } else {
             await controller.setPressureTarget('bowPort', 75, 'percent');
             await controller.setPressureTarget('bowStarboard', 100, 'percent');
-            if (this.stopRequested) return;
+            if (shouldStop()) return;
             if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) return;
-            await new Promise(resolve => setTimeout(resolve, randomInt(1200,2500)));                
+            await this.sleep(randomInt(1200,2500), shouldStop);             
         }
 
         //raise the stern
         if (Math.random() < 0.5) {
             await controller.setPressureTarget('sternPort', 100, 'percent');
             await controller.setPressureTarget('sternStarboard', 75, 'percent');
-            if (this.stopRequested) return;
+            if (shouldStop()) return;
             if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) return;
-            await new Promise(resolve => setTimeout(resolve, randomInt(1200,2500)));                
+            await this.sleep(randomInt(1200,2500), shouldStop);                
         } else {
             await controller.setPressureTarget('sternPort', 75, 'percent');
             await controller.setPressureTarget('sternStarboard', 100, 'percent');
-            if (this.stopRequested) return;
+            if (shouldStop()) return;
             if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) return;
-            await new Promise(resolve => setTimeout(resolve, randomInt(1200,2500)));                
+            await this.sleep(randomInt(1200,2500), shouldStop);                
         }
 
         //drop the bow
         if (Math.random() < 0.5) {
             await controller.setPressureTarget('sternPort', 0, 'percent');
             await controller.setPressureTarget('sternStarboard', 25, 'percent');
-            if (this.stopRequested) return;
+            if (shouldStop()) return;
             if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) return;
-            await new Promise(resolve => setTimeout(resolve, randomInt(1200,2500)));                
+            await this.sleep(randomInt(1200,2500), shouldStop);                
         } else {
             await controller.setPressureTarget('sternPort', 25, 'percent');
             await controller.setPressureTarget('sternStarboard', 0, 'percent');
-            if (this.stopRequested) return;
+            if (shouldStop()) return;
             if (Date.now() - this.patternStartTime > this.inPatternTimeMarker) return;
-            await new Promise(resolve => setTimeout(resolve, randomInt(1200,2500)));                
+            await this.sleep(randomInt(1200,2500), shouldStop);                
         }
     }
 
     private chooseRandomSide() {
         const randomSide = Math.random() < 0.5 ? 'port' : 'starboard';
         return randomSide
+    }
+    
+    private async sleep(ms: number, shouldStop: () => boolean): Promise<void> {
+        const sleepInterval = 100; // Check every 100ms
+        for (let elapsed = 0; elapsed < ms; elapsed += sleepInterval) {
+            if (shouldStop()) return;
+            await new Promise(resolve => setTimeout(resolve, sleepInterval));
+        }
     }
 
     private async allPistonsToLowestPoint(controller: PneumaticsController) {
@@ -1380,6 +1395,7 @@ export class PneumaticsPatternController {
     }
 
     public async setPattern(patternName: PneumaticsCommandPatternName) {
+        this.patternSwitchRequested = true;
         const pattern = this.patterns.get(patternName);
         if (pattern) {
             await this.stopPattern(); // Ensure the current pattern is fully stopped
@@ -1410,26 +1426,19 @@ export class PneumaticsPatternController {
         this.isRunning = true;
         this.stopRequested = false;
         this.patternSwitchRequested = false;
+        console.log("starting pattern", this.currentPattern.name)
 
         this.currentPatternExecution = this.executePattern();
     }
 
     private async executePattern() {
         try {
-            while (!this.stopRequested) {
-                if (this.patternSwitchRequested) {
-                    console.log("Switching to new pattern...");
-                    this.patternSwitchRequested = false;
-                    break; // Exit the loop to allow a new pattern to start
-                }
-                await this.currentPattern!.main(this.pneumaticsController);
-                if (this.stopRequested) break;
-            }
+            await this.currentPattern!.main(this.pneumaticsController, () => this.stopRequested);
+            
         } catch (error) {
             console.error("Error running pattern:", error);
         } finally {
             this.isRunning = false;
-            this.stopRequested = false;
             this.patternSwitchRequested = false;
             await this.pneumaticsController.handleCommand({ type: 'pneumaticsCommandText', command: 'holdPosition', sendTime: new Date().toLocaleString() });
         }

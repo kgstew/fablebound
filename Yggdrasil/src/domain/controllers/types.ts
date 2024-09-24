@@ -181,7 +181,7 @@ const PneumaticsCommandLibrary = {
   
  export interface PneumaticsCommandPattern {
     name: PneumaticsCommandPatternName;
-    main: (controller: PneumaticsController) => void;
+    main: (controller: PneumaticsController, shouldStop: () => boolean) => void;
     pressureSettings?: Partial<PressureSettings>;
 }
 

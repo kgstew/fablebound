@@ -34,12 +34,9 @@ class PneumaticsCommandPatternHandler implements Handler<PneumaticsCommandPatter
 
         const validatedCommand = this.validate(data);
 
-        // Set the pattern
-        this.pneumaticsModelSingleton.patternController.setPattern(validatedCommand.pattern);
-
         // Start the pattern
         try {
-            await this.pneumaticsModelSingleton.patternController.startPattern();
+            await this.pneumaticsModelSingleton.patternController.setPattern(validatedCommand.pattern);
         } catch (error) {
             console.error("Error running pattern:", error);
         }
