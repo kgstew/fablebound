@@ -109,20 +109,25 @@ export class WavesComponent implements OnInit, AfterViewInit {
     this.controls.update();
   }
 
-  generateRandomUint8Array = (length: number): Uint8Array => {
-    const array = new Uint8Array(length);
-    for (let i = 0; i < length; i++) {
-      array[i] = Math.floor(Math.random() * 256); // Generate a random number between 0 and 255
-    }
+  createSingleRowAmplitude = (length: number): Uint8Array => {
+    const array = new Uint8Array(length).fill(0);
+    array[4] = 255;
+    array[8] = 255;
+    // for (let i = 0; i < 4; i++) {
+    //   array[i] = 255;
+    // }
+    // for (let i = 0; i < array.length; i += 6) {
+    //   array[i] = 1;
+    // }
     return array;
   };
 
   render() {
     this.uniforms['u_time'].value += this.clock.getDelta();
-    this.uniforms['u_data_arr'].value = this.generateRandomUint8Array(4096);
+    this.uniforms['u_data_arr'].value = this.createSingleRowAmplitude(64);
     this.renderer.render(this.scene, this.camera);
     // console.log(this.uniforms['u_time'].value);
-    // console.log(this.uniforms['u_data_arr'].value);
+    // console.log(JSON.stringify(this.uniforms['u_data_arr'].value, null, 4));
   }
 
   onWindowResize() {
@@ -159,8 +164,10 @@ export class WavesComponent implements OnInit, AfterViewInit {
     planeMesh.scale.x = 2;
     planeMesh.scale.y = 2;
     planeMesh.scale.z = 2;
-    planeMesh.position.y = 8;
+    planeMesh.position.y = 24;
     this.scene.add(planeMesh);
+
+    console.log(JSON.stringify(this.createSingleRowAmplitude(4096), null, 4));
     this.startRenderingLoop();
   }
 }
