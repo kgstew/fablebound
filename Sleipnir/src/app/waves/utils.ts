@@ -6,7 +6,9 @@ const vertexShader = () => {
       // varying vec3 vUv;
 
       uniform float u_time;
-      // uniform float u_amplitude;
+      uniform float u_speed; // 0 < u_speed > 2.0 for waves from bow to stern -2.0 < u_speed > 0 for stern to bow
+      uniform float u_wavelength; // 0 < u_wavelength > 16.0
+      uniform float u_amplitude; // 0 < u_amplitude > 4.0;
       // uniform float[64] u_data_arr;
 
       void main() {
@@ -15,19 +17,20 @@ const vertexShader = () => {
         x = position.x;
 	      y = position.y;
 
-        // float floor_x = round(x);
-	      // float floor_y = round(y);
+        float floor_x = round(x);
+	      float floor_y = round(y);
 
         float x_multiplier = (32.0 - x) / 8.0;
-        float y_multiplier = (32.0 - y) / 8.0;
+        float frequency = (32.0 - y) / u_wavelength;
 
         // z = position.z;
         // z = abs(position.x) + abs(position.y);
         // z = sin(abs(position.x) + abs(position.y));
         // z = sin(position.x + position.y + u_time * .5);
-        z = sin(position.y + u_time * .5);
-        // z = (u_data_arr[int(floor_x)] / 50.0 + u_data_arr[int(floor_y)] / 50.0) * (u_amplitude);
+        // z = (int(floor_x) / 50.0 + int(floor_y) / 50.0) * (u_amplitude) * u_time;
         // z = (u_data_arr[int(floor_x)] / 50.0 + u_data_arr[int(floor_y)] / 50.0) * 2.0;
+
+        z = sin(frequency + (u_time * u_speed)) * u_amplitude;
 
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position.x, position.y, z, 1.0);
       }

@@ -1,10 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  Inject,
-  InjectionToken,
-  OnInit,
-} from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import * as THREE from 'three';
 import { NgClass } from '@angular/common';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -19,7 +13,20 @@ interface UniformsInterface {
   [uniform: string]: UniformsTypeAddition;
 }
 
-const dataArray = new Uint8Array();
+const CENTER_POINT = [window.innerWidth / 2, window.innerHeight / 2];
+const positionToTrack = new THREE.Vector3(); // Vector that will track the animated point
+const points = [CENTER_POINT, [400, 50], [225, 120]].map((point) => {
+  const infoElem = document.createElement('pre');
+  document.body.appendChild(infoElem);
+  infoElem.className = 'info';
+  infoElem.style.color = 'white';
+  infoElem.style.left = `${point[0] + 10}px`;
+  infoElem.style.top = `${point[1]}px`;
+  return {
+    point,
+    infoElem,
+  };
+});
 
 const DEFAULT_UNIFORMS = {
   u_time: { type: 'f', value: 1.0 },
@@ -27,14 +34,27 @@ const DEFAULT_UNIFORMS = {
   colorA: { type: 'vec3', value: new THREE.Color(0xffffff) },
   u_amplitude: {
     type: 'f',
-    value: 3.0,
+    value: 1.0,
   },
-  u_data_arr: {
-    type: 'float[64]',
-    value: dataArray,
+  u_speed: {
+    type: 'f',
+    value: 1.0,
+  },
+  u_wavelength: {
+    type: 'f',
+    value: 1.0,
   },
 };
 
+const staticPlanePoints = [
+  new THREE.Vector3(-32, 0, -32), // Bottom-left corner
+  new THREE.Vector3(32, 0, -32), // Bottom-right corner
+  new THREE.Vector3(-32, 0, 32), // Top-left corner
+  new THREE.Vector3(32, 0, 32), // Top-right corner
+];
+
+const near = 1;
+const far = 1000;
 @Component({
   selector: 'app-waves',
   standalone: true,
@@ -49,8 +69,8 @@ export class WavesComponent implements OnInit, AfterViewInit {
   private camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera(
     this.fov,
     window.innerWidth / window.innerHeight,
-    1,
-    1000,
+    near,
+    far,
   );
   private clock: THREE.Clock = new THREE.Clock();
   private scene: THREE.Scene = new THREE.Scene();
@@ -58,17 +78,13 @@ export class WavesComponent implements OnInit, AfterViewInit {
   private renderer!: THREE.WebGLRenderer;
   private uniforms: UniformsInterface = DEFAULT_UNIFORMS;
   private controls!: OrbitControls;
-  private framebuffer!: THREE.WebGLRenderTarget;
-  public shouldRenderVisualization: boolean = true;
-  private rayCaster!: THREE.Raycaster;
+  private animatedPlaneMesh!: THREE.Mesh;
+  private staticPlaneMesh!: THREE.Mesh;
 
   ngOnInit(): void {}
 
-  initPlaneMesh() {
-    // note: set up plane mesh and add it to the scene
+  initAnimatedPlaneMesh() {
     const planeGeometry = new THREE.PlaneGeometry(64, 64, 64, 64);
-    // const planeMaterial = new THREE.MeshNormalMaterial({ wireframe: true });
-    // const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
     const planeCustomMaterial = new THREE.ShaderMaterial({
       // note: this is where the magic happens
       uniforms: this.uniforms,
@@ -76,64 +92,39 @@ export class WavesComponent implements OnInit, AfterViewInit {
       fragmentShader: fragmentShader(),
       wireframe: true,
     });
-    const planeMesh = new THREE.Mesh(planeGeometry, planeCustomMaterial);
-    planeMesh.rotation.x = -Math.PI / 2 + Math.PI / 4;
-    planeMesh.scale.x = 2;
-    planeMesh.scale.y = 2;
-    planeMesh.scale.z = 2;
-    planeMesh.position.y = 24;
-    this.scene.add(planeMesh);
+    this.animatedPlaneMesh = new THREE.Mesh(planeGeometry, planeCustomMaterial);
+    this.scene.add(this.animatedPlaneMesh);
+  }
+
+  initStaticPlaneMesh() {
+    const planeGeometry = new THREE.PlaneGeometry(64, 64, 64, 64);
+    const planeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      wireframe: true,
+    });
+
+    this.staticPlaneMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+    this.scene.add(this.staticPlaneMesh);
   }
 
   initAmbientLight() {
     // ambient light which is for the whole scene
-    let ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-    ambientLight.castShadow = false;
-    this.scene.add(ambientLight);
-
-    // spot light which is illuminating the chart directly
-    let spotLight = new THREE.SpotLight(0xffffff, 0.55);
-    spotLight.castShadow = true;
-    spotLight.position.set(0, 80, 10);
-    this.scene.add(spotLight);
-  }
-
-  initFrameBuffer() {
-    /**
-     * Create a framebuffer to inspect the rendered pixels
-     * This allows the gathering of pixel values to convert the amplitude
-     * of a pixel to an actual position
-     */
-
-    this.framebuffer = new THREE.WebGLRenderTarget(
-      window.innerWidth,
-      window.innerHeight,
-    );
-    this.framebuffer.texture.format = THREE.RGBAFormat;
-    this.framebuffer.texture.minFilter = THREE.LinearFilter;
-    this.framebuffer.texture.magFilter = THREE.LinearFilter;
-    this.framebuffer.texture.generateMipmaps = false;
-    this.framebuffer.stencilBuffer = false;
-    this.framebuffer.depthBuffer = true;
-
-    // Attach a depth texture
-    this.framebuffer.depthTexture = new THREE.DepthTexture(
-      window.innerWidth,
-      window.innerHeight,
-    );
-    this.framebuffer.depthTexture.type = THREE.FloatType;
-    this.framebuffer.depthTexture.format = THREE.DepthFormat;
-    this.framebuffer.depthTexture.minFilter = THREE.NearestFilter;
-    this.framebuffer.depthTexture.magFilter = THREE.NearestFilter;
+    // let ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    // ambientLight.castShadow = false;
+    // this.scene.add(ambientLight);
+    // // spot light which is illuminating the chart directly
+    // let spotLight = new THREE.SpotLight(0xffffff, 0.55);
+    // spotLight.castShadow = true;
+    // spotLight.position.set(0, 80, 10);
+    // this.scene.add(spotLight);
   }
 
   initScene() {
-    this.camera.position.z = 196;
+    this.camera.position.z = 100;
     this.canvas = document.getElementById(this.canvasID) as HTMLElement;
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       antialias: true,
-      depth: true,
     });
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -144,13 +135,12 @@ export class WavesComponent implements OnInit, AfterViewInit {
     this.stats = new Stats();
     document.body.appendChild(this.stats.dom);
 
-    this.initPlaneMesh();
+    this.initAnimatedPlaneMesh();
+    this.initStaticPlaneMesh();
     this.initAmbientLight();
-    this.initFrameBuffer();
 
     // if window resizes
     window.addEventListener('resize', () => this.onWindowResize(), false);
-    this.rayCaster = new THREE.Raycaster();
   }
 
   animate() {
@@ -158,44 +148,39 @@ export class WavesComponent implements OnInit, AfterViewInit {
     this.render();
     this.stats.update();
     this.controls.update();
+    this.updateTracking();
   }
 
-  toggleVisualization() {
-    this.shouldRenderVisualization = !this.shouldRenderVisualization;
-  }
+  updateTracking() {
+    // Access the geometry of the animated mesh
+    const geometry = this.animatedPlaneMesh.geometry;
 
-  renderForPositionBuffer() {
-    this.renderer.setRenderTarget(this.framebuffer);
-    this.renderer.render(this.scene, this.camera); // Make sure you render to the framebuffer first
+    // Get the vertex to track (first vertex in this case)
+    const vertexIndex = 0;
+    const vertex = new THREE.Vector3();
+    vertex.fromBufferAttribute(geometry.attributes['position'], vertexIndex);
 
-    const x = Math.floor(window.innerWidth / 2);
-    const y = Math.floor(window.innerHeight / 2);
-    const zBuffer = new Float32Array(16); // Array to store z-values of 4 pixels
-    // Read depth values (z-values) from the framebuffer
-    this.renderer.readRenderTargetPixels(
-      this.framebuffer,
-      x - 1,
-      y - 1,
-      1,
-      1,
-      zBuffer,
-    );
+    // Apply the same transformation as the shader (assuming a sine wave animation)
+    const elapsedTime = this.uniforms['u_time'].value;
+    const y_multiplier = (32.0 - vertex.y) / 8.0;
+    // Example transformation similar to vertex shader logic
+    console.log(32 - vertex.y);
+    console.log(y_multiplier + elapsedTime * 5);
+    vertex.z += Math.sin(elapsedTime * 0.5);
+    console.log(vertex.z);
 
-    console.log('Z-values of the 4 center pixels:', zBuffer);
-  }
+    // Apply the mesh's world transformations to the vertex
+    vertex.applyMatrix4(this.animatedPlaneMesh.matrixWorld);
 
-  renderVisualization() {
-    this.renderer.setRenderTarget(null);
-    this.renderer.render(this.scene, this.camera);
+    // Update the positionToTrack to follow the animated vertex
+    positionToTrack.copy(vertex);
+
+    console.log('Tracked position:', positionToTrack);
   }
 
   render() {
     this.uniforms['u_time'].value += this.clock.getDelta();
-    if (this.shouldRenderVisualization) {
-      this.renderVisualization();
-    } else {
-      this.renderForPositionBuffer();
-    }
+    this.renderer.render(this.scene, this.camera);
   }
 
   onWindowResize() {
@@ -204,18 +189,8 @@ export class WavesComponent implements OnInit, AfterViewInit {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  private startRenderingLoop() {
-    let component: WavesComponent = this;
-    (function render() {
-      requestAnimationFrame(render);
-      component.animate();
-      component.renderer.render(component.scene, component.camera);
-    })();
-  }
-
   ngAfterViewInit() {
     this.initScene();
     this.animate();
-    this.startRenderingLoop();
   }
 }
