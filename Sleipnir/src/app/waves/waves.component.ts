@@ -3,7 +3,8 @@ import * as THREE from 'three';
 import { NgClass } from '@angular/common';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import { fragmentShader, vertexShader } from './utils';
+import { fragmentShader, getVertexIndex, vertexShader } from './utils';
+import GUI from 'lil-gui';
 
 interface UniformsTypeAddition extends THREE.IUniform {
   type: string;
@@ -13,38 +14,26 @@ interface UniformsInterface {
   [uniform: string]: UniformsTypeAddition;
 }
 
-const CENTER_POINT = [window.innerWidth / 2, window.innerHeight / 2];
-const positionToTrack = new THREE.Vector3(); // Vector that will track the animated point
-const points = [CENTER_POINT, [400, 50], [225, 120]].map((point) => {
-  const infoElem = document.createElement('pre');
-  document.body.appendChild(infoElem);
-  infoElem.className = 'info';
-  infoElem.style.color = 'white';
-  infoElem.style.left = `${point[0] + 10}px`;
-  infoElem.style.top = `${point[1]}px`;
-  return {
-    point,
-    infoElem,
-  };
-});
-
-const DEFAULT_UNIFORMS = {
-  u_time: { type: 'f', value: 1.0 },
-  colorB: { type: 'vec3', value: new THREE.Color(0xfff000) },
-  colorA: { type: 'vec3', value: new THREE.Color(0xffffff) },
-  u_amplitude: {
-    type: 'f',
-    value: 1.0,
-  },
-  u_speed: {
-    type: 'f',
-    value: 1.0,
-  },
-  u_wavelength: {
-    type: 'f',
-    value: 1.0,
-  },
+const SCALE = 8; // 1 segment is 72/SCALE inches. 9" at scale of 8
+const getSegmentLengthForInches = (inches: number): number => {
+  return Math.round(inches / (PLANE_HEIGHT_SEGMENTS / SCALE));
 };
+const PLANE_WIDTH = 72;
+const PLANE_HEIGHT = PLANE_WIDTH;
+const PLANE_WIDTH_SEGMENTS = 72;
+const PLANE_HEIGHT_SEGMENTS = PLANE_WIDTH_SEGMENTS;
+const PLANE_X_CENTER = PLANE_WIDTH_SEGMENTS / 2;
+const PLANE_Y_CENTER = PLANE_HEIGHT_SEGMENTS / 2;
+
+const centerPosition = new THREE.Vector3();
+const portSternPosition = new THREE.Vector3();
+const portBowPosition = new THREE.Vector3();
+const starboardBowPosition = new THREE.Vector3();
+const starboardSternPosition = new THREE.Vector3();
+
+const INITIAL_SPEED = 1.0;
+const INITIAL_AMPLITUDE = 1.0;
+const INITIAL_WAVELENGTH = 1.0;
 
 const staticPlanePoints = [
   new THREE.Vector3(-32, 0, -32), // Bottom-left corner
@@ -76,15 +65,38 @@ export class WavesComponent implements OnInit, AfterViewInit {
   private scene: THREE.Scene = new THREE.Scene();
   private stats: Stats = new Stats();
   private renderer!: THREE.WebGLRenderer;
-  private uniforms: UniformsInterface = DEFAULT_UNIFORMS;
+  private uniforms: UniformsInterface = {
+    u_time: { type: 'f', value: 1.0 },
+    colorB: { type: 'vec3', value: new THREE.Color(0xfff000) },
+    colorA: { type: 'vec3', value: new THREE.Color(0xffffff) },
+    u_amplitude: {
+      type: 'f',
+      value: INITIAL_AMPLITUDE,
+    },
+    u_speed: {
+      type: 'f',
+      value: INITIAL_SPEED,
+    },
+    u_wavelength: {
+      type: 'f',
+      value: INITIAL_WAVELENGTH,
+    },
+  };
+  private planeGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(
+    PLANE_WIDTH,
+    PLANE_HEIGHT,
+    PLANE_WIDTH_SEGMENTS,
+    PLANE_HEIGHT_SEGMENTS,
+  );
   private controls!: OrbitControls;
   private animatedPlaneMesh!: THREE.Mesh;
   private staticPlaneMesh!: THREE.Mesh;
+  private shipVertices!: THREE.Vector3[];
+  private animationHandle!: number;
 
   ngOnInit(): void {}
 
   initAnimatedPlaneMesh() {
-    const planeGeometry = new THREE.PlaneGeometry(64, 64, 64, 64);
     const planeCustomMaterial = new THREE.ShaderMaterial({
       // note: this is where the magic happens
       uniforms: this.uniforms,
@@ -92,18 +104,20 @@ export class WavesComponent implements OnInit, AfterViewInit {
       fragmentShader: fragmentShader(),
       wireframe: true,
     });
-    this.animatedPlaneMesh = new THREE.Mesh(planeGeometry, planeCustomMaterial);
+    this.animatedPlaneMesh = new THREE.Mesh(
+      this.planeGeometry,
+      planeCustomMaterial,
+    );
     this.scene.add(this.animatedPlaneMesh);
   }
 
   initStaticPlaneMesh() {
-    const planeGeometry = new THREE.PlaneGeometry(64, 64, 64, 64);
     const planeMaterial = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       wireframe: true,
     });
 
-    this.staticPlaneMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+    this.staticPlaneMesh = new THREE.Mesh(this.planeGeometry, planeMaterial);
     this.scene.add(this.staticPlaneMesh);
   }
 
@@ -117,6 +131,30 @@ export class WavesComponent implements OnInit, AfterViewInit {
     // spotLight.castShadow = true;
     // spotLight.position.set(0, 80, 10);
     // this.scene.add(spotLight);
+  }
+
+  initGui() {
+    const gui = new GUI();
+    const obj = {
+      amplitude: INITIAL_AMPLITUDE,
+      speed: INITIAL_SPEED,
+      wavelength: INITIAL_WAVELENGTH,
+      pause: () => {
+        this.controls.autoRotate = false;
+        window.cancelAnimationFrame(this.animationHandle);
+      },
+    };
+
+    gui.add(obj, 'amplitude', 0, 4.0, 1).onChange((value: number) => {
+      this.uniforms['u_amplitude'].value = parseFloat(value.toString());
+    }); // min, max, step
+    gui.add(obj, 'wavelength', 0, 16.0, 0.5).onChange((value: number) => {
+      this.uniforms['u_wavelength'].value = parseFloat(value.toString());
+    }); // min, max, step
+    gui.add(obj, 'speed', -4.0, 4.0, 0.1).onChange((value: number) => {
+      this.uniforms['u_speed'].value = parseFloat(value.toString());
+    }); // min, max, step
+    gui.add(obj, 'pause'); // button
   }
 
   initScene() {
@@ -138,44 +176,98 @@ export class WavesComponent implements OnInit, AfterViewInit {
     this.initAnimatedPlaneMesh();
     this.initStaticPlaneMesh();
     this.initAmbientLight();
+    this.initGui();
 
     // if window resizes
     window.addEventListener('resize', () => this.onWindowResize(), false);
   }
 
-  animate() {
-    window.requestAnimationFrame(this.animate.bind(this));
-    this.render();
-    this.stats.update();
-    this.controls.update();
-    this.updateTracking();
+  addVertexAtPosition(
+    x: number,
+    y: number,
+    color?: THREE.ColorRepresentation,
+  ): THREE.Vector3 {
+    const vertexIndex = getVertexIndex(
+      PLANE_X_CENTER + x,
+      PLANE_Y_CENTER + y,
+      PLANE_WIDTH_SEGMENTS,
+      PLANE_HEIGHT_SEGMENTS,
+    );
+    const vertex = new THREE.Vector3();
+    vertex.fromBufferAttribute(
+      this.animatedPlaneMesh.geometry.attributes['position'],
+      vertexIndex,
+    );
+
+    // Apply any transformations if necessary
+    vertex.applyMatrix4(this.animatedPlaneMesh.matrixWorld);
+    const sphereGeometry = new THREE.SphereGeometry(1, 16, 16);
+    const sphereMaterial = new THREE.MeshBasicMaterial({
+      color: color || THREE.Color.NAMES.darkred,
+    });
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+    sphere.position.copy(vertex);
+    this.scene.add(sphere);
+
+    return vertex;
+  }
+
+  setShipVertexPositions(): void {
+    const centerVertex = this.addVertexAtPosition(
+      0,
+      0,
+      THREE.Color.NAMES.goldenrod,
+    );
+    const portSternVertex = this.addVertexAtPosition(
+      -getSegmentLengthForInches(36),
+      getSegmentLengthForInches(7 * 12),
+      THREE.Color.NAMES.darkred,
+    );
+    const portBowVertex = this.addVertexAtPosition(
+      -getSegmentLengthForInches(36),
+      -getSegmentLengthForInches(7 * 12),
+      THREE.Color.NAMES.darkred,
+    );
+    const starboardSternVertex = this.addVertexAtPosition(
+      getSegmentLengthForInches(36),
+      getSegmentLengthForInches(7 * 12),
+      THREE.Color.NAMES.darkred,
+    );
+    const starboardBowVertex = this.addVertexAtPosition(
+      getSegmentLengthForInches(36),
+      -getSegmentLengthForInches(7 * 12),
+      THREE.Color.NAMES.darkred,
+    );
+
+    this.shipVertices = [
+      centerVertex,
+      portSternVertex,
+      portBowVertex,
+      starboardBowVertex,
+      starboardSternVertex,
+    ];
   }
 
   updateTracking() {
-    // Access the geometry of the animated mesh
-    const geometry = this.animatedPlaneMesh.geometry;
-
-    // Get the vertex to track (first vertex in this case)
-    const vertexIndex = 0;
-    const vertex = new THREE.Vector3();
-    vertex.fromBufferAttribute(geometry.attributes['position'], vertexIndex);
+    const wavelength = this.uniforms['u_wavelength'].value;
+    const amplitude = this.uniforms['u_amplitude'].value;
+    const speed = this.uniforms['u_speed'].value;
+    const time = this.uniforms['u_time'].value;
 
     // Apply the same transformation as the shader (assuming a sine wave animation)
-    const elapsedTime = this.uniforms['u_time'].value;
-    const y_multiplier = (32.0 - vertex.y) / 8.0;
-    // Example transformation similar to vertex shader logic
-    console.log(32 - vertex.y);
-    console.log(y_multiplier + elapsedTime * 5);
-    vertex.z += Math.sin(elapsedTime * 0.5);
-    console.log(vertex.z);
+    this.shipVertices.forEach((vertex) => {
+      const frequency = (32.0 - vertex.y) / wavelength;
+      vertex.z = Math.sin(frequency + time * speed) * amplitude;
+    });
 
-    // Apply the mesh's world transformations to the vertex
-    vertex.applyMatrix4(this.animatedPlaneMesh.matrixWorld);
+    console.log('number of vertices', this.shipVertices);
 
-    // Update the positionToTrack to follow the animated vertex
-    positionToTrack.copy(vertex);
-
-    console.log('Tracked position:', positionToTrack);
+    console.log(this.shipVertices[0].z);
+    console.log(this.shipVertices[1].z);
+    console.log(this.shipVertices[2].z);
+    console.log(this.shipVertices[3].z);
+    console.log(this.shipVertices[4].z);
   }
 
   render() {
@@ -189,8 +281,19 @@ export class WavesComponent implements OnInit, AfterViewInit {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
+  animate() {
+    this.animationHandle = window.requestAnimationFrame(
+      this.animate.bind(this),
+    );
+    this.render();
+    this.stats.update();
+    this.controls.update();
+    this.updateTracking();
+  }
+
   ngAfterViewInit() {
     this.initScene();
+    this.setShipVertexPositions();
     this.animate();
   }
 }

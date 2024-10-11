@@ -65,3 +65,27 @@ const fragmentShader = () => {
 };
 
 export { vertexShader, fragmentShader };
+
+/**
+ * Returns the vertex index for a given position on the grid of a PlaneGeometry.
+ * @param ix - The X position (horizontal index) on the grid (between 0 and widthSegments).
+ * @param iy - The Y position (vertical index) on the grid (between 0 and heightSegments).
+ * @param widthSegments - The number of segments along the width of the plane.
+ * @param heightSegments - The number of segments along the height of the plane.
+ * @returns The vertex index for the given position.
+ */
+export const getVertexIndex = (
+  ix: number,
+  iy: number,
+  widthSegments: number,
+  heightSegments: number,
+): number => {
+  // Ensure the ix and iy are within the valid range
+  if (ix < 0 || ix > widthSegments || iy < 0 || iy > heightSegments) {
+    throw new Error('Invalid grid coordinates');
+  }
+
+  // Calculate the vertex index based on row-major order
+  console.log(iy, widthSegments, ix);
+  return iy * (widthSegments + 1) + ix;
+};
