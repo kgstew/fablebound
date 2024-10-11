@@ -3,7 +3,12 @@ import * as THREE from 'three';
 import { NgClass } from '@angular/common';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import { fragmentShader, getVertexIndex, vertexShader } from './utils';
+import {
+  fragmentShader,
+  getVertexIndex,
+  transformVertex,
+  vertexShader,
+} from './utils';
 import GUI from 'lil-gui';
 
 interface UniformsTypeAddition extends THREE.IUniform {
@@ -34,7 +39,7 @@ const starboardSternPosition = new THREE.Vector3();
 const INITIAL_SPEED = 1.0;
 const INITIAL_AMPLITUDE = 1.0;
 const INITIAL_WAVELENGTH = 1.0;
-const INITAL_DIRECTION = 15.0;
+const INITAL_DIRECTION = 0.0;
 
 const staticPlanePoints = [
   new THREE.Vector3(-32, 0, -32), // Bottom-left corner
@@ -96,7 +101,7 @@ export class WavesComponent implements OnInit, AfterViewInit {
   private controls!: OrbitControls;
   private animatedPlaneMesh!: THREE.Mesh;
   private staticPlaneMesh!: THREE.Mesh;
-  private shipVertices!: THREE.Vector3[];
+  private shipVertices!: { vertex: THREE.Vector3; sphere: THREE.Mesh }[];
   private animationHandle!: number;
 
   ngOnInit(): void {}
@@ -195,7 +200,8 @@ export class WavesComponent implements OnInit, AfterViewInit {
     x: number,
     y: number,
     color?: THREE.ColorRepresentation,
-  ): THREE.Vector3 {
+    name?: string,
+  ): { vertex: THREE.Vector3; sphere: THREE.Mesh } {
     const vertexIndex = getVertexIndex(
       PLANE_X_CENTER + x,
       PLANE_Y_CENTER + y,
@@ -215,11 +221,12 @@ export class WavesComponent implements OnInit, AfterViewInit {
       color: color || THREE.Color.NAMES.darkred,
     });
     const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    sphere.name = name || '';
 
     sphere.position.copy(vertex);
     this.scene.add(sphere);
 
-    return vertex;
+    return { vertex, sphere };
   }
 
   setShipVertexPositions(): void {
@@ -227,26 +234,31 @@ export class WavesComponent implements OnInit, AfterViewInit {
       0,
       0,
       THREE.Color.NAMES.goldenrod,
+      'center',
     );
     const portSternVertex = this.addVertexAtPosition(
       -getSegmentLengthForInches(36),
       getSegmentLengthForInches(7 * 12),
       THREE.Color.NAMES.darkred,
+      'portStern',
     );
     const portBowVertex = this.addVertexAtPosition(
       -getSegmentLengthForInches(36),
       -getSegmentLengthForInches(7 * 12),
       THREE.Color.NAMES.darkred,
+      'portBow',
     );
     const starboardSternVertex = this.addVertexAtPosition(
       getSegmentLengthForInches(36),
       getSegmentLengthForInches(7 * 12),
       THREE.Color.NAMES.darkred,
+      'starboardStern',
     );
     const starboardBowVertex = this.addVertexAtPosition(
       getSegmentLengthForInches(36),
       -getSegmentLengthForInches(7 * 12),
       THREE.Color.NAMES.darkred,
+      'starboardBow',
     );
 
     this.shipVertices = [
@@ -263,20 +275,35 @@ export class WavesComponent implements OnInit, AfterViewInit {
     const amplitude = this.uniforms['u_amplitude'].value;
     const speed = this.uniforms['u_speed'].value;
     const time = this.uniforms['u_time'].value;
+    const direction = this.uniforms['u_direction'].value;
 
     // Apply the same transformation as the shader (assuming a sine wave animation)
-    this.shipVertices.forEach((vertex) => {
-      const frequency = (32.0 - vertex.y) / wavelength;
-      vertex.z = Math.sin(frequency + time * speed) * amplitude;
+    this.shipVertices.forEach((position) => {
+      if (position.sphere.name !== 'center') {
+        position.vertex = transformVertex(
+          position.vertex,
+          time,
+          speed,
+          wavelength,
+          amplitude,
+          direction,
+        );
+
+        position.sphere.position.set(
+          position.vertex.x,
+          position.vertex.y,
+          position.vertex.z,
+        );
+      }
     });
 
     console.log('number of vertices', this.shipVertices);
 
-    console.log(this.shipVertices[0].z);
-    console.log(this.shipVertices[1].z);
-    console.log(this.shipVertices[2].z);
-    console.log(this.shipVertices[3].z);
-    console.log(this.shipVertices[4].z);
+    // console.log(this.shipVertices[0].z);
+    console.log(this.shipVertices[1].vertex.z);
+    console.log(this.shipVertices[2].vertex.z);
+    console.log(this.shipVertices[3].vertex.z);
+    console.log(this.shipVertices[4].vertex.z);
   }
 
   render() {

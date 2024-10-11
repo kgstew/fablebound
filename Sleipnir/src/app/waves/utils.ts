@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 const vertexShader = () => {
   return `
       varying float x;
@@ -24,16 +26,16 @@ const vertexShader = () => {
 
         float frequency = (36.0 - y) / u_wavelength;
 
+        z = sin(frequency + (u_time * u_speed)) * u_amplitude;
+
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position.x, position.y, z, 1.0);
+
         // z = position.z;
         // z = abs(position.x) + abs(position.y);
         // z = sin(abs(position.x) + abs(position.y));
         // z = sin(position.x + position.y + u_time * .5);
         // z = (int(floor_x) / 50.0 + int(floor_y) / 50.0) * (u_amplitude) * u_time;
         // z = (u_data_arr[int(floor_x)] / 50.0 + u_data_arr[int(floor_y)] / 50.0) * 2.0;
-
-        z = sin(frequency + (u_time * u_speed)) * u_amplitude;
-
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position.x, position.y, z, 1.0);
       }
     `;
 };
@@ -89,4 +91,30 @@ export const getVertexIndex = (
   // Calculate the vertex index based on row-major order
   console.log(iy, widthSegments, ix);
   return iy * (widthSegments + 1) + ix;
+};
+
+export const transformVertex = (
+  position: THREE.Vector3,
+  u_time: number,
+  u_speed: number,
+  u_wavelength: number,
+  u_amplitude: number,
+  u_direction: number,
+): THREE.Vector3 => {
+  const directionRad = (u_direction * Math.PI) / 180;
+
+  // Apply rotation matrix to x and y to rotate the wave direction
+  const rotatedX =
+    Math.cos(directionRad) * position.x - Math.sin(directionRad) * position.y;
+  const rotatedY =
+    Math.sin(directionRad) * position.x + Math.cos(directionRad) * position.y;
+
+  // Calculate frequency based on rotated Y and wavelength
+  const frequency = (36.0 - rotatedY) / u_wavelength;
+
+  // Calculate the Z position based on the wave formula
+  const z = Math.sin(frequency + u_time * u_speed) * u_amplitude;
+
+  // Return the new position vector
+  return new THREE.Vector3(position.x, position.y, z);
 };
