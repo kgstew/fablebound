@@ -34,6 +34,7 @@ const starboardSternPosition = new THREE.Vector3();
 const INITIAL_SPEED = 1.0;
 const INITIAL_AMPLITUDE = 1.0;
 const INITIAL_WAVELENGTH = 1.0;
+const INITAL_DIRECTION = 15.0;
 
 const staticPlanePoints = [
   new THREE.Vector3(-32, 0, -32), // Bottom-left corner
@@ -80,6 +81,10 @@ export class WavesComponent implements OnInit, AfterViewInit {
     u_wavelength: {
       type: 'f',
       value: INITIAL_WAVELENGTH,
+    },
+    u_direction: {
+      type: 'f',
+      value: INITAL_DIRECTION,
     },
   };
   private planeGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(
@@ -139,20 +144,24 @@ export class WavesComponent implements OnInit, AfterViewInit {
       amplitude: INITIAL_AMPLITUDE,
       speed: INITIAL_SPEED,
       wavelength: INITIAL_WAVELENGTH,
+      direction: INITAL_DIRECTION,
       pause: () => {
         this.controls.autoRotate = false;
         window.cancelAnimationFrame(this.animationHandle);
       },
     };
 
-    gui.add(obj, 'amplitude', 0, 4.0, 1).onChange((value: number) => {
+    gui.add(obj, 'amplitude', 0, 4, 1).onChange((value: number) => {
       this.uniforms['u_amplitude'].value = parseFloat(value.toString());
     }); // min, max, step
-    gui.add(obj, 'wavelength', 0, 16.0, 0.5).onChange((value: number) => {
+    gui.add(obj, 'wavelength', 0, 16, 0.5).onChange((value: number) => {
       this.uniforms['u_wavelength'].value = parseFloat(value.toString());
     }); // min, max, step
-    gui.add(obj, 'speed', -4.0, 4.0, 0.1).onChange((value: number) => {
+    gui.add(obj, 'speed', 0, 4, 0.1).onChange((value: number) => {
       this.uniforms['u_speed'].value = parseFloat(value.toString());
+    }); // min, max, step
+    gui.add(obj, 'direction', 0, 360, 0.1).onChange((value: number) => {
+      this.uniforms['u_direction'].value = parseFloat(value.toString());
     }); // min, max, step
     gui.add(obj, 'pause'); // button
   }

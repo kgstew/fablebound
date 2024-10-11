@@ -3,25 +3,26 @@ const vertexShader = () => {
       varying float x;
       varying float y;
       varying float z;
-      // varying vec3 vUv;
 
       uniform float u_time;
       uniform float u_speed; // 0 < u_speed > 2.0 for waves from bow to stern -2.0 < u_speed > 0 for stern to bow
       uniform float u_wavelength; // 0 < u_wavelength > 16.0
       uniform float u_amplitude; // 0 < u_amplitude > 4.0;
-      // uniform float[64] u_data_arr;
+      uniform float u_direction; // 0 < u_amplitude > 360.0;
 
       void main() {
-        // vUv = position;
 
-        x = position.x;
-	      y = position.y;
+        // Convert direction to radians
+        float directionRad = radians(u_direction);
 
-        float floor_x = round(x);
-	      float floor_y = round(y);
+        // Apply rotation matrix to x and y to rotate the wave direction
+        float rotatedX = cos(directionRad) * position.x - sin(directionRad) * position.y;
+        float rotatedY = sin(directionRad) * position.x + cos(directionRad) * position.y;
 
-        float x_multiplier = (32.0 - x) / 8.0;
-        float frequency = (32.0 - y) / u_wavelength;
+        x = rotatedX;
+        y = rotatedY;
+
+        float frequency = (36.0 - y) / u_wavelength;
 
         // z = position.z;
         // z = abs(position.x) + abs(position.y);
