@@ -8,6 +8,7 @@ interface LegAssemblyReadings {
     ballastIntakeValve: Valve
     ballastToPistonValve: Valve
     pistonReleaseValve: Valve
+    distanceSensorPosition: number
 }
 
 interface BigAssMainTankReadings {

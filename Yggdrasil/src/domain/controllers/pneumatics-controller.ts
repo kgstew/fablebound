@@ -18,6 +18,7 @@ export const defaultSystemState: ReadingsData = {
         ballastIntakeValve: 'closed',
         ballastToPistonValve: 'closed',
         pistonReleaseValve: 'closed',
+        distanceSensorPosition: 0,
     },
     bowPort: {
         ballastPressurePsi: 0,
@@ -25,6 +26,7 @@ export const defaultSystemState: ReadingsData = {
         ballastIntakeValve: 'closed',
         ballastToPistonValve: 'closed',
         pistonReleaseValve: 'closed',
+        distanceSensorPosition: 0,
     },
     sternPort: {
         ballastPressurePsi: 0,
@@ -32,6 +34,7 @@ export const defaultSystemState: ReadingsData = {
         ballastIntakeValve: 'closed',
         ballastToPistonValve: 'closed',
         pistonReleaseValve: 'closed',
+        distanceSensorPosition: 0,
     },
     sternStarboard: {
         ballastPressurePsi: 0,
@@ -39,6 +42,7 @@ export const defaultSystemState: ReadingsData = {
         ballastIntakeValve: 'closed',
         ballastToPistonValve: 'closed',
         pistonReleaseValve: 'closed',
+        distanceSensorPosition: 0,
     },
     sendTime: new Date().toLocaleString(), // example output to replicate in C: `6/23/2024, 2:50:59 PM`
 }

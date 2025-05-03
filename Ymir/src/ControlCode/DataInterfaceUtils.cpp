@@ -16,7 +16,9 @@ json getStateJson(const std::string& messageType)
                 { "ballastToPistonValve",
                     LegStarboard->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed" },
                 { "pistonReleaseValve",
-                    LegStarboard->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" } } },
+                    LegStarboard->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" },
+                {"distanceSensorPosition",
+                    LegStarboard->getDistanceSensorReading()} } },
         { "port",
             { { "ballastPressurePsi", LegPort->getPressureSensorReading(PressureSensor::PressurePosition::ballast) },
                 { "pistonPressurePsi", LegPort->getPressureSensorReading(PressureSensor::PressurePosition::piston) },
@@ -25,7 +27,9 @@ json getStateJson(const std::string& messageType)
                 { "ballastToPistonValve",
                     LegPort->isSolenoidOpen(Solenoid::SolenoidPosition::piston) ? "open" : "closed" },
                 { "pistonReleaseValve",
-                    LegPort->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" } } }};
+                    LegPort->isSolenoidOpen(Solenoid::SolenoidPosition::vent) ? "open" : "closed" },
+                {"distanceSensorPosition",
+                    LegPort->getDistanceSensorReading()} } }};
     return system_state;
 }
 

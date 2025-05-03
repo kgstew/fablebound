@@ -45,10 +45,10 @@ const char* messageType = "espToServerSystemStateStern";
 json system_state = { { "type", messageType }, { "sendTime", "notime" },
     { "starboard",
         { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } },
+            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" }, {"distanceSensorPosition", 0} } },
     { "port",
         { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } } };
+            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" }, {"distanceSensorPosition", 0} } } };
 
 // Create a WebSocket client instance
 WebSocketsClient webSocket;
