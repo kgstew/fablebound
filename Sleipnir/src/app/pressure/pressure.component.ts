@@ -58,7 +58,7 @@ export class PressureComponent {
     }
     if (Object.prototype.hasOwnProperty.call(message, 'bowPort')) {
       if (message.bowPort.distanceSensorPosition !== undefined) {
-        this.bowPortBallastValue = message.bowPort.distanceSensorPosition;
+        this.bowPortDistanceValue = message.bowPort.distanceSensorPosition;
       }
       if (message.bowPort.ballastPressurePsi !== undefined) {
         this.bowPortBallastValue = message.bowPort.ballastPressurePsi;
@@ -78,7 +78,8 @@ export class PressureComponent {
     }
     if (Object.prototype.hasOwnProperty.call(message, 'bowStarboard')) {
       if (message.bowStarboard.distanceSensorPosition !== undefined) {
-        this.bowPortBallastValue = message.bowStarboard.distanceSensorPosition;
+        this.bowStarboardDistanceValue =
+          message.bowStarboard.distanceSensorPosition;
       }
       if (message.bowStarboard.ballastPressurePsi !== undefined) {
         this.bowStarboardBallastValue = message.bowStarboard.ballastPressurePsi;
@@ -100,7 +101,7 @@ export class PressureComponent {
     }
     if (Object.prototype.hasOwnProperty.call(message, 'sternPort')) {
       if (message.sternPort.distanceSensorPosition !== undefined) {
-        this.bowPortBallastValue = message.sternPort.distanceSensorPosition;
+        this.sternPortDistanceValue = message.sternPort.distanceSensorPosition;
       }
       if (message.sternPort.ballastPressurePsi !== undefined) {
         this.sternPortBallastValue = message.sternPort.ballastPressurePsi;
@@ -120,7 +121,7 @@ export class PressureComponent {
     }
     if (Object.prototype.hasOwnProperty.call(message, 'sternStarboard')) {
       if (message.sternStarboard.distanceSensorPosition !== undefined) {
-        this.sternStarboardBallastValue =
+        this.sternStarboardDistanceValue =
           message.sternStarboard.distanceSensorPosition;
       }
       if (message.sternStarboard.ballastPressurePsi !== undefined) {
