@@ -3,12 +3,56 @@
 #include <iostream>
 #include <string>
 
-// int ballastFillPin = 23;
-// int pistonFillPin = 22;
-// int ventPin = 21;
-// int ballastPressureSensorPin = 32; // Location of the pins for the sensor and
-// int pistonPressureSensorPin = 33;
+DistanceSensor::DistanceSensor(double reading, int triggerPin, int echoPin)
+    : reading(reading)
+    , triggerPin(triggerPin)
+    , echoPin(echoPin)
+{
+    pinMode(triggerPin, OUTPUT);
+    pinMode(echoPin, INPUT);
+}
+
+DistanceSensor::~DistanceSensor() { }
+uint16_t DistanceSensor::getReading()
+{
+
+    long duration;
+    float average;
+    float distanceInch;
+    // Clears the triggerPin
+    digitalWrite(triggerPin, LOW);
+    delayMicroseconds(2);
+    // Sets the triggerPin on HIGH state for 10 micro seconds
+    digitalWrite(triggerPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(triggerPin, LOW);
+
+    // Reads the echoPin, returns the sound wave travel time in microseconds
+    duration = pulseIn(echoPin, HIGH);
+    int readings = 0;
+    for (int i = 0; i < 10; i++) {
+        readings += duration * SOUND_SPEED / 2;
+    }
+    average = readings / 10;
+    // Calculate the distance
+
+    // Convert to inches
+    distanceInch = average * CM_TO_INCH;
+
+    // Prints the distance in the Serial Monitor
+    Serial.print("Distance (cm): ");
+    Serial.println(average);
+    Serial.print("Distance (inch): ");
+    Serial.println(distanceInch);
+
+    delay(1000);
+
+    return average;
+};
+
 /*
+
+
 
 
 PRESSURESENSOR`
@@ -16,19 +60,21 @@ PRESSURESENSOR`
 
 */
 PressureSensor::PressureSensor(double reading, int pin)
-    : reading(reading), pin(pin)
+    : reading(reading)
+    , pin(pin)
 {
     pinMode(pin, INPUT);
 }
 
-PressureSensor::~PressureSensor() {}
-uint16_t PressureSensor::getReading() {
+PressureSensor::~PressureSensor() { }
+uint16_t PressureSensor::getReading()
+{
     uint16_t reading = analogRead(pin);
-    uint16_t pressure = reading / 28; 
+    uint16_t pressure = reading / 28;
 
-    //float voltage = 5.0 * reading / 4095; // voltage = 0..5V;  we do the math in millivolts!!
-    //map(value, fromLow, fromHigh, toLow, toHigh)
-    return pressure; //map(voltage, 0.5, 3.0, 0.0, 150.0); // Arduino map() function
+    // float voltage = 5.0 * reading / 4095; // voltage = 0..5V;  we do the math in millivolts!!
+    // map(value, fromLow, fromHigh, toLow, toHigh)
+    return pressure; // map(voltage, 0.5, 3.0, 0.0, 150.0); // Arduino map() function
     ;
 };
 
@@ -41,13 +87,14 @@ SOLENOID
 */
 
 Solenoid::Solenoid(bool open, int pin)
-    : open(open), pin(pin)
+    : open(open)
+    , pin(pin)
 {
     pinMode(pin, OUTPUT);
     digitalWrite(pin, LOW);
 }
 
-Solenoid::~Solenoid() {}
+Solenoid::~Solenoid() { }
 
 bool Solenoid::isOpen() { return open; }
 
@@ -69,8 +116,20 @@ LEG
 */
 
 Leg::Leg(std::string position, int ballastFillPin, int pistonFillPin, int ventPin, int ballastPressureSensorPin,
-         int pistonPressureSensorPin)
-    : ballastFillPin(ballastFillPin), pistonFillPin(pistonFillPin), ventPin(ventPin), ballastPressureSensorPin(ballastPressureSensorPin), pistonPressureSensorPin(pistonPressureSensorPin), ballastSolenoid(false, ballastFillPin), pistonSolenoid(false, pistonFillPin), ventSolenoid(false, ventPin), ballastPressureSensor(-1, ballastPressureSensorPin), pistonPressureSensor(-1, pistonPressureSensorPin), position(position)
+    int pistonPressureSensorPin, int ultrasonicTriggerPin, int ultrasonicEchoPin)
+    : ballastFillPin(ballastFillPin)
+    , pistonFillPin(pistonFillPin)
+    , ventPin(ventPin)
+    , ballastPressureSensorPin(ballastPressureSensorPin)
+    , pistonPressureSensorPin(pistonPressureSensorPin)
+    , ballastSolenoid(false, ballastFillPin)
+    , pistonSolenoid(false, pistonFillPin)
+    , ventSolenoid(false, ventPin)
+    , ballastPressureSensor(-1, ballastPressureSensorPin)
+    , pistonPressureSensor(-1, pistonPressureSensorPin)
+    , distanceSensor(-1, ultrasonicTriggerPin, ultrasonicEchoPin)
+    , position(position)
+    , distance(distance)
 {
     std::cout << "constructing " << position << '\n';
 }
@@ -81,8 +140,7 @@ std::string Leg::getPosition() { return position; }
 
 bool Leg::isSolenoidOpen(Solenoid::SolenoidPosition position)
 {
-    switch (position)
-    {
+    switch (position) {
     case Solenoid::SolenoidPosition::ballast:
         return ballastSolenoid.isOpen();
 
@@ -98,8 +156,7 @@ bool Leg::isSolenoidOpen(Solenoid::SolenoidPosition position)
 
 uint16_t Leg::getPressureSensorReading(PressureSensor::PressurePosition position)
 {
-    switch (position)
-    {
+    switch (position) {
     case PressureSensor::PressurePosition::ballast:
         return ballastPressureSensor.getReading();
 
@@ -110,11 +167,12 @@ uint16_t Leg::getPressureSensorReading(PressureSensor::PressurePosition position
     }
 }
 
+uint16_t Leg::getDistanceSensorReading() { return distanceSensor.getReading(); };
+
 void Leg::setSolenoidState(Solenoid::SolenoidPosition position, bool state)
 {
     Serial.printf("Set Solenoid State: state %s\n", state ? "true" : "false");
-    switch (position)
-    {
+    switch (position) {
     case Solenoid::SolenoidPosition::ballast:
         ballastSolenoid.setState(state);
         break;

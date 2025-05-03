@@ -13,10 +13,13 @@ using json = nlohmann::json;
 
 #define LED 5
 #define TESTSOLENOID 15
+// #define USE_WIFI
 
 Leg* LegStarboard = nullptr;
 Leg* LegPort = nullptr;
 
+const int porttrigPin = 16; // yellow
+const int portechoPin = 36; // white
 
 // Replace with your network credentials
 const char* ssid = "VikingRadio";
@@ -30,13 +33,13 @@ const char* websocket_server = "0.0.0.0";
 // BOW: 8071 and espToServerSystemStateBow
 // STERN: 8072 and espToServerSystemStateStern
 
-// UNCOMMENT THIS FOR BOW 
-const uint16_t websocket_port = 8071;
-const char* messageType = "espToServerSystemStateBow";
+// UNCOMMENT THIS FOR BOW
+// const uint16_t websocket_port = 8071;
+// const char* messageType = "espToServerSystemStateBow";
 
 // UNCOMMENT THIS FOR STERN
-// const uint16_t websocket_port = 8072;
-// const char* messageType = "espToServerSystemStateStern";
+const uint16_t websocket_port = 8072;
+const char* messageType = "espToServerSystemStateStern";
 
 // init Json data object
 json system_state = { { "type", messageType }, { "sendTime", "notime" },
@@ -45,7 +48,7 @@ json system_state = { { "type", messageType }, { "sendTime", "notime" },
             { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } },
     { "port",
         { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } }};
+            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" } } } };
 
 // Create a WebSocket client instance
 WebSocketsClient webSocket;
@@ -115,15 +118,21 @@ void setup()
         22, // piston fill pin
         23, // vent pin
         34, // ballast pressure sensor pin
-        35 // piston pressure sensor pin
+        35, // piston pressure sensor pin
+        16, // Change to 1
+        36 // Change to 39
     );
     LegPort = new Leg("Port",
         17, // ballast fill pin
         18, // piston fill pin
         19, // vent pin
         32, // ballast pressure sensor pin
-        33 // piston pressure sensor pin
+        33, // piston pressure sensor pin
+        16, // ultrasonic trigger pin
+        36 // ultrasonic echo pin
     );
+#ifdef USE_WIFI
+
     // Connect to Wi-Fi
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
@@ -132,10 +141,11 @@ void setup()
     }
     Serial.println("Connected to WiFi");
 
-    // Set up WebSocket client
+    // // Set up WebSocket client
     webSocket.begin(websocket_server, websocket_port, "/");
     webSocket.onEvent(webSocketEvent);
     updateTicker.attach(.2, sendStateJson);
+#endif // USE_WIFI
 }
 
 // {
@@ -184,10 +194,13 @@ void setup()
 
 void loop()
 {
-    // Run the WebSocket client
+// Run the WebSocket client
+#ifdef USE_WIFI
     webSocket.loop();
+#endif // USE_WIFI
 
     // Serial.println(LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::ballast));
     // system_state["sternStarboard"]["pistonPressurePsi"] =
     // LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston);
+    LegPort->getDistanceSensorReading();
 }
