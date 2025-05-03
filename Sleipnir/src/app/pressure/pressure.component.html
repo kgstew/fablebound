@@ -3,33 +3,43 @@
 <p class="text-center py-2">Bow</p>
 <div class="row row-cols-2 row-cols-sm-2 g-4">
   <div class="col">
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">
-          Ballast
-          <span class="pressure-left">{{ bowPortBallastValue }}</span></li>
-        <li class="list-group-item">
-          Piston
-          <span class="pressure-left">{{ bowPortPistonValue }}</span>
-        </li>
-        <li class="list-group-item">
-          Ballast In
-          <span class="pressure-left">{{ bowPortValveBallastIn }}</span>
-        </li>
-        <li class="list-group-item">
-          Ballast Out
-          <span class="pressure-left">{{ bowPortValveBallastOut }}</span>
-        </li>
-        <li class="list-group-item">
-          Release
-          <span class="pressure-left">{{ bowPortValveRelease }}</span>
-        </li>
-      </ul>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        Distance
+        <span class="pressure-left">{{ bowPortDistanceValue }}</span>
+      </li>
+      <li class="list-group-item">
+        Ballast
+        <span class="pressure-left">{{ bowPortBallastValue }}</span>
+      </li>
+      <li class="list-group-item">
+        Piston
+        <span class="pressure-left">{{ bowPortPistonValue }}</span>
+      </li>
+      <li class="list-group-item">
+        Ballast In
+        <span class="pressure-left">{{ bowPortValveBallastIn }}</span>
+      </li>
+      <li class="list-group-item">
+        Ballast Out
+        <span class="pressure-left">{{ bowPortValveBallastOut }}</span>
+      </li>
+      <li class="list-group-item">
+        Release
+        <span class="pressure-left">{{ bowPortValveRelease }}</span>
+      </li>
+    </ul>
   </div>
   <div class="col">
     <ul class="list-group list-group-flush">
       <li class="list-group-item">
+        Distance
+        <span class="pressure-left">{{ bowStarboardDistanceValue }}</span>
+      </li>
+      <li class="list-group-item">
         Ballast
-        <span class="pressure-left">{{ bowStarboardBallastValue }}</span></li>
+        <span class="pressure-left">{{ bowStarboardBallastValue }}</span>
+      </li>
       <li class="list-group-item">
         Piston
         <span class="pressure-left">{{ bowStarboardPistonValue }}</span>
@@ -47,38 +57,48 @@
         <span class="pressure-left">{{ bowStarboardValveRelease }}</span>
       </li>
     </ul>
-    </div>
   </div>
-  <hr class="pt-5" />
-  <div class="row row-cols-2 row-cols-sm-2 g-4">
-    <div class="col">
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">
-          Ballast
-          <span class="pressure-left">{{ sternPortBallastValue }}</span></li>
-        <li class="list-group-item">
-          Piston
-          <span class="pressure-left">{{ sternPortPistonValue }}</span>
-        </li>
-        <li class="list-group-item">
-          Ballast In
-          <span class="pressure-left">{{ sternPortValveBallastIn }}</span>
-        </li>
-        <li class="list-group-item">
-          Ballast Out
-          <span class="pressure-left">{{ sternPortValveBallastOut }}</span>
-        </li>
-        <li class="list-group-item">
-          Release
-          <span class="pressure-left">{{ sternPortValveRelease }}</span>
-        </li>
-      </ul>
+</div>
+<hr class="pt-5" />
+<div class="row row-cols-2 row-cols-sm-2 g-4">
+  <div class="col">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        Distance
+        <span class="pressure-left">{{ sternPortDistanceValue }}</span>
+      </li>
+      <li class="list-group-item">
+        Ballast
+        <span class="pressure-left">{{ sternPortBallastValue }}</span>
+      </li>
+      <li class="list-group-item">
+        Piston
+        <span class="pressure-left">{{ sternPortPistonValue }}</span>
+      </li>
+      <li class="list-group-item">
+        Ballast In
+        <span class="pressure-left">{{ sternPortValveBallastIn }}</span>
+      </li>
+      <li class="list-group-item">
+        Ballast Out
+        <span class="pressure-left">{{ sternPortValveBallastOut }}</span>
+      </li>
+      <li class="list-group-item">
+        Release
+        <span class="pressure-left">{{ sternPortValveRelease }}</span>
+      </li>
+    </ul>
   </div>
   <div class="col">
     <ul class="list-group list-group-flush">
       <li class="list-group-item">
+        Distance
+        <span class="pressure-left">{{ sternStarboardDistanceValue }}</span>
+      </li>
+      <li class="list-group-item">
         Ballast
-        <span class="pressure-left">{{ sternStarboardBallastValue }}</span></li>
+        <span class="pressure-left">{{ sternStarboardBallastValue }}</span>
+      </li>
       <li class="list-group-item">
         Piston
         <span class="pressure-left">{{ sternStarboardPistonValue }}</span>
@@ -98,4 +118,4 @@
     </ul>
   </div>
 </div>
-<p class="text-center py-2">Stern</p> 
+<p class="text-center py-2">Stern</p>
