@@ -39,8 +39,8 @@ uint16_t DistanceSensor::getReading()
     // Prints the distance in the Serial Monitor
     Serial.print("Distance (cm): ");
     Serial.println(distanceAverageCm);
-    // Serial.print("Distance (inch): ");
-    // Serial.println(distanceAverageIn);
+    Serial.print("Distance (inch): ");
+    Serial.println(distanceAverageIn);
 
     return distanceAverageCm;
 };
