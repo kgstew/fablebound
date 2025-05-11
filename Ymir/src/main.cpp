@@ -82,8 +82,8 @@ void webSocketEvent(WStype_t type, uint8_t* payload, size_t length)
     case WStype_CONNECTED: {
         Serial.println("Connected to WebSocket server");
         auto s = system_state.dump();
-        // webSocket.sendTXT(s.c_str(), s.length());
-        // Serial.println("Sent JSON to WebSocket server");
+        webSocket.sendTXT(s.c_str(), s.length());
+        Serial.println("Sent JSON to WebSocket server");
         break;
     }
     case WStype_TEXT: {
