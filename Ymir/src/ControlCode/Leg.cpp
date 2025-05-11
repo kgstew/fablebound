@@ -15,10 +15,6 @@ DistanceSensor::DistanceSensor(double reading, int triggerPin, int echoPin)
 DistanceSensor::~DistanceSensor() { }
 uint16_t DistanceSensor::getReading()
 {
-
-    long duration;
-    float average;
-    float distanceInch;
     // Clears the triggerPin
     digitalWrite(triggerPin, LOW);
     delayMicroseconds(2);
@@ -28,26 +24,25 @@ uint16_t DistanceSensor::getReading()
     digitalWrite(triggerPin, LOW);
 
     // Reads the echoPin, returns the sound wave travel time in microseconds
-    duration = pulseIn(echoPin, HIGH);
-    int readings = 0;
-    for (int i = 0; i < 10; i++) {
-        readings += duration * SOUND_SPEED / 2;
+    double distanceAverageCm = 0.0;
+    double distanceAverageIn = 0.0;
+    constexpr size_t N = 1;
+    for (size_t i = 0; i < N; i++) {
+        auto timeDelta = pulseIn(echoPin, HIGH);
+        distanceAverageCm += static_cast<double>(timeDelta) * SOUND_SPEED * 0.5;
     }
-    average = readings / 10;
     // Calculate the distance
-
+    distanceAverageCm /= static_cast<double>(N);
     // Convert to inches
-    distanceInch = average * CM_TO_INCH;
+    distanceAverageIn = distanceAverageCm * CM_TO_INCH;
 
     // Prints the distance in the Serial Monitor
     Serial.print("Distance (cm): ");
-    Serial.println(average);
-    Serial.print("Distance (inch): ");
-    Serial.println(distanceInch);
+    Serial.println(distanceAverageCm);
+    // Serial.print("Distance (inch): ");
+    // Serial.println(distanceAverageIn);
 
-    delay(1000);
-
-    return average;
+    return distanceAverageCm;
 };
 
 /*
