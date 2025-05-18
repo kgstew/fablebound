@@ -13,20 +13,19 @@ using json = nlohmann::json;
 
 #define LED 5
 #define TESTSOLENOID 15
-// #define USE_WIFI
+#define USE_WIFI
 
-Leg* LegStarboard = nullptr;
-Leg* LegPort = nullptr;
-
-const int porttrigPin = 16; // yellow
-const int portechoPin = 36; // white
+constexpr double UPDATE_DELTA = 0.2; // seconds
 
 // Replace with your network credentials
 const char* ssid = "VikingRadio";
 const char* password = "vikinglongship";
 
 // WebSocket server address and port
-const char* websocket_server = "0.0.0.0";
+const char* websocket_server = "192.168.0.101";
+
+constexpr int portTriggerPin = 16; // yellow
+constexpr int portEchoPin = 36; // white
 
 // Websocket server port
 // CHANGE THIS TO CHANGE BOW VS STERN
@@ -39,16 +38,21 @@ const char* websocket_server = "0.0.0.0";
 
 // UNCOMMENT THIS FOR STERN
 const uint16_t websocket_port = 8072;
-const char* messageType = "espToServerSystemStateStern";
+const std::string messageType = "espToServerSystemStateStern";
+
+Leg* LegStarboard = nullptr;
+Leg* LegPort = nullptr;
 
 // init Json data object
 json system_state = { { "type", messageType }, { "sendTime", "notime" },
     { "starboard",
         { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" }, {"distanceSensorPosition", 0} } },
+            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" },
+            { "distanceSensorPosition", 0 } } },
     { "port",
         { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" }, {"distanceSensorPosition", 0} } } };
+            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" },
+            { "distanceSensorPosition", 0 } } } };
 
 // Create a WebSocket client instance
 WebSocketsClient webSocket;
@@ -71,22 +75,24 @@ void webSocketEvent(WStype_t type, uint8_t* payload, size_t length)
     // LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston);
 
     switch (type) {
-    case WStype_DISCONNECTED:
+    case WStype_DISCONNECTED: {
         Serial.println("Disconnected from WebSocket server");
         break;
-    case WStype_CONNECTED:
-
+    }
+    case WStype_CONNECTED: {
         Serial.println("Connected to WebSocket server");
-        s = system_state.dump();
+        auto s = system_state.dump();
         webSocket.sendTXT(s.c_str(), s.length());
         Serial.println("Sent JSON to WebSocket server");
         break;
-    case WStype_TEXT:
+    }
+    case WStype_TEXT: {
         Serial.printf("Received text: %s\n", payload);
         desired_state = json::parse(payload);
         findLegsToUpdate(desired_state);
         break;
-    case WStype_BIN:
+    }
+    case WStype_BIN: {
         Serial.println("Received binary data");
         Serial.println("Toggling TESTSOLENOID / LED ");
         digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
@@ -94,22 +100,27 @@ void webSocketEvent(WStype_t type, uint8_t* payload, size_t length)
         digitalWrite(LED, !digitalRead(LED));
         digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
         break;
-    case WStype_PING:
+    }
+    case WStype_PING: {
         Serial.println("Received ping");
         break;
-    case WStype_PONG:
+    }
+    case WStype_PONG: {
         Serial.println("Received pong");
         break;
-    case WStype_ERROR:
+    }
+    case WStype_ERROR: {
         Serial.println("Error occurred");
         break;
+    }
+    default: {
+        Serial.println("Unknown event");
+    }
     }
 }
 
 void setup()
-
 {
-
     Serial.begin(115200);
     delay(1000);
 
@@ -132,7 +143,6 @@ void setup()
         36 // ultrasonic echo pin
     );
 #ifdef USE_WIFI
-
     // Connect to Wi-Fi
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
@@ -141,10 +151,10 @@ void setup()
     }
     Serial.println("Connected to WiFi");
 
-    // // Set up WebSocket client
+    // Set up WebSocket client
     webSocket.begin(websocket_server, websocket_port, "/");
     webSocket.onEvent(webSocketEvent);
-    updateTicker.attach(.2, sendStateJson);
+    // updateTicker.attach(UPDATE_DELTA, sendStateJson);
 #endif // USE_WIFI
 }
 
@@ -198,9 +208,13 @@ void loop()
 #ifdef USE_WIFI
     webSocket.loop();
 #endif // USE_WIFI
-
     // Serial.println(LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::ballast));
     // system_state["sternStarboard"]["pistonPressurePsi"] =
     // LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston);
-    LegPort->getDistanceSensorReading();
+    // LegPort->getDistanceSensorReading();
+
+    // XXX: workaround for what seems to be a race condition (and subsequent out-of-bounds read) 
+    // when calling sendStateJson via Ticker
+    delay(UPDATE_DELTA * 1000.0);
+    sendStateJson();
 }
