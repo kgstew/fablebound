@@ -53,7 +53,7 @@ static std::atomic<bool> shouldSendState { false };
 // Create a WebSocket client instance
 WebSocketsClient webSocket;
 
-Ticker sendStateJsonTicker;
+Ticker sendStateTicker;
 Ticker processSensorsTicker;
 
 void sendState()
@@ -211,7 +211,7 @@ void setup()
     webSocket.begin(websocketServer, websocket_port, "/");
     webSocket.onEvent(onWebSocketEvent);
 
-    sendStateJsonTicker.attach(SEND_STATE_DELTA, onSendStateJsonTicker);
+    sendStateTicker.attach(SEND_STATE_DELTA, onSendStateJsonTicker);
 #endif // USE_WIFI
 
 }
