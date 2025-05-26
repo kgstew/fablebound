@@ -130,8 +130,8 @@ void setup()
         23, // vent pin
         34, // ballast pressure sensor pin
         35, // piston pressure sensor pin
-        16, // Change to 1
-        36 // Change to 39
+        5, // ultrasonic trigger pin
+        39 // ultrasonic echo pin
     );
     LegPort = new Leg("Port",
         17, // ballast fill pin
@@ -213,7 +213,7 @@ void loop()
     // LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston);
     // LegPort->getDistanceSensorReading();
 
-    // XXX: workaround for what seems to be a race condition (and subsequent out-of-bounds read) 
+    // XXX: workaround for what seems to be a race condition (and subsequent out-of-bounds read)
     // when calling sendStateJson via Ticker
     delay(UPDATE_DELTA * 1000.0);
     sendStateJson();
