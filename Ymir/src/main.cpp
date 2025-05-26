@@ -85,12 +85,8 @@ void processStateRequest(json& requestedState)
 
                 if (requestedState.contains(solenoidPositionString)) {
                     solenoid.setState(requestedState[solenoidPositionString]);
-                } else {
-                    Serial.printf("Unknown solenoid position: %s\n", solenoidPositionString.c_str());
                 }
             }
-        } else {
-            Serial.printf("Unknown leg position: %s\n", legPositionString.c_str());
         }
     }
 }
