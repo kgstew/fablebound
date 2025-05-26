@@ -6,27 +6,27 @@
 #include <ControlCode/json.hpp>
 using json = nlohmann::json;
 
-enum LegPosition
-{
-    STARBOARD,
-    PORT,
-    UNKNOWN_POSITION
-};
+// enum class LegPosition
+// {
+//     STARBOARD,
+//     PORT,
+//     UNKNOWN_POSITION
+// };
 
-LegPosition getLegPositions(const std::string &legPosition);
+// LegPosition getLegPositions(const std::string &legPosition);
 
-enum ValveType
-{
-    BALLAST_INTAKE_VALVE,
-    BALLAST_TO_PISTON_VALVE,
-    PISTON_RELEASE_VALVE,
-    UNKNOWN_VALVE
-};
+// enum class ValveType
+// {
+//     BALLAST_INTAKE_VALVE,
+//     BALLAST_TO_PISTON_VALVE,
+//     PISTON_RELEASE_VALVE,
+//     UNKNOWN_VALVE
+// };
 
-ValveType getValveType(const std::string &valveName);
+// json getSystemStateJson(const std::string &messageType);
 
-void updateLeg(Leg *leg, json leg_state);
+// ValveType getValveType(const std::string &solenoidPositionString);
 
-void findLegsToUpdate(json desired_state);
+// void updateLeg(Leg *leg, json& requestedState);
 
-json getStateJson(const std::string &messageType);
+// void findLegsToUpdate(json& requestedState);
