@@ -128,8 +128,10 @@ void onProcessSensorsTicker()
     //   and the abs of the average error is decreasing
     // - decrease piston pressure if error < -threshold (i.e. distance > target) 
     //   and the abs of the average error is decreasing
+    
     // - instead of trying to reach a target distance, maybe find an overall pressure 
     //   scale factor that minimizes the distance error instead
+    // - will probably need to limit the duty cycle 
 }
 
 void onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length)
