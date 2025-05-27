@@ -55,8 +55,8 @@ export type PneumaticsCommandGranular = {
 
 export type PneumaticsCommandGranularBowOrStern = {
     type: string
-    starboard: LegCommandGranular
-    port: LegCommandGranular
+    starboard?: LegCommandGranular
+    port?: LegCommandGranular
     sendTime: string
 }
 
