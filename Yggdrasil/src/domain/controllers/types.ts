@@ -148,6 +148,7 @@ const PneumaticsCommandLibrary = {
 } as const
 
 const PneumaticsPatternLibrary = {
+    calibrateDistance: 'calibrateDistance',
     inPort: 'inPort',
     setOutOnAdventure: 'setOutOnAdventure',
     intoTheUnknown: 'intoTheUnknown',
