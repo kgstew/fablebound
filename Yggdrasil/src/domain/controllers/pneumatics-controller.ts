@@ -74,7 +74,10 @@ export class PneumaticsController {
     public ballastTankMaxPressure!: number
     public maxPistonPressure!: number
     public minPistonPressure!: number
+    public maxDistance!: number
+    public zeroDistance!: number
     private pressureTargets: Map<string, number> = new Map()
+    private distanceTargets: Map<string, number> = new Map()
 
     public defaultPressureSettings: PressureSettings = {
         ballastTankMaxPressure: 40,
@@ -157,6 +160,28 @@ export class PneumaticsController {
 
     public restoreDefaultPressureSettings(): void {
         this.updatePressureSettings(this.defaultPressureSettings)
+    }
+
+    public setDistanceTarget(
+        legAssembly:
+            | 'bowStarboard'
+            | 'bowPort'
+            | 'sternPort'
+            | 'sternStarboard',
+        targetDistance: number
+    ): void {
+        if (targetDistance < 0 || targetDistance > 100) {
+            console.warn(
+                `Invalid distance ${targetDistance}%. Must be between 0 and 100. Ignoring.`
+            )
+            return
+        }
+        const actualTargetDistance =
+            this.zeroDistance +
+            (targetDistance / 100) * (this.maxDistance - this.zeroDistance)
+
+        //console.log(`Setting distance set point for ${legAssembly} to ${actualTargetDistance} cm`);
+        this.distanceTargets.set(legAssembly, actualTargetDistance)
     }
 
     public setPressureTarget(
