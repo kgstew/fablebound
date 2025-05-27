@@ -106,7 +106,7 @@ void getSensorReadings()
     }
 }
 
-void onSendStateJsonTicker()
+void onSendStateTicker()
 {
     if (shouldSendState)
         sendState();
@@ -218,7 +218,7 @@ void setup()
     webSocket.begin(websocketServer, websocket_port, "/");
     webSocket.onEvent(onWebSocketEvent);
 
-    sendStateTicker.attach(SEND_STATE_DELTA, onSendStateJsonTicker);
+    sendStateTicker.attach(SEND_STATE_DELTA, onSendStateTicker);
 #endif // USE_WIFI
 
 }
