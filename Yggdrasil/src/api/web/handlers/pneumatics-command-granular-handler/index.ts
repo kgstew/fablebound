@@ -1,16 +1,10 @@
 import { PneumaticsSystemService, Valve } from 'domain/'
 import { Handler } from '../handler'
-import { webSocketConnections } from 'app/websocket/server/open-socket'
-import {
-    PneumaticsModelSingleton,
-    PneumaticsPatternController,
-} from 'domain/controllers/pneumatics-controller'
+import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller'
 import {
     FrontendCommandGranularMessage,
     LegCommandGranular,
     PneumaticsCommandGranular,
-    PneumaticsCommandGranularBowOrStern,
-    PneumaticsCommandGranularCombined,
 } from 'domain/controllers/types'
 
 const sampleReadingsData = {

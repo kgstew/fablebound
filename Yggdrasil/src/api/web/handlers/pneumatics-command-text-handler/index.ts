@@ -1,12 +1,7 @@
-import { PneumaticsSystemService, Valve } from 'domain/'
+import { PneumaticsSystemService } from 'domain/'
 import { Handler } from '../handler'
-import { webSocketConnections } from 'app/websocket/server/open-socket'
+import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller'
 import {
-    PneumaticsModelSingleton,
-    PneumaticsPatternController,
-} from 'domain/controllers/pneumatics-controller'
-import {
-    PneumaticsCommandText,
     PneumaticsCommandTextMessage,
     isValidPneumaticsCommand,
 } from 'domain/controllers/types'
