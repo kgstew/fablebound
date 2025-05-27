@@ -311,6 +311,7 @@ export class PneumaticsController {
     public dischargeCommand(): PneumaticsCommandGranularCombined {
         const outgoingCommand = this.splitOutgoingCommand()
         if ('esp32bow' in webSocketConnections) {
+            // @ts-expect-error Websocket type mismatch
             webSocketConnections['esp32bow'].send(
                 JSON.stringify(outgoingCommand.bow)
             )
@@ -319,6 +320,7 @@ export class PneumaticsController {
             //    console.log("Failed to send data: 'esp32' connection does not exist.");
         }
         if ('esp32stern' in webSocketConnections) {
+            // @ts-expect-error Websocket type mismatch
             webSocketConnections['esp32stern'].send(
                 JSON.stringify(outgoingCommand.stern)
             )
@@ -387,6 +389,7 @@ export class PneumaticsController {
         //console.log(this.systemState)
         //console.log("END SYSTEM STATE")
         if ('frontend' in webSocketConnections) {
+            // @ts-expect-error Websocket type mismatch
             webSocketConnections['frontend'].send(
                 JSON.stringify(this.systemState)
             )

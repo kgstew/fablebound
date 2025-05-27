@@ -1,9 +1,6 @@
 import { PneumaticsSystemService } from 'domain/'
 import { Handler } from '../handler'
-import {
-    PneumaticsModelSingleton,
-    PneumaticsPatternController,
-} from 'domain/controllers/pneumatics-controller'
+import { PneumaticsModelSingleton } from 'domain/controllers/pneumatics-controller'
 import {
     PneumaticsCommandPatternMessage,
     isValidPneumaticsPattern,
