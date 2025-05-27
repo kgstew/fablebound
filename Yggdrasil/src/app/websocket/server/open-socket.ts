@@ -3,7 +3,7 @@ import { WebSocket, WebSocketServer } from 'ws'
 import { ConnectionStatus } from '../connection-status'
 import { logConnectionStatus } from '../monitoring'
 
-const webSocketConnections = {};
+const webSocketConnections = {}
 
 type Message = {
     type: string
@@ -22,8 +22,8 @@ const openSocket = async (
         const wss = new WebSocketServer({ port })
 
         wss.on('connection', (ws) => {
-            console.log(`🔗 New client connected to ${socketName}`)        
-            webSocketConnections[socketName] = ws;
+            console.log(`🔗 New client connected to ${socketName}`)
+            webSocketConnections[socketName] = ws
             connectionStatus[socketName].connected = true
             connectionStatus[socketName].lastConnected = null
             if (!connectionStatus[socketName].firstConnected) {
@@ -38,35 +38,35 @@ const openSocket = async (
             resolve(ws)
 
             ws.on('message', (message) => {
-             //   console.log(`📩 Received message on ${socketName} => ${message}`);
-                connectionStatus[socketName].lastReceived = new Date().toLocaleString();
-            
-                const stringMessage = message.toString();
-                let parsed;
-            
-                try {
-
-                    parsed = parseJsonMessage(stringMessage, parsed);
-            
-            //    console.log(
-              //      `📩 Received message on ${socketName} => ${parsed}`
-               // )
+                //   console.log(`📩 Received message on ${socketName} => ${message}`);
                 connectionStatus[socketName].lastReceived =
                     new Date().toLocaleString()
-                
-                const handler = handlerMap[parsed.type]
-                if (!handler) {
-                    console.error(
-                        `❌ Controller not found for message type ${parsed.type}`
-                    )
-                    return
-                }
-                handler.handle(parsed)
 
-                connectionStatus[socketName].lastSent =
-                    new Date().toLocaleString()
-                }catch (error) {
-                    console.error("An error occurred:", error);
+                const stringMessage = message.toString()
+                let parsed
+
+                try {
+                    parsed = parseJsonMessage(stringMessage, parsed)
+
+                    //    console.log(
+                    //      `📩 Received message on ${socketName} => ${parsed}`
+                    // )
+                    connectionStatus[socketName].lastReceived =
+                        new Date().toLocaleString()
+
+                    const handler = handlerMap[parsed.type]
+                    if (!handler) {
+                        console.error(
+                            `❌ Controller not found for message type ${parsed.type}`
+                        )
+                        return
+                    }
+                    handler.handle(parsed)
+
+                    connectionStatus[socketName].lastSent =
+                        new Date().toLocaleString()
+                } catch (error) {
+                    console.error('An error occurred:', error)
                 }
             })
 
@@ -89,10 +89,7 @@ const openSocket = async (
         })
 
         wss.on('error', (error) => {
-            console.error(
-                `⚠️ WebSocket server error on ${socketName}:`,
-                error
-            )
+            console.error(`⚠️ WebSocket server error on ${socketName}:`, error)
             reject(error)
         })
 
@@ -102,38 +99,35 @@ const openSocket = async (
     })
 }
 
-
 function parseJsonMessage(stringMessage: string, parsed: any) {
-    const jsonObj = JSON.parse(stringMessage);
+    const jsonObj = JSON.parse(stringMessage)
 
     // Check for double-encoded JSON and parse if necessary
     if (typeof jsonObj.message === 'string') {
         // The message is a string, implying it's double-encoded JSON
         try {
-            const innerJson = JSON.parse(jsonObj.message);
+            const innerJson = JSON.parse(jsonObj.message)
             if (innerJson.type) {
-                parsed = innerJson; // Properly formatted message from double-encoded JSON
+                parsed = innerJson // Properly formatted message from double-encoded JSON
             } else {
                 // Default handling if inner JSON does not contain 'type'
-                parsed = { type: 'defaultType', payload: innerJson };
+                parsed = { type: 'defaultType', payload: innerJson }
             }
         } catch (innerError) {
-            console.error('Error parsing double-encoded JSON:', innerError);
-            parsed = { type: 'defaultType', payload: jsonObj.message };
+            console.error('Error parsing double-encoded JSON:', innerError)
+            parsed = { type: 'defaultType', payload: jsonObj.message }
         }
     } else if (jsonObj.type) {
         // Direct format where 'type' is at the root level of JSON
-        parsed = jsonObj;
+        parsed = jsonObj
     } else {
         // Assume payload is the entire JSON if no type is directly present
         parsed = {
             type: jsonObj.type || 'defaultType', // Provide a default or extract appropriately
-            payload: jsonObj
-        };
+            payload: jsonObj,
+        }
     }
-    return parsed;
+    return parsed
 }
-
-
 
 export { openSocket, webSocketConnections }

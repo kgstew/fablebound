@@ -8,7 +8,6 @@ const run = async () => {
     startWebSocketServer(appConfig, handlers)
     startMidiServer()
     startPixelblazeClients()
-
 }
 
 export { run }
