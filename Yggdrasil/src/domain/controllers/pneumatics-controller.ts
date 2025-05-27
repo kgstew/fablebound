@@ -493,19 +493,19 @@ export class PneumaticsController {
             this.systemState[legAssembly].pistonPressurePsi >=
             this.maxPistonPressure
         ) {
-            ;(this.command[legAssembly] ??= {}).ballastToPistonValve = 'closed'
+            this.command[legAssembly]!.ballastToPistonValve = 'closed'
         }
         if (
             this.systemState[legAssembly].ballastPressurePsi >=
             this.ballastTankMaxPressure
         ) {
-            ;(this.command[legAssembly] ??= {}).ballastIntakeValve = 'closed'
+            this.command[legAssembly]!.ballastIntakeValve = 'closed'
         }
     }
 
     public handleCommandGranular(
         commandMessage: FrontendCommandGranularMessage
-    ): PneumaticsCommandGranular {
+    ): PneumaticsCommandGranular | PneumaticsCommandGranularCombined {
         this.lastCommand = 'none'
         this.buildCommandGranular(commandMessage)
         this.opportunisticBallastFill()
@@ -515,7 +515,7 @@ export class PneumaticsController {
 
     public handleCommand(
         commandMessage: PneumaticsCommandTextMessage
-    ): PneumaticsCommandGranular {
+    ): PneumaticsCommandGranular | PneumaticsCommandGranularCombined {
         this.lastCommand = commandMessage.command
         this.buildCommand(commandMessage)
         if (
@@ -551,7 +551,7 @@ export class PneumaticsController {
 
     public buildCommand(
         incomingCommandMessage: PneumaticsCommandTextMessage
-    ): PneumaticsCommandGranular {
+    ): PneumaticsCommandGranular | void {
         this.command = {
             type: 'pneumaticsCommandGranular',
             sendTime: new Date().toLocaleString(),
