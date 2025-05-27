@@ -20,7 +20,7 @@ public:
     int getTriggerPin() const noexcept;
     int getEchoPin() const noexcept;
     DistanceSensor::Position getPosition() const noexcept;
-    std::string getPositionAsString() const;
+    std::string getPositionAsString() const noexcept;
 
 private:
     const DistanceSensor::Position position;
@@ -38,7 +38,7 @@ public:
     double getLastReading() const noexcept;
     int getPin() const noexcept;
     PressureSensor::Position getPosition() const noexcept;
-    std::string getPositionAsString() const;
+    std::string getPositionAsString() const noexcept;
 
 private:
     const PressureSensor::Position position;
@@ -49,21 +49,28 @@ private:
 class Solenoid {
 public:
     enum class Position { ballast, piston, vent };
+    enum class State { open, closed };
 
-    Solenoid(Solenoid::Position position, bool open, int pin);
-    bool isOpen();
-    bool getState() const noexcept;
-    void setState(bool state);
-    void setState(std::string& state);
+    Solenoid(Solenoid::Position position, Solenoid::State defaultState, int pin);
+    Solenoid::State getState() const noexcept;
+    Solenoid::State getDefaultState() const noexcept;
+    void setState(Solenoid::State newState);
+    void setState(std::string& newState);
+    void setOpen(bool open);
+    void reset();
+    bool isOpen() const noexcept;
+    bool isClosed() const noexcept;
     int getPin() const noexcept;
     Solenoid::Position getPosition() const noexcept;
-    std::string getPositionAsString() const;
-    std::string getStateAsString() const;
+    std::string getPositionAsString() const noexcept;
+    std::string getStateAsString() const noexcept;
 
 private:
+    void writeState(Solenoid::State state);
     const Solenoid::Position position;
+    const Solenoid::State defaultState; // i.e. whether the solenoid is normally open or normally closed
     const int pin;
-    bool open;
+    Solenoid::State state;
 };
 
 class Leg {
@@ -81,14 +88,8 @@ public:
     std::vector<std::reference_wrapper<PressureSensor>> getPressureSensors() noexcept;
     std::vector<std::reference_wrapper<DistanceSensor>> getDistanceSensors() noexcept;
 
-    bool isSolenoidOpen(Solenoid::Position position);
-    void setSolenoidState(Solenoid::Position position, bool state);
-
-    double getPressureSensorReading(PressureSensor::Position position);
-    double getDistanceSensorReading();
-
     Leg::Position getPosition() const noexcept;
-    std::string getPositionAsString() const;
+    std::string getPositionAsString() const noexcept;
 
     json getStateAsJson();
     json getLastStateAsJson() const noexcept;

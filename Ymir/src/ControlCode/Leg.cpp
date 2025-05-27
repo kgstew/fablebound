@@ -95,14 +95,14 @@ int DistanceSensor::getEchoPin() const noexcept { return echoPin; }
 
 DistanceSensor::Position DistanceSensor::getPosition() const noexcept { return position; }
 
-std::string DistanceSensor::getPositionAsString() const
+std::string DistanceSensor::getPositionAsString() const noexcept
 {
     switch (position) {
     case DistanceSensor::Position::none:
         return std::string { "distanceSensorPosition" };
-    default: {
+    default: { // This should never happen
         Serial.println("Invalid distance sensor position");
-        throw std::runtime_error("Invalid distance sensor position");
+        return std::string { "" };
     }
     }
 }
@@ -133,16 +133,16 @@ int PressureSensor::getPin() const noexcept { return pin; }
 
 PressureSensor::Position PressureSensor::getPosition() const noexcept { return position; }
 
-std::string PressureSensor::getPositionAsString() const
+std::string PressureSensor::getPositionAsString() const noexcept
 {
     switch (position) {
     case PressureSensor::Position::ballast:
         return std::string { "ballastPressurePsi" };
     case PressureSensor::Position::piston:
         return std::string { "pistonPressurePsi" };
-    default: {
+    default: { // This should never happen
         Serial.println("Invalid pressure sensor position");
-        throw std::runtime_error("Invalid pressure sensor position");
+        return std::string { "invalid" };
     }
     }
 }
@@ -151,46 +151,68 @@ std::string PressureSensor::getPositionAsString() const
 // SOLENOID
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Solenoid::Solenoid(Solenoid::Position position, bool open, int pin)
+Solenoid::Solenoid(Solenoid::Position position, Solenoid::State defaultState, int pin)
     : position(position)
-    , open(open)
+    , defaultState(defaultState)
+    , state(defaultState)
     , pin(pin)
 {
     pinMode(pin, OUTPUT);
-    digitalWrite(pin, LOW);
+    writeState(defaultState);
 }
 
-bool Solenoid::isOpen() { return open; }
+bool Solenoid::isOpen() const noexcept { return state == Solenoid::State::open; }
 
-bool Solenoid::getState() const noexcept { return open; }
+bool Solenoid::isClosed() const noexcept { return state == Solenoid::State::closed; }
 
-void Solenoid::setState(bool state)
+Solenoid::State Solenoid::getState() const noexcept { return state; }
+
+Solenoid::State Solenoid::getDefaultState() const noexcept { return defaultState; }
+
+void Solenoid::setState(Solenoid::State newState)
 {
-    Serial.printf("Setting solenoid state to %s", state ? "open" : "closed");
-    Serial.print("pin");
-    Serial.println(pin);
-    open = state;
-    digitalWrite(pin, open ? HIGH : LOW);
+    writeState(newState);
+    state = newState;
 }
 
-void Solenoid::setState(std::string& state)
+void Solenoid::setState(std::string& newState)
 {
-    if (state == "open") {
-        open = true;
-        digitalWrite(pin, HIGH);
-    } else if (state == "closed") {
-        open = false;
-        digitalWrite(pin, LOW);
+    if (newState == "open") {
+        writeState(Solenoid::State::open);
+        state = Solenoid::State::open;
+    } else if (newState == "closed") {
+        writeState(Solenoid::State::closed);
+        state = Solenoid::State::closed;
     } else {
-        Serial.println("Invalid state string");
+        // default to closing the solenoid/valve to prevent 
+        // overpressurizing the ballast, piston, etc.
+        Serial.println("Invalid solenoid state string");
+        reset();
     }
+}
+
+void Solenoid::setOpen(bool open)
+{
+    if (open) {
+        writeState(Solenoid::State::open);
+        state = Solenoid::State::open;
+    } else {
+        writeState(Solenoid::State::closed);
+        state = Solenoid::State::closed;
+    }
+}
+
+void Solenoid::reset()
+{
+    writeState(defaultState);
+    state = defaultState;
 }
 
 int Solenoid::getPin() const noexcept { return pin; }
 
 Solenoid::Position Solenoid::getPosition() const noexcept { return position; }
 
-std::string Solenoid::getPositionAsString() const
+std::string Solenoid::getPositionAsString() const noexcept
 {
     switch (position) {
     case Solenoid::Position::ballast:
@@ -199,14 +221,34 @@ std::string Solenoid::getPositionAsString() const
         return std::string { "ballastToPistonValve" };
     case Solenoid::Position::vent:
         return std::string { "pistonReleaseValve" };
-    default: {
+    default: { // This should never happen
         Serial.println("Invalid solenoid position");
-        throw std::runtime_error("Invalid solenoid position");
+        return std::string { "invalid" };
     }
     }
 }
 
-std::string Solenoid::getStateAsString() const { return open ? std::string { "open" } : std::string { "closed" }; }
+std::string Solenoid::getStateAsString() const noexcept
+{
+    switch (state) {
+    case Solenoid::State::open: {
+        return std::string { "open" };
+    }
+    case Solenoid::State::closed: {
+        return std::string { "closed" };
+    }
+    default: { // This should never happen
+        Serial.println("Invalid solenoid state");
+        return std::string { "invalid" };
+    }
+    }
+}
+
+void Solenoid::writeState(Solenoid::State state) 
+{
+    assert((state == Solenoid::State::open) || (state == Solenoid::State::closed));
+    digitalWrite(pin, state == defaultState ? LOW : HIGH);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // LEG
@@ -215,9 +257,9 @@ std::string Solenoid::getStateAsString() const { return open ? std::string { "op
 Leg::Leg(Leg::Position position, int ballastFillPin, int pistonFillPin, int ventPin, int ballastPressureSensorPin,
     int pistonPressureSensorPin, int distanceSensorTriggerPin, int distanceSensorEchoPin)
     : position(position)
-    , ballastSolenoid(Solenoid::Position::ballast, false, ballastFillPin)
-    , pistonSolenoid(Solenoid::Position::piston, false, pistonFillPin)
-    , ventSolenoid(Solenoid::Position::vent, false, ventPin)
+    , ballastSolenoid(Solenoid::Position::ballast, Solenoid::State::closed, ballastFillPin)
+    , pistonSolenoid(Solenoid::Position::piston, Solenoid::State::closed, pistonFillPin)
+    , ventSolenoid(Solenoid::Position::vent, Solenoid::State::closed, ventPin)
     , ballastPressureSensor(PressureSensor::Position::ballast, -1, ballastPressureSensorPin)
     , pistonPressureSensor(PressureSensor::Position::piston, -1, pistonPressureSensorPin)
     , distanceSensor(DistanceSensor::Position::none, -1, distanceSensorTriggerPin, distanceSensorEchoPin)
@@ -292,33 +334,18 @@ std::vector<std::reference_wrapper<DistanceSensor>> Leg::getDistanceSensors() no
     };
 } // clang-format on
 
-bool Leg::isSolenoidOpen(Solenoid::Position position) { return getSolenoid(position).isOpen(); }
-
-void Leg::setSolenoidState(Solenoid::Position position, bool state)
-{
-    Serial.printf("setSolenoidState: state %s\n", state ? "true" : "false");
-    getSolenoid(position).setState(state);
-}
-
-double Leg::getPressureSensorReading(PressureSensor::Position position)
-{
-    return getPressureSensor(position).getReading();
-}
-
-double Leg::getDistanceSensorReading() { return distanceSensor.getReading(); }
-
 Leg::Position Leg::getPosition() const noexcept { return position; }
 
-std::string Leg::getPositionAsString() const
+std::string Leg::getPositionAsString() const noexcept
 {
     switch (position) {
     case Leg::Position::port:
         return std::string { "port" };
     case Leg::Position::starboard:
         return std::string { "starboard" };
-    default: {
+    default: { // This should never happen
         Serial.println("Invalid leg position");
-        throw std::runtime_error("Invalid leg position");
+        return std::string { "invalid" };
     }
     }
 }
