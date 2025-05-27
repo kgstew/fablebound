@@ -76,7 +76,10 @@ export class PneumaticsController {
     public ballastTankMaxPressure!: number
     public maxPistonPressure!: number
     public minPistonPressure!: number
+    public maxDistance!: number
+    public zeroDistance!: number
     private pressureTargets: Map<string, number> = new Map()
+    private distanceTargets: Map<string, number> = new Map()
 
     public defaultPressureSettings: PressureSettings = {
         ballastTankMaxPressure: 40,
@@ -159,6 +162,44 @@ export class PneumaticsController {
 
     public restoreDefaultPressureSettings(): void {
         this.updatePressureSettings(this.defaultPressureSettings)
+    }
+
+    public setMovementTarget(
+        legAssembly:
+            | 'bowStarboard'
+            | 'bowPort'
+            | 'sternPort'
+            | 'sternStarboard',
+        target: number,
+        unit?: 'psi' | 'percent'
+    ): void {
+        if (unit) {
+            this.setPressureTarget(legAssembly, target, unit)
+        } else {
+            this.setDistanceTarget(legAssembly, target)
+        }
+    }
+
+    public setDistanceTarget(
+        legAssembly:
+            | 'bowStarboard'
+            | 'bowPort'
+            | 'sternPort'
+            | 'sternStarboard',
+        targetDistance: number
+    ): void {
+        if (targetDistance < 0 || targetDistance > 100) {
+            console.warn(
+                `Invalid distance ${targetDistance}%. Must be between 0 and 100. Ignoring.`
+            )
+            return
+        }
+        const actualTargetDistance =
+            this.zeroDistance +
+            (targetDistance / 100) * (this.maxDistance - this.zeroDistance)
+
+        //console.log(`Setting distance set point for ${legAssembly} to ${actualTargetDistance} cm`);
+        this.distanceTargets.set(legAssembly, actualTargetDistance)
     }
 
     public setPressureTarget(
@@ -452,19 +493,19 @@ export class PneumaticsController {
             this.systemState[legAssembly].pistonPressurePsi >=
             this.maxPistonPressure
         ) {
-            ;(this.command[legAssembly] ??= {}).ballastToPistonValve = 'closed'
+            this.command[legAssembly]!.ballastToPistonValve = 'closed'
         }
         if (
             this.systemState[legAssembly].ballastPressurePsi >=
             this.ballastTankMaxPressure
         ) {
-            ;(this.command[legAssembly] ??= {}).ballastIntakeValve = 'closed'
+            this.command[legAssembly]!.ballastIntakeValve = 'closed'
         }
     }
 
     public handleCommandGranular(
         commandMessage: FrontendCommandGranularMessage
-    ): PneumaticsCommandGranular {
+    ): PneumaticsCommandGranular | PneumaticsCommandGranularCombined {
         this.lastCommand = 'none'
         this.buildCommandGranular(commandMessage)
         this.opportunisticBallastFill()
@@ -474,7 +515,7 @@ export class PneumaticsController {
 
     public handleCommand(
         commandMessage: PneumaticsCommandTextMessage
-    ): PneumaticsCommandGranular {
+    ): PneumaticsCommandGranular | PneumaticsCommandGranularCombined {
         this.lastCommand = commandMessage.command
         this.buildCommand(commandMessage)
         if (
@@ -510,7 +551,7 @@ export class PneumaticsController {
 
     public buildCommand(
         incomingCommandMessage: PneumaticsCommandTextMessage
-    ): PneumaticsCommandGranular {
+    ): PneumaticsCommandGranular | void {
         this.command = {
             type: 'pneumaticsCommandGranular',
             sendTime: new Date().toLocaleString(),
