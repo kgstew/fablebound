@@ -164,6 +164,22 @@ export class PneumaticsController {
         this.updatePressureSettings(this.defaultPressureSettings)
     }
 
+    public setMovementTarget(
+        legAssembly:
+            | 'bowStarboard'
+            | 'bowPort'
+            | 'sternPort'
+            | 'sternStarboard',
+        target: number,
+        unit?: 'psi' | 'percent'
+    ): void {
+        if (unit) {
+            this.setPressureTarget(legAssembly, target, unit)
+        } else {
+            this.setDistanceTarget(legAssembly, target)
+        }
+    }
+
     public setDistanceTarget(
         legAssembly:
             | 'bowStarboard'
