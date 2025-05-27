@@ -1,6 +1,8 @@
 import { Valve } from 'domain/models'
 import { PneumaticsController } from './pneumatics-controller'
 
+export const MAX_SAFE_PISTON_PRESSURE = 33
+
 interface LegAssemblyReadings {
     ballastPressurePsi: number
     pistonPressurePsi: number

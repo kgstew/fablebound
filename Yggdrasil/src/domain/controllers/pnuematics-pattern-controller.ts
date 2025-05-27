@@ -4,6 +4,7 @@ import {
     PneumaticsCommandPatternName,
     PneumaticsCommandPatternMap,
     PressureSettingsOverTime,
+    MAX_SAFE_PISTON_PRESSURE,
 } from './types'
 import { randomInt } from 'crypto'
 
@@ -34,8 +35,8 @@ export class PneumaticsPatternController {
             name: 'calibrateDistance',
             pressureSettings: {
                 ballastTankMaxPressure: 34,
-                maxPistonPressure: 25,
-                minPistonPressure: 22,
+                maxPistonPressure: MAX_SAFE_PISTON_PRESSURE,
+                minPistonPressure: 0,
             },
             main: async (controller, shouldStop) => {
                 if (shouldStop()) return
