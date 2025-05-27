@@ -15,6 +15,7 @@ public:
     enum class Position { none }; // TODO: port/starboard?
 
     DistanceSensor(DistanceSensor::Position position, double reading, int triggerPin, int echoPin);
+    void setup();
     double getReading();
     double getLastReading() const noexcept;
     int getTriggerPin() const noexcept;
@@ -33,7 +34,8 @@ class PressureSensor {
 public:
     enum class Position { ballast, piston };
 
-    PressureSensor(PressureSensor::Position position, double reading, int pin);
+    PressureSensor(PressureSensor::Position position, int pin);
+    void setup();
     double getReading();
     double getLastReading() const noexcept;
     int getPin() const noexcept;
@@ -52,6 +54,7 @@ public:
     enum class State { open, closed };
 
     Solenoid(Solenoid::Position position, Solenoid::State defaultState, int pin);
+    void setup();
     Solenoid::State getState() const noexcept;
     Solenoid::State getDefaultState() const noexcept;
     void setState(Solenoid::State newState);
@@ -79,7 +82,7 @@ public:
 
     Leg(Leg::Position position, int ballastFillPin, int pistonFillPin, int ventPin, int ballastPressureSensorPin,
         int pistonPressureSensorPin, int distanceSensorTriggerPin, int distanceSensorEchoPin);
-
+    void setup();
     Solenoid& getSolenoid(Solenoid::Position position);
     PressureSensor& getPressureSensor(PressureSensor::Position position);
     DistanceSensor& getDistanceSensor() noexcept;
@@ -103,25 +106,4 @@ protected:
     DistanceSensor distanceSensor;
 
     const Leg::Position position;
-    double ballastPressure;
-    double pistonPressure;
-    double distance;
-
-    const int ballastFillPin;
-    const int pistonFillPin;
-    const int ventPin;
-
-    const int ballastPressureSensorPin;
-    const int pistonPressureSensorPin;
-
-    const int distanceSensorTriggerPin;
-    const int distanceSensorEchoPin;
-
-    // const double maxBallastPressure { 40.0 };
-    // const double maxPistonPressure { 35.0 };
-    // const double minPistonPressure { 10.0 };
 };
-
-// Init 2 leg objects
-extern Leg* legStarboard;
-extern Leg* legPort;

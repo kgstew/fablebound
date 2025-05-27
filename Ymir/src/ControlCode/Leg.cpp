@@ -44,14 +44,19 @@
 //     delay(100);
 // }
 
-DistanceSensor::DistanceSensor(DistanceSensor::Position position, double reading, int triggerPin, int echoPin)
+DistanceSensor::DistanceSensor(DistanceSensor::Position position, int triggerPin, int echoPin)
     : position(position)
-    , reading(reading)
+    , reading(-1.0)
     , triggerPin(triggerPin)
     , echoPin(echoPin)
 {
+}
+
+void DistanceSensor::setup()
+{
     pinMode(triggerPin, OUTPUT);
     pinMode(echoPin, INPUT);
+    getReading(); // get initial reading
 }
 
 double DistanceSensor::getReading()
@@ -111,12 +116,17 @@ std::string DistanceSensor::getPositionAsString() const noexcept
 // PRESSURE SENSOR
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PressureSensor::PressureSensor(PressureSensor::Position position, double reading, int pin)
+PressureSensor::PressureSensor(PressureSensor::Position position, int pin)
     : position(position)
-    , reading(reading)
+    , reading(-1.0)
     , pin(pin)
 {
+}
+
+void PressureSensor::setup()
+{
     pinMode(pin, INPUT);
+    getReading(); // get initial reading
 }
 
 double PressureSensor::getReading()
@@ -156,6 +166,10 @@ Solenoid::Solenoid(Solenoid::Position position, Solenoid::State defaultState, in
     , defaultState(defaultState)
     , state(defaultState)
     , pin(pin)
+{
+}
+
+void Solenoid::setup() 
 {
     pinMode(pin, OUTPUT);
     writeState(defaultState);
@@ -260,17 +274,22 @@ Leg::Leg(Leg::Position position, int ballastFillPin, int pistonFillPin, int vent
     , ballastSolenoid(Solenoid::Position::ballast, Solenoid::State::closed, ballastFillPin)
     , pistonSolenoid(Solenoid::Position::piston, Solenoid::State::closed, pistonFillPin)
     , ventSolenoid(Solenoid::Position::vent, Solenoid::State::closed, ventPin)
-    , ballastPressureSensor(PressureSensor::Position::ballast, -1, ballastPressureSensorPin)
-    , pistonPressureSensor(PressureSensor::Position::piston, -1, pistonPressureSensorPin)
-    , distanceSensor(DistanceSensor::Position::none, -1, distanceSensorTriggerPin, distanceSensorEchoPin)
-    , ballastFillPin(ballastFillPin)
-    , pistonFillPin(pistonFillPin)
-    , ventPin(ventPin)
-    , ballastPressureSensorPin(ballastPressureSensorPin)
-    , pistonPressureSensorPin(pistonPressureSensorPin)
-    , distanceSensorTriggerPin(distanceSensorTriggerPin)
-    , distanceSensorEchoPin(distanceSensorEchoPin)
+    , ballastPressureSensor(PressureSensor::Position::ballast, ballastPressureSensorPin)
+    , pistonPressureSensor(PressureSensor::Position::piston, pistonPressureSensorPin)
+    , distanceSensor(DistanceSensor::Position::none, distanceSensorTriggerPin, distanceSensorEchoPin)
 {
+}
+
+void Leg::setup()
+{
+    ballastSolenoid.setup();
+    pistonSolenoid.setup();
+    ventSolenoid.setup();
+
+    ballastPressureSensor.setup();
+    pistonPressureSensor.setup();
+
+    distanceSensor.setup(); 
 }
 
 Solenoid& Leg::getSolenoid(Solenoid::Position position)

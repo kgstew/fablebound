@@ -45,9 +45,6 @@ static const char* websocketServer = "192.168.0.101";
 constexpr int portTriggerPin = 16; // yellow
 constexpr int portEchoPin = 36; // white
 
-Leg* legStarboard = nullptr;
-Leg* legPort = nullptr;
-
 static std::atomic<bool> shouldSendState { false };
 
 // Create a WebSocket client instance
@@ -56,6 +53,28 @@ WebSocketsClient webSocket;
 Ticker sendStateTicker;
 Ticker processSensorsTicker;
 
+static Leg legStarboard {
+    Leg::Position::starboard,
+    21, // ballast fill pin
+    22, // piston fill pin
+    23, // vent pin
+    34, // ballast pressure sensor pin
+    35, // piston pressure sensor pin
+    16, // Change to 1
+    36 // Change to 39
+};
+
+static Leg legPort {
+    Leg::Position::port,
+    17, // ballast fill pin
+    18, // piston fill pin
+    19, // vent pin
+    32, // ballast pressure sensor pin
+    33, // piston pressure sensor pin
+    16, // ultrasonic trigger pin
+    36 // ultrasonic echo pin
+};
+
 void sendState()
 {
     json systemState = { // clang-format off
@@ -63,8 +82,8 @@ void sendState()
         { "sendTime", "notime" },
         { "bigAssMainTank", { { "pressurePsi", 0 }, 
                             { "compressorToTankValve", "closed" } } },
-        { legStarboard->getPositionAsString(), legStarboard->getLastStateAsJson() },
-        { legPort->getPositionAsString(), legPort->getLastStateAsJson() } 
+        { legStarboard.getPositionAsString(), legStarboard.getLastStateAsJson() },
+        { legPort.getPositionAsString(), legPort.getLastStateAsJson() } 
     }; // clang-format on
 
     std::string s = systemState.dump();
@@ -75,11 +94,11 @@ void processStateRequest(json& requestedState)
 {
     // update each leg
     for (auto& leg : { legStarboard, legPort }) {
-        auto legPositionString = leg->getPositionAsString();
+        auto legPositionString = leg.getPositionAsString();
 
         if (requestedState.contains(legPositionString)) {
             // update solenoid states
-            for (auto& solenoidRef : leg->getSolenoids()) {
+            for (auto& solenoidRef : leg.getSolenoids()) {
                 auto& solenoid = solenoidRef.get();
                 auto solenoidPositionString = solenoid.getPositionAsString();
 
@@ -95,13 +114,13 @@ void getSensorReadings()
 {
     // update readings
     for (auto& leg : { legStarboard, legPort }) {
-        for (auto& pressureSensorRef : leg->getPressureSensors()) {
+        for (auto& pressureSensorRef : leg.getPressureSensors()) {
             auto& pressureSensor = pressureSensorRef.get();
-            auto pressure = pressureSensor.getReading();
+            pressureSensor.getReading();
         }
-        for (auto& distanceSensorRef : leg->getDistanceSensors()) {
+        for (auto& distanceSensorRef : leg.getDistanceSensors()) {
             auto& distanceSensor = distanceSensorRef.get();
-            auto distance = distanceSensor.getReading();
+            distanceSensor.getReading();
         }
     }
 }
@@ -132,8 +151,6 @@ void onProcessSensorsTicker()
 
 void onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length)
 {
-    std::string s;
-
     switch (type) {
     case WStype_DISCONNECTED: {
         Serial.println("Disconnected from WebSocket server");
@@ -184,27 +201,11 @@ void setup()
     Serial.begin(115200);
     delay(1000);
 
-    legStarboard = new Leg(Leg::Position::starboard,
-        21, // ballast fill pin
-        22, // piston fill pin
-        23, // vent pin
-        34, // ballast pressure sensor pin
-        35, // piston pressure sensor pin
-        16, // Change to 1
-        36 // Change to 39
-    );
-    legPort = new Leg(Leg::Position::port,
-        17, // ballast fill pin
-        18, // piston fill pin
-        19, // vent pin
-        32, // ballast pressure sensor pin
-        33, // piston pressure sensor pin
-        16, // ultrasonic trigger pin
-        36 // ultrasonic echo pin
-    );
+    legStarboard.setup();
+    legPort.setup();
 
-    getSensorReadings(); // get initial sensor readings
     processSensorsTicker.attach(PROCESS_SENSORS_DELTA, onProcessSensorsTicker);
+
 #ifdef USE_WIFI
     // Connect to Wi-Fi
     WiFi.begin(ssid, password);
