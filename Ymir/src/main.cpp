@@ -53,7 +53,7 @@ WebSocketsClient webSocket;
 Ticker sendStateTicker;
 Ticker processSensorsTicker;
 
-static Leg legStarboard {
+Leg legStarboard {
     Leg::Position::starboard,
     21, // ballast fill pin
     22, // piston fill pin
@@ -64,7 +64,7 @@ static Leg legStarboard {
     36 // Change to 39
 };
 
-static Leg legPort {
+Leg legPort {
     Leg::Position::port,
     17, // ballast fill pin
     18, // piston fill pin
@@ -93,14 +93,14 @@ void sendState()
 void processStateRequest(json& requestedState)
 {
     // update each leg
-    for (auto& leg : { legStarboard, legPort }) {
-        auto legPositionString = leg.getPositionAsString();
+    for (Leg* leg : { &legStarboard, &legPort }) {
+        auto legPositionString = leg->getPositionAsString();
 
         if (requestedState.contains(legPositionString)) {
             // update solenoid states
-            for (auto& solenoidRef : leg.getSolenoids()) {
-                auto& solenoid = solenoidRef.get();
-                auto solenoidPositionString = solenoid.getPositionAsString();
+            for (auto& solenoidRef : leg->getSolenoids())  {
+                Solenoid& solenoid = solenoidRef.get();
+                std::string solenoidPositionString = solenoid.getPositionAsString();
 
                 if (requestedState.contains(solenoidPositionString)) {
                     solenoid.setState(requestedState[solenoidPositionString]);
@@ -113,13 +113,13 @@ void processStateRequest(json& requestedState)
 void getSensorReadings()
 {
     // update readings
-    for (auto& leg : { legStarboard, legPort }) {
-        for (auto& pressureSensorRef : leg.getPressureSensors()) {
-            auto& pressureSensor = pressureSensorRef.get();
+    for (Leg* leg : { &legStarboard, &legPort }) {
+        for (auto& pressureSensorRef : leg->getPressureSensors()) {
+            PressureSensor& pressureSensor = pressureSensorRef.get();
             pressureSensor.getReading();
         }
-        for (auto& distanceSensorRef : leg.getDistanceSensors()) {
-            auto& distanceSensor = distanceSensorRef.get();
+        for (auto& distanceSensorRef : leg->getDistanceSensors()) {
+            DistanceSensor& distanceSensor = distanceSensorRef.get();
             distanceSensor.getReading();
         }
     }

@@ -14,7 +14,7 @@ class DistanceSensor {
 public:
     enum class Position { none }; // TODO: port/starboard?
 
-    DistanceSensor(DistanceSensor::Position position, double reading, int triggerPin, int echoPin);
+    DistanceSensor(DistanceSensor::Position position, int triggerPin, int echoPin);
     void setup();
     double getReading();
     double getLastReading() const noexcept;
