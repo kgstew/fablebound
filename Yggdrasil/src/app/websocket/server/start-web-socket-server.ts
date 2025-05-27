@@ -25,9 +25,7 @@ const startWebSocketServer = async (
 
     const socketPromises = Object.entries(config.sockets).map(
         ([socketName, port]) => {
-            console.log(
-                `🔌 Opening socket ${socketName} on port ${port}...`
-            )
+            console.log(`🔌 Opening socket ${socketName} on port ${port}...`)
             return openSocket(
                 port,
                 socketName,
