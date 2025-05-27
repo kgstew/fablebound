@@ -1,6 +1,5 @@
-import { Valve } from "domain/models"
-import { PneumaticsController } from "./pneumatics-controller"
-
+import { Valve } from 'domain/models'
+import { PneumaticsController } from './pneumatics-controller'
 
 interface LegAssemblyReadings {
     ballastPressurePsi: number
@@ -16,7 +15,6 @@ interface BigAssMainTankReadings {
     compressorToTankValve: Valve
 }
 
-
 export interface SystemState {
     currentPattern: PneumaticsCommandPatternName | null
     bigAssMainTank: BigAssMainTankReadings
@@ -27,61 +25,60 @@ export interface SystemState {
     lastReadingsReceived: Date | null
 }
 
-
-export type BowOrSternReadingsData= {
-    type: 'espToServerSystemStateBow' | 'espToServerSystemStateStern';
-    bigAssMainTank: BigAssMainTankReadings;
-    starboard: LegAssemblyReadings;
-    port: LegAssemblyReadings;
-    sendTime: string;
+export type BowOrSternReadingsData = {
+    type: 'espToServerSystemStateBow' | 'espToServerSystemStateStern'
+    bigAssMainTank: BigAssMainTankReadings
+    starboard: LegAssemblyReadings
+    port: LegAssemblyReadings
+    sendTime: string
 }
 
-export type ReadingsData= {
-    type: 'espToServerSystemState';
-    bigAssMainTank: BigAssMainTankReadings;
-    bowStarboard: LegAssemblyReadings;
-    bowPort: LegAssemblyReadings;
-    sternPort: LegAssemblyReadings;
-    sternStarboard: LegAssemblyReadings;
-    sendTime: string;
+export type ReadingsData = {
+    type: 'espToServerSystemState'
+    bigAssMainTank: BigAssMainTankReadings
+    bowStarboard: LegAssemblyReadings
+    bowPort: LegAssemblyReadings
+    sternPort: LegAssemblyReadings
+    sternStarboard: LegAssemblyReadings
+    sendTime: string
 }
 
 export type PneumaticsCommandGranular = {
-    type: string,
-    bowStarboard?: LegCommandGranular,
-    bowPort?: LegCommandGranular,
-    sternPort?:  LegCommandGranular,
-    sternStarboard?:  LegCommandGranular,
-    bigAssMainTank?: BigAssMainTankCommandGranular,
+    type: string
+    bowStarboard?: LegCommandGranular
+    bowPort?: LegCommandGranular
+    sternPort?: LegCommandGranular
+    sternStarboard?: LegCommandGranular
+    bigAssMainTank?: BigAssMainTankCommandGranular
     sendTime: string
 }
 
 export type PneumaticsCommandGranularBowOrStern = {
-    type: string,
-    starboard: LegCommandGranular,
-    port: LegCommandGranular,
+    type: string
+    starboard?: LegCommandGranular
+    port?: LegCommandGranular
     sendTime: string
 }
 
-
 export type PneumaticsCommandGranularCombined = {
-    bow: PneumaticsCommandGranularBowOrStern,
-    stern: PneumaticsCommandGranularBowOrStern,
+    bow: PneumaticsCommandGranularBowOrStern
+    stern: PneumaticsCommandGranularBowOrStern
 }
 
-
-export type  LegCommandGranular = {
-    ballastIntakeValve?: Valve,
-    ballastToPistonValve?: Valve,
-    pistonReleaseValve?: Valve,
+export type LegCommandGranular = {
+    ballastIntakeValve?: Valve
+    ballastToPistonValve?: Valve
+    pistonReleaseValve?: Valve
 }
-
 
 export type BigAssMainTankCommandGranular = {
-    compressorToTankValve?: Valve,
+    compressorToTankValve?: Valve
 }
 
-export type PneumaticsCommandsGranular = Record<string, PneumaticsCommandGranular>
+export type PneumaticsCommandsGranular = Record<
+    string,
+    PneumaticsCommandGranular
+>
 
 export interface CommandDetailGranular {
     assembly: keyof PneumaticsCommandGranular // Refers to 'bowStarboard', 'bowPort', etc.
@@ -89,20 +86,17 @@ export interface CommandDetailGranular {
     state: Valve
 }
 
-
 export interface FrontendCommandGranularMessage {
     type: 'pneumaticsCommandGranular'
     command: CommandDetailGranular
     sendTime: string
 }
 
-
 export interface PneumaticsCommandTextMessage {
     type: 'pneumaticsCommandText'
     command: PneumaticsCommandText
     sendTime: string
 }
-
 
 export interface PneumaticsCommandPatternMessage {
     type: 'pneumaticsCommandPattern'
@@ -151,18 +145,17 @@ const PneumaticsCommandLibrary = {
     ventAll: 'ventAll',
     closeAllValves: 'closeAllValves',
     none: 'none',
-  } as const;
-  
+} as const
 
-    const PneumaticsPatternLibrary = {
+const PneumaticsPatternLibrary = {
     inPort: 'inPort',
     setOutOnAdventure: 'setOutOnAdventure',
-    intoTheUnknown: "intoTheUnknown",
-    risingStorm: "risingStorm",
+    intoTheUnknown: 'intoTheUnknown',
+    risingStorm: 'risingStorm',
     stormySeas: 'stormySeas',
-    meetTheGods: "meetTheGods",
-    trickstersPromise: "trickstersPromise",
-    arrivingHome: "arrivingHome",
+    meetTheGods: 'meetTheGods',
+    trickstersPromise: 'trickstersPromise',
+    arrivingHome: 'arrivingHome',
     upDownUpDown: 'upDownUpDown',
     ventEverything: 'ventEverything',
     closeAllValves: 'closeAllValves',
@@ -176,33 +169,42 @@ const PneumaticsCommandLibrary = {
     setPressure25: 'setPressure25',
     setPressure27: 'setPressure27',
     setPressure30: 'setPressure30',
-  } as const;
+} as const
 
- export type PneumaticsCommandText = typeof PneumaticsCommandLibrary[keyof typeof PneumaticsCommandLibrary];
-  
- export interface PneumaticsCommandPattern {
-    name: PneumaticsCommandPatternName;
-    main: (controller: PneumaticsController, shouldStop: () => boolean) => void;
-    pressureSettings?: Partial<PressureSettings>;
+export type PneumaticsCommandText =
+    (typeof PneumaticsCommandLibrary)[keyof typeof PneumaticsCommandLibrary]
+
+export interface PneumaticsCommandPattern {
+    name: PneumaticsCommandPatternName
+    main: (controller: PneumaticsController, shouldStop: () => boolean) => void
+    pressureSettings?: Partial<PressureSettings>
 }
 
-export type PneumaticsCommandPatternName = typeof PneumaticsPatternLibrary[keyof typeof PneumaticsPatternLibrary];  
-export type PneumaticsCommandPatternMap = Map<PneumaticsCommandPatternName, PneumaticsCommandPattern>;
+export type PneumaticsCommandPatternName =
+    (typeof PneumaticsPatternLibrary)[keyof typeof PneumaticsPatternLibrary]
+export type PneumaticsCommandPatternMap = Map<
+    PneumaticsCommandPatternName,
+    PneumaticsCommandPattern
+>
 
 export type PressureSettings = {
-    ballastTankMaxPressure?: number;
-    maxPistonPressure?: number;
-    minPistonPressure?: number;
-};
-
-export type PressureSettingsOverTime = {
-    [timeElapsed: number]: PressureSettings;
+    ballastTankMaxPressure?: number
+    maxPistonPressure?: number
+    minPistonPressure?: number
 }
 
-export function isValidPneumaticsCommand(command: string): command is PneumaticsCommandText {
-    return command in PneumaticsCommandLibrary;
-  }
+export type PressureSettingsOverTime = {
+    [timeElapsed: number]: PressureSettings
+}
 
-export function isValidPneumaticsPattern(pattern: string): pattern is PneumaticsCommandPatternName {
-    return pattern in PneumaticsPatternLibrary;
-  }
+export function isValidPneumaticsCommand(
+    command: string
+): command is PneumaticsCommandText {
+    return command in PneumaticsCommandLibrary
+}
+
+export function isValidPneumaticsPattern(
+    pattern: string
+): pattern is PneumaticsCommandPatternName {
+    return pattern in PneumaticsPatternLibrary
+}

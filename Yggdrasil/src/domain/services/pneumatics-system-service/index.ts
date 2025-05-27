@@ -1,5 +1,10 @@
 import { sideToCorners } from '../../mappers'
-import { AssemblyName, PneumaticsAssembly, PressureReading, Side } from '../../models'
+import {
+    AssemblyName,
+    PneumaticsAssembly,
+    PressureReading,
+    Side,
+} from '../../models'
 import { PneumaticsAssemblyService } from '../pneumatics-assembly-service'
 
 class PneumaticsSystemService {
