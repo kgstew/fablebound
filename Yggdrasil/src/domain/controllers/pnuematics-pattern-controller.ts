@@ -4,6 +4,7 @@ import {
     PneumaticsCommandPatternName,
     PneumaticsCommandPatternMap,
     PressureSettingsOverTime,
+    MAX_SAFE_PISTON_PRESSURE,
 } from './types'
 import { randomInt } from 'crypto'
 
@@ -30,12 +31,12 @@ export class PneumaticsPatternController {
     }
 
     private initializePatterns() {
-        this.patterns.set('inPort', {
-            name: 'inPort',
+        this.patterns.set('calibrateDistance', {
+            name: 'calibrateDistance',
             pressureSettings: {
                 ballastTankMaxPressure: 34,
-                maxPistonPressure: 25,
-                minPistonPressure: 22,
+                maxPistonPressure: MAX_SAFE_PISTON_PRESSURE,
+                minPistonPressure: 0,
             },
             main: async (controller, shouldStop) => {
                 if (shouldStop()) return
@@ -49,8 +50,8 @@ export class PneumaticsPatternController {
                     100,
                     'percent'
                 )
-                await controller.setMovementTarget('bowPort', 0, 'percent')
-                await controller.setMovementTarget('sternPort', 0, 'percent')
+                await controller.setMovementTarget('bowPort', 100, 'percent')
+                await controller.setMovementTarget('sternPort', 100, 'percent')
                 await this.sleep(randomInt(2000, 3000), shouldStop)
                 if (shouldStop()) return
                 await controller.setMovementTarget('bowStarboard', 0, 'percent')
@@ -59,12 +60,63 @@ export class PneumaticsPatternController {
                     0,
                     'percent'
                 )
-                await controller.setMovementTarget('bowPort', 100, 'percent')
-                await controller.setMovementTarget('sternPort', 100, 'percent')
+                await controller.setMovementTarget('bowPort', 0, 'percent')
+                await controller.setMovementTarget('sternPort', 0, 'percent')
                 await this.sleep(randomInt(2000, 3000), shouldStop)
                 if (shouldStop()) return
             },
-        })
+        }),
+            this.patterns.set('inPort', {
+                name: 'inPort',
+                pressureSettings: {
+                    ballastTankMaxPressure: 34,
+                    maxPistonPressure: 25,
+                    minPistonPressure: 22,
+                },
+                main: async (controller, shouldStop) => {
+                    if (shouldStop()) return
+                    await controller.setMovementTarget(
+                        'bowStarboard',
+                        100,
+                        'percent'
+                    )
+                    await controller.setMovementTarget(
+                        'sternStarboard',
+                        100,
+                        'percent'
+                    )
+                    await controller.setMovementTarget('bowPort', 0, 'percent')
+                    await controller.setMovementTarget(
+                        'sternPort',
+                        0,
+                        'percent'
+                    )
+                    await this.sleep(randomInt(2000, 3000), shouldStop)
+                    if (shouldStop()) return
+                    await controller.setMovementTarget(
+                        'bowStarboard',
+                        0,
+                        'percent'
+                    )
+                    await controller.setMovementTarget(
+                        'sternStarboard',
+                        0,
+                        'percent'
+                    )
+                    await controller.setMovementTarget(
+                        'bowPort',
+                        100,
+                        'percent'
+                    )
+                    await controller.setMovementTarget(
+                        'sternPort',
+                        100,
+                        'percent'
+                    )
+                    await this.sleep(randomInt(2000, 3000), shouldStop)
+                    if (shouldStop()) return
+                },
+            })
         this.patterns.set('setOutOnAdventure', {
             name: 'setOutOnAdventure',
             pressureSettings: {

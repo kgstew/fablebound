@@ -1,4 +1,11 @@
 <h3 class="text-center py-3">Patterns</h3>
+<div class="row">
+    <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
+        (touchstart)="buttonPress($event,'calibrateDistance')" (touchend)="buttonRelease($event, '')"
+        (mousedown)="buttonPress($event,'calibrateDistance')" (mouseup)="buttonRelease($event, '')">
+        <p class="text-center no-select">{{'calibrateDistance' }}</p>
+    </div>
+</div>
 
 <div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
@@ -6,36 +13,31 @@
         (mousedown)="buttonPress($event, patterns[0])" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ patterns[0] }}</p>
     </div>
-    <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
-        (touchstart)="buttonPress($event,'inPort')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'inPort')" (mouseup)="buttonRelease($event, '')"
-        >
+    <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()" (touchstart)="buttonPress($event,'inPort')"
+        (touchend)="buttonRelease($event, '')" (mousedown)="buttonPress($event,'inPort')"
+        (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'inPort' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'setOutOnAdventure')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'setOutOnAdventure')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'setOutOnAdventure')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{'setOutOnAdventure' }}</p>
     </div>
 </div>
 <div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'intoTheUnknown')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'intoTheUnknown')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'intoTheUnknown')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'intoTheUnknown' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'risingStorm')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'risingStorm')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'risingStorm')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'risingStorm' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'stormySeas')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'stormySeas')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'stormySeas')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'stormySeas' }}</p>
     </div>
 </div>
@@ -43,60 +45,51 @@
 <div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'meetTheGods')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'meetTheGods')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'meetTheGods')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'meetTheGods' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'trickstersPromise')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'trickstersPromise')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'trickstersPromise')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'trickstersPromise' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'arrivingHome')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'arrivingHome')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'arrivingHome')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'arrivingHome' }}</p>
     </div>
 </div>
 <div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'maintainBaseline')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'maintainBaseline')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'maintainBaseline')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'maintainBaseline' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'closeAllValves')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'closeAllValves')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'closeAllValves')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'closeAllValves' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'ventEverything')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'ventEverything')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'ventEverything')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'ventEverything' }}</p>
     </div>
 </div>
 <div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'setPressure10')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'setPressure10')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'setPressure10')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'setPressure10' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'setPressure12')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'setPressure12')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'setPressure12')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'setPressure12' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'setPressure15')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'setPressure15')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'setPressure15')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'setPressure14' }}</p>
     </div>
 </div>
@@ -104,20 +97,17 @@
 <div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'setPressure17')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'setPressure17')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'setPressure17')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'setPressure17' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'setPressure20')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'setPressure20')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'setPressure20')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'setPressure20' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'setPressure22')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'setPressure22')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'setPressure22')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'setPressure22' }}</p>
     </div>
 </div>
@@ -126,20 +116,17 @@
 <div class="row">
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'setPressure25')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'setPressure25')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'setPressure25')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'setPressure25' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'setPressure27')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'setPressure27')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'setPressure27')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'setPressure27' }}</p>
     </div>
     <div class="col button pt-3 m-2" (contextmenu)="$event.preventDefault()"
         (touchstart)="buttonPress($event,'setPressure30')" (touchend)="buttonRelease($event, '')"
-        (mousedown)="buttonPress($event,'setPressure30')" (mouseup)="buttonRelease($event, '')"
-        >
+        (mousedown)="buttonPress($event,'setPressure30')" (mouseup)="buttonRelease($event, '')">
         <p class="text-center no-select">{{ 'setPressure30' }}</p>
     </div>
 </div>

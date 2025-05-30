@@ -105,6 +105,7 @@ const startMidiServer = async () => {
                     startPneumaticsPattern('inPort')
                     signalPixelblaze(0, 0)
                     signalPixelblaze(1, 0)
+                    break
                 case 15:
                     break
                 case 20:
@@ -159,6 +160,7 @@ const startMidiServer = async () => {
                     signalPixelblaze(0, 0)
                     signalPixelblaze(1, 0)
                     signalPixelblaze(2, 0)
+                    break
                 case 70:
                     startPneumaticsPattern('closeAllValves')
                     signalPixelblaze(0, 0)
@@ -170,8 +172,10 @@ const startMidiServer = async () => {
                     signalPixelblaze(0, 0, true)
                     signalPixelblaze(1, 0, true)
                     signalPixelblaze(2, 0, true)
+                    break
                 default:
                     console.log(`Unhandled MIDI note: ${note}`)
+                    break
             }
         } else if (
             (status >= 128 && status <= 143) ||
