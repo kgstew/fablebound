@@ -32,7 +32,7 @@ static const std::string messageType = "espToServerSystemStateStern";
 
 constexpr double SEND_STATE_DELTA = 0.2; // seconds
 
-constexpr double PROCESS_SENSORS_RATE = 100.0; // Hz
+constexpr double PROCESS_SENSORS_RATE = 10.0; // Hz
 constexpr double PROCESS_SENSORS_DELTA = 1.0 / PROCESS_SENSORS_RATE; // seconds
 
 // Replace with your network credentials
@@ -75,8 +75,25 @@ Leg legPort {
     36 // ultrasonic echo pin
 };
 
+void getSensorReadings()
+{
+    // update readings
+    for (Leg* leg : { &legStarboard, &legPort }) {
+        for (auto& pressureSensorRef : leg->getPressureSensors()) {
+            PressureSensor& pressureSensor = pressureSensorRef.get();
+            pressureSensor.getReading();
+        }
+        for (auto& distanceSensorRef : leg->getDistanceSensors()) {
+            DistanceSensor& distanceSensor = distanceSensorRef.get();
+            distanceSensor.getReading();
+        }
+    }
+}
+
 void sendState()
 {
+    getSensorReadings();
+
     json systemState = { // clang-format off
         { "type", messageType }, 
         { "sendTime", "notime" },
@@ -87,6 +104,7 @@ void sendState()
     }; // clang-format on
 
     std::string s = systemState.dump();
+    Serial.println(s.c_str());
     webSocket.sendTXT(s.c_str(), s.length());
 }
 
@@ -106,21 +124,6 @@ void processStateRequest(json& requestedState)
                     solenoid.setState(requestedState[solenoidPositionString]);
                 }
             }
-        }
-    }
-}
-
-void getSensorReadings()
-{
-    // update readings
-    for (Leg* leg : { &legStarboard, &legPort }) {
-        for (auto& pressureSensorRef : leg->getPressureSensors()) {
-            PressureSensor& pressureSensor = pressureSensorRef.get();
-            pressureSensor.getReading();
-        }
-        for (auto& distanceSensorRef : leg->getDistanceSensors()) {
-            DistanceSensor& distanceSensor = distanceSensorRef.get();
-            distanceSensor.getReading();
         }
     }
 }
@@ -201,10 +204,6 @@ void setup()
     Serial.begin(115200);
     delay(1000);
 
-    legStarboard.setup();
-    legPort.setup();
-
-    processSensorsTicker.attach(PROCESS_SENSORS_DELTA, onProcessSensorsTicker);
 
 #ifdef USE_WIFI
     // Connect to Wi-Fi
@@ -215,6 +214,9 @@ void setup()
     }
     Serial.println("Connected to WiFi");
 
+    legStarboard.setup();
+    legPort.setup();
+
     // Set up WebSocket client
     webSocket.begin(websocketServer, websocket_port, "/");
     webSocket.onEvent(onWebSocketEvent);
@@ -222,6 +224,7 @@ void setup()
     sendStateTicker.attach(SEND_STATE_DELTA, onSendStateTicker);
 #endif // USE_WIFI
 
+    // processSensorsTicker.attach(PROCESS_SENSORS_DELTA, onProcessSensorsTicker);
 }
 
 void loop()
@@ -230,4 +233,6 @@ void loop()
 #ifdef USE_WIFI
     webSocket.loop();
 #endif // USE_WIFI
+    // delay(SEND_STATE_DELTA * 1000);    
+    // sendState();
 }

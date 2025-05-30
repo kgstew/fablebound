@@ -56,7 +56,6 @@ void DistanceSensor::setup()
 {
     pinMode(triggerPin, OUTPUT);
     pinMode(echoPin, INPUT);
-    getReading(); // get initial reading
 }
 
 double DistanceSensor::getReading()
@@ -126,7 +125,6 @@ PressureSensor::PressureSensor(PressureSensor::Position position, int pin)
 void PressureSensor::setup()
 {
     pinMode(pin, INPUT);
-    getReading(); // get initial reading
 }
 
 double PressureSensor::getReading()
