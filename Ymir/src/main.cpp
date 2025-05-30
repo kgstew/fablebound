@@ -1,13 +1,13 @@
 #include <Ticker.h>
 #include <WebSocketsClient.h>
 #include <WiFi.h>
+#include <atomic>
 // #include "index.h"
 
 #include <ControlCode/json.hpp>
 // for convenience
 using json = nlohmann::json;
 
-#include "ControlCode/DataInterfaceUtils.h"
 #include "ControlCode/Leg.h"
 #include <Arduino.h>
 
@@ -15,86 +15,166 @@ using json = nlohmann::json;
 #define TESTSOLENOID 15
 #define USE_WIFI
 
-constexpr double UPDATE_DELTA = 0.2; // seconds
+// UNCOMMENT THIS FOR BOW
+// #define BOW
+// UNCOMMENT THIS FOR STERN
+#define STERN
+
+#ifdef BOW
+constexpr uint16_t websocket_port = 8071;
+static const std::string messageType = "espToServerSystemStateBow";
+#endif
+
+#ifdef STERN
+constexpr uint16_t websocket_port = 8072;
+static const std::string messageType = "espToServerSystemStateStern";
+#endif
+
+constexpr double SEND_STATE_DELTA = 0.2; // seconds
+
+constexpr double PROCESS_SENSORS_RATE = 10.0; // Hz
+constexpr double PROCESS_SENSORS_DELTA = 1.0 / PROCESS_SENSORS_RATE; // seconds
 
 // Replace with your network credentials
-const char* ssid = "VikingRadio";
-const char* password = "vikinglongship";
+static const char* ssid = "VikingRadio";
+static const char* password = "vikinglongship";
 
 // WebSocket server address and port
-const char* websocket_server = "192.168.0.101";
+static const char* websocketServer = "192.168.0.101";
 
 constexpr int portTriggerPin = 16; // yellow
 constexpr int portEchoPin = 36; // white
 
-// Websocket server port
-// CHANGE THIS TO CHANGE BOW VS STERN
-// BOW: 8071 and espToServerSystemStateBow
-// STERN: 8072 and espToServerSystemStateStern
-
-// UNCOMMENT THIS FOR BOW
-// const uint16_t websocket_port = 8071;
-// const char* messageType = "espToServerSystemStateBow";
-
-// UNCOMMENT THIS FOR STERN
-const uint16_t websocket_port = 8072;
-const std::string messageType = "espToServerSystemStateStern";
-
-Leg* LegStarboard = nullptr;
-Leg* LegPort = nullptr;
-
-// init Json data object
-json system_state = { { "type", messageType }, { "sendTime", "notime" },
-    { "starboard",
-        { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" },
-            { "distanceSensorPosition", 0 } } },
-    { "port",
-        { { "ballastPressurePsi", 0 }, { "pistonPressurePsi", 0 }, { "ballastIntakeValve", "closed" },
-            { "ballastToPistonValve", "closed" }, { "pistonReleaseValve", "closed" },
-            { "distanceSensorPosition", 0 } } } };
+static std::atomic<bool> shouldSendState { false };
 
 // Create a WebSocket client instance
 WebSocketsClient webSocket;
-Ticker updateTicker;
 
-void sendStateJson()
+Ticker sendStateTicker;
+Ticker processSensorsTicker;
+
+Leg legStarboard {
+    Leg::Position::starboard,
+    21, // ballast fill pin
+    22, // piston fill pin
+    23, // vent pin
+    34, // ballast pressure sensor pin
+    35, // piston pressure sensor pin
+    16, // Change to 1
+    36 // Change to 39
+};
+
+Leg legPort {
+    Leg::Position::port,
+    17, // ballast fill pin
+    18, // piston fill pin
+    19, // vent pin
+    32, // ballast pressure sensor pin
+    33, // piston pressure sensor pin
+    16, // ultrasonic trigger pin
+    36 // ultrasonic echo pin
+};
+
+void getSensorReadings()
 {
-    auto stateJson = getStateJson(messageType);
-    std::string s = stateJson.dump();
+    // update readings
+    for (Leg* leg : { &legStarboard, &legPort }) {
+        for (auto& pressureSensorRef : leg->getPressureSensors()) {
+            PressureSensor& pressureSensor = pressureSensorRef.get();
+            pressureSensor.getReading();
+        }
+        for (auto& distanceSensorRef : leg->getDistanceSensors()) {
+            DistanceSensor& distanceSensor = distanceSensorRef.get();
+            distanceSensor.getReading();
+        }
+    }
+}
+
+void sendState()
+{
+    getSensorReadings();
+
+    json systemState = { // clang-format off
+        { "type", messageType }, 
+        { "sendTime", "notime" },
+        { "bigAssMainTank", { { "pressurePsi", 0 }, 
+                            { "compressorToTankValve", "closed" } } },
+        { legStarboard.getPositionAsString(), legStarboard.getLastStateAsJson() },
+        { legPort.getPositionAsString(), legPort.getLastStateAsJson() } 
+    }; // clang-format on
+
+    std::string s = systemState.dump();
+    Serial.println(s.c_str());
     webSocket.sendTXT(s.c_str(), s.length());
 }
 
-void webSocketEvent(WStype_t type, uint8_t* payload, size_t length)
+void processStateRequest(json& requestedState)
 {
-    json desired_state;
-    std::string s;
-    // system_state["sternStarboard"]["ballastPressurePsi"] =
-    // LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::ballast);
-    // system_state["sternStarboard"]["pistonPressurePsi"] =
-    // LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston);
+    // update each leg
+    for (Leg* leg : { &legStarboard, &legPort }) {
+        auto legPositionString = leg->getPositionAsString();
 
+        if (requestedState.contains(legPositionString)) {
+            // update solenoid states
+            for (auto& solenoidRef : leg->getSolenoids())  {
+                Solenoid& solenoid = solenoidRef.get();
+                std::string solenoidPositionString = solenoid.getPositionAsString();
+
+                if (requestedState.contains(solenoidPositionString)) {
+                    solenoid.setState(requestedState[solenoidPositionString]);
+                }
+            }
+        }
+    }
+}
+
+void onSendStateTicker()
+{
+    if (shouldSendState)
+        sendState();
+}
+
+void onProcessSensorsTicker()
+{
+    getSensorReadings();
+
+    // TODO: set pressure from distance
+
+    // general idea: 
+    // - distance error = measured - target
+    // - increase piston pressure while error > +threshold (i.e. distance < target) 
+    //   and the abs of the average error is decreasing
+    // - decrease piston pressure if error < -threshold (i.e. distance > target) 
+    //   and the abs of the average error is decreasing
+    
+    // - instead of trying to reach a target distance, maybe find an overall pressure 
+    //   scale factor that minimizes the distance error instead
+    // - will probably need to limit the duty cycle 
+}
+
+void onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length)
+{
     switch (type) {
     case WStype_DISCONNECTED: {
         Serial.println("Disconnected from WebSocket server");
+        shouldSendState = false;
         break;
     }
     case WStype_CONNECTED: {
         Serial.println("Connected to WebSocket server");
-        auto s = system_state.dump();
-        webSocket.sendTXT(s.c_str(), s.length());
-        Serial.println("Sent JSON to WebSocket server");
+        shouldSendState = true;
         break;
     }
     case WStype_TEXT: {
         Serial.printf("Received text: %s\n", payload);
-        desired_state = json::parse(payload);
-        findLegsToUpdate(desired_state);
+        auto requestedState = json::parse(payload);
+        processStateRequest(requestedState);
         break;
     }
     case WStype_BIN: {
         Serial.println("Received binary data");
         Serial.println("Toggling TESTSOLENOID / LED ");
+
         digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
         digitalWrite(LED, !digitalRead(LED));
         digitalWrite(LED, !digitalRead(LED));
@@ -124,24 +204,7 @@ void setup()
     Serial.begin(115200);
     delay(1000);
 
-    LegStarboard = new Leg("Starboard",
-        21, // ballast fill pin
-        22, // piston fill pin
-        23, // vent pin
-        34, // ballast pressure sensor pin
-        35, // piston pressure sensor pin
-        5, // ultrasonic trigger pin
-        39 // ultrasonic echo pin
-    );
-    LegPort = new Leg("Port",
-        17, // ballast fill pin
-        18, // piston fill pin
-        19, // vent pin
-        32, // ballast pressure sensor pin
-        33, // piston pressure sensor pin
-        16, // ultrasonic trigger pin
-        36 // ultrasonic echo pin
-    );
+
 #ifdef USE_WIFI
     // Connect to Wi-Fi
     WiFi.begin(ssid, password);
@@ -151,56 +214,18 @@ void setup()
     }
     Serial.println("Connected to WiFi");
 
+    legStarboard.setup();
+    legPort.setup();
+
     // Set up WebSocket client
-    webSocket.begin(websocket_server, websocket_port, "/");
-    webSocket.onEvent(webSocketEvent);
-    // updateTicker.attach(UPDATE_DELTA, sendStateJson);
+    webSocket.begin(websocketServer, websocket_port, "/");
+    webSocket.onEvent(onWebSocketEvent);
+
+    sendStateTicker.attach(SEND_STATE_DELTA, onSendStateTicker);
 #endif // USE_WIFI
+
+    // processSensorsTicker.attach(PROCESS_SENSORS_DELTA, onProcessSensorsTicker);
 }
-
-// {
-//   // When filling the BallastSolenoid of a Leg, the pistonSolenoid must be closed
-//   if (leg->isSolenoidOpen(Solenoid::SolenoidPosition::ballast) &&
-//   leg->isSolenoidOpen(Solenoid::SolenoidPosition::piston))
-//   {
-//     leg->toggleSolenoid(Solenoid::SolenoidPosition::piston);
-//   }
-
-//   // When filling the JackSolenoid of a Leg, the VentSolenoid must be closed
-//   if (leg->isSolenoidOpen(Solenoid::SolenoidPosition::piston) &&
-//   leg->isSolenoidOpen(Solenoid::SolenoidPosition::vent))
-//   {
-//     leg->toggleSolenoid(Solenoid::SolenoidPosition::vent);
-//   }
-
-//   // If the Jack pressure exceeds 150 psi, the JackSolenoid is closed and the VentSolenoid opens until the pressure
-//   is less than 100 PSI if (leg->getPressureSensorReading(PressureSensor::PressurePosition::piston) > 150)
-//   {
-//     leg->toggleSolenoid(Solenoid::SolenoidPosition::piston);
-//     leg->toggleSolenoid(Solenoid::SolenoidPosition::vent);
-//     while (leg->getPressureSensorReading(PressureSensor::PressurePosition::piston) > 100)
-//     {
-//       // Wait until the pressure is less than 100 PSI
-//     }
-//     leg->toggleSolenoid(Solenoid::SolenoidPosition::vent);
-//   }
-
-//   // If the JackSolenoid is closed and the pressure in the Ballast is less than 90 psi, the ballast solenoid opens
-//   if (!leg->isSolenoidOpen(Solenoid::SolenoidPosition::piston) &&
-//   (leg->getPressureSensorReading(PressureSensor::PressurePosition::ballast) < 90))
-//   {
-//     leg->toggleSolenoid(Solenoid::SolenoidPosition::ballast);
-//   }
-
-//   // The VentSolenoid is closed and will not open if the pistonPressure is <= 30 PSI
-//   if ((leg->getPressureSensorReading(PressureSensor::PressurePosition::piston) <= 30) &&
-//   leg->isSolenoidOpen(Solenoid::SolenoidPosition::vent))
-//   {
-//     leg->toggleSolenoid(Solenoid::SolenoidPosition::vent);
-//   }
-
-//   // Add any additional control code logic here
-// }
 
 void loop()
 {
@@ -208,13 +233,6 @@ void loop()
 #ifdef USE_WIFI
     webSocket.loop();
 #endif // USE_WIFI
-    // Serial.println(LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::ballast));
-    // system_state["sternStarboard"]["pistonPressurePsi"] =
-    // LegStarboardStern->getPressureSensorReading(PressureSensor::PressurePosition::piston);
-    // LegPort->getDistanceSensorReading();
-
-    // XXX: workaround for what seems to be a race condition (and subsequent out-of-bounds read)
-    // when calling sendStateJson via Ticker
-    delay(UPDATE_DELTA * 1000.0);
-    sendStateJson();
+    // delay(SEND_STATE_DELTA * 1000);    
+    // sendState();
 }
