@@ -16,9 +16,9 @@ using json = nlohmann::json;
 #define USE_WIFI
 
 // UNCOMMENT THIS FOR BOW
-// #define BOW
+#define BOW
 // UNCOMMENT THIS FOR STERN
-#define STERN
+// #define STERN
 
 #ifdef BOW
 constexpr uint16_t websocket_port = 8071;
@@ -60,8 +60,8 @@ Leg legStarboard {
     23, // vent pin
     34, // ballast pressure sensor pin
     35, // piston pressure sensor pin
-    16, // Change to 1
-    36 // Change to 39
+    5, // ultrasonic trigger pin
+    39 // ultrasonic echo pin
 };
 
 Leg legPort {
@@ -116,7 +116,7 @@ void processStateRequest(json& requestedState)
 
         if (requestedState.contains(legPositionString)) {
             // update solenoid states
-            for (auto& solenoidRef : leg->getSolenoids())  {
+            for (auto& solenoidRef : leg->getSolenoids()) {
                 Solenoid& solenoid = solenoidRef.get();
                 std::string solenoidPositionString = solenoid.getPositionAsString();
 
@@ -140,16 +140,16 @@ void onProcessSensorsTicker()
 
     // TODO: set pressure from distance
 
-    // general idea: 
+    // general idea:
     // - distance error = measured - target
-    // - increase piston pressure while error > +threshold (i.e. distance < target) 
+    // - increase piston pressure while error > +threshold (i.e. distance < target)
     //   and the abs of the average error is decreasing
-    // - decrease piston pressure if error < -threshold (i.e. distance > target) 
+    // - decrease piston pressure if error < -threshold (i.e. distance > target)
     //   and the abs of the average error is decreasing
-    
-    // - instead of trying to reach a target distance, maybe find an overall pressure 
+
+    // - instead of trying to reach a target distance, maybe find an overall pressure
     //   scale factor that minimizes the distance error instead
-    // - will probably need to limit the duty cycle 
+    // - will probably need to limit the duty cycle
 }
 
 void onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length)
@@ -204,7 +204,6 @@ void setup()
     Serial.begin(115200);
     delay(1000);
 
-
 #ifdef USE_WIFI
     // Connect to Wi-Fi
     WiFi.begin(ssid, password);
@@ -233,6 +232,6 @@ void loop()
 #ifdef USE_WIFI
     webSocket.loop();
 #endif // USE_WIFI
-    // delay(SEND_STATE_DELTA * 1000);    
+    // delay(SEND_STATE_DELTA * 1000);
     // sendState();
 }
