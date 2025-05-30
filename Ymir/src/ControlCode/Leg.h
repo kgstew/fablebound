@@ -1,83 +1,109 @@
 #pragma once
+#include <Arduino.h>
+#include <ControlCode/json.hpp>
+#include <iostream>
 #include <string>
+#include <vector>
 
-#define SOUND_SPEED 0.0343
-#define CM_TO_INCH 0.393701
+using json = nlohmann::json;
+
+constexpr double SOUND_SPEED = 0.0343;
+constexpr double CM_TO_INCH = 0.393701;
 
 class DistanceSensor {
-private:
-    double reading;
-    int triggerPin;
-    int echoPin;
-
 public:
-    DistanceSensor(double reading, int triggerPin, int echoPin);
-    ~DistanceSensor();
-    uint16_t getReading();
+    enum class Position { none }; // TODO: port/starboard?
+
+    DistanceSensor(DistanceSensor::Position position, int triggerPin, int echoPin);
+    void setup();
+    double getReading();
+    double getLastReading() const noexcept;
+    int getTriggerPin() const noexcept;
+    int getEchoPin() const noexcept;
+    DistanceSensor::Position getPosition() const noexcept;
+    std::string getPositionAsString() const noexcept;
+
+private:
+    const DistanceSensor::Position position;
+    const int triggerPin;
+    const int echoPin;
+    double reading;
 };
 
 class PressureSensor {
-private:
-    double reading;
-    int pin;
-
 public:
-    enum class PressurePosition {
-        ballast,
-        piston,
-    };
-    PressureSensor(double reading, int pin);
-    ~PressureSensor();
-    uint16_t getReading();
+    enum class Position { ballast, piston };
+
+    PressureSensor(PressureSensor::Position position, int pin);
+    void setup();
+    double getReading();
+    double getLastReading() const noexcept;
+    int getPin() const noexcept;
+    PressureSensor::Position getPosition() const noexcept;
+    std::string getPositionAsString() const noexcept;
+
+private:
+    const PressureSensor::Position position;
+    const int pin;
+    double reading;
 };
 
 class Solenoid {
-private:
-    bool open;
-    int pin;
-
 public:
-    enum class SolenoidPosition { ballast, piston, vent };
-    Solenoid(bool open, int pin);
-    ~Solenoid();
-    bool isOpen();
-    void setState(bool state);
+    enum class Position { ballast, piston, vent };
+    enum class State { open, closed };
+
+    Solenoid(Solenoid::Position position, Solenoid::State defaultState, int pin);
+    void setup();
+    Solenoid::State getState() const noexcept;
+    Solenoid::State getDefaultState() const noexcept;
+    void setState(Solenoid::State newState);
+    void setState(std::string& newState);
+    void setOpen(bool open);
+    void reset();
+    bool isOpen() const noexcept;
+    bool isClosed() const noexcept;
+    int getPin() const noexcept;
+    Solenoid::Position getPosition() const noexcept;
+    std::string getPositionAsString() const noexcept;
+    std::string getStateAsString() const noexcept;
+
+private:
+    void writeState(Solenoid::State state);
+    const Solenoid::Position position;
+    const Solenoid::State defaultState; // i.e. whether the solenoid is normally open or normally closed
+    const int pin;
+    Solenoid::State state;
 };
 
 class Leg {
+public:
+    enum class Position { port, starboard };
 
-private:
+    Leg(Leg::Position position, int ballastFillPin, int pistonFillPin, int ventPin, int ballastPressureSensorPin,
+        int pistonPressureSensorPin, int distanceSensorTriggerPin, int distanceSensorEchoPin);
+    void setup();
+    Solenoid& getSolenoid(Solenoid::Position position);
+    PressureSensor& getPressureSensor(PressureSensor::Position position);
+    DistanceSensor& getDistanceSensor() noexcept;
+
+    std::vector<std::reference_wrapper<Solenoid>> getSolenoids() noexcept;
+    std::vector<std::reference_wrapper<PressureSensor>> getPressureSensors() noexcept;
+    std::vector<std::reference_wrapper<DistanceSensor>> getDistanceSensors() noexcept;
+
+    Leg::Position getPosition() const noexcept;
+    std::string getPositionAsString() const noexcept;
+
+    json getStateAsJson();
+    json getLastStateAsJson() const noexcept;
+
+protected:
     Solenoid ballastSolenoid;
     Solenoid pistonSolenoid;
     Solenoid ventSolenoid;
     PressureSensor ballastPressureSensor;
     PressureSensor pistonPressureSensor;
     DistanceSensor distanceSensor;
-    std::string position;
-    double ballastPressure;
-    double pistonPressure;
-    double distance;
 
-    int ballastFillPin;
-    int pistonFillPin;
-    int ventPin;
-    int ballastPressureSensorPin; // Location of the pins for the sensor and
-    int pistonPressureSensorPin;
-    int ultrasonicTriggerPin;
-    int ultrasonicEchoPin;
-
-public:
-    Leg(std::string position, int ballastFillPin, int pistonFillPin, int ventPin, int ballastPressureSensorPin,
-        int pistonPressureSensorPin, int ultrasonicTriggerPin, int ultrasonicEchoPin);
-    ~Leg();
-    std::string getPosition();
-    std::string getDistance();
-    bool isSolenoidOpen(Solenoid::SolenoidPosition position);
-    void setSolenoidState(Solenoid::SolenoidPosition position, bool state);
-    uint16_t getPressureSensorReading(PressureSensor::PressurePosition position);
-    uint16_t getDistanceSensorReading();
+    const Leg::Position position;
 };
-
-// Init 2 leg objects
-extern Leg* LegStarboard;
-extern Leg* LegPort;
