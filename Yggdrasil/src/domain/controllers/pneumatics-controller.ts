@@ -18,6 +18,7 @@ import {
     LegCommandGranular,
     PneumaticsCommandGranularCombined,
     PneumaticsCommandGranularBowOrStern,
+    MAX_SAFE_PISTON_PRESSURE,
 } from './types'
 
 import { Valve } from 'domain/models'
@@ -83,7 +84,7 @@ export class PneumaticsController {
 
     public defaultPressureSettings: PressureSettings = {
         ballastTankMaxPressure: 40,
-        maxPistonPressure: 35,
+        maxPistonPressure: MAX_SAFE_PISTON_PRESSURE,
         minPistonPressure: 10,
     }
 
@@ -140,6 +141,39 @@ export class PneumaticsController {
         if (this.systemState) {
             this.systemState.currentPattern = patternName
         }
+    }
+
+    public setInitialZeroDistance() {
+        const sternPortZero = this.systemState.sternPort.distanceSensorPosition
+        const sternStarboardZero =
+            this.systemState.sternStarboard.distanceSensorPosition
+        const bowPortZero = this.systemState.bowPort.distanceSensorPosition
+        const bowStarboardZero =
+            this.systemState.bowStarboard.distanceSensorPosition
+
+        this.zeroDistance =
+            (sternPortZero +
+                sternStarboardZero +
+                bowPortZero +
+                bowStarboardZero) /
+            4
+
+        console.log('this.zeroDistance', this.zeroDistance)
+    }
+
+    public setInitialMaxDistance() {
+        const sternPortMax = this.systemState.sternPort.distanceSensorPosition
+        const sternStarboardMax =
+            this.systemState.sternStarboard.distanceSensorPosition
+        const bowPortMax = this.systemState.bowPort.distanceSensorPosition
+        const bowStarboardMax =
+            this.systemState.bowStarboard.distanceSensorPosition
+
+        this.maxDistance =
+            (sternPortMax + sternStarboardMax + bowPortMax + bowStarboardMax) /
+            4
+
+        console.log('this.maxDistance', this.maxDistance)
     }
 
     public updatePressureSettings(settings: Partial<PressureSettings>): void {

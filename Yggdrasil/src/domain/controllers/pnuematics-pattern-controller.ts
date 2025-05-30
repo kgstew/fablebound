@@ -39,6 +39,7 @@ export class PneumaticsPatternController {
                 minPistonPressure: 0,
             },
             main: async (controller, shouldStop) => {
+                this.pneumaticsController.setInitialZeroDistance()
                 if (shouldStop()) return
                 await controller.setMovementTarget(
                     'bowStarboard',
@@ -52,8 +53,9 @@ export class PneumaticsPatternController {
                 )
                 await controller.setMovementTarget('bowPort', 100, 'percent')
                 await controller.setMovementTarget('sternPort', 100, 'percent')
-                await this.sleep(randomInt(2000, 3000), shouldStop)
+                await this.sleep(3000, shouldStop)
                 if (shouldStop()) return
+                this.pneumaticsController.setInitialMaxDistance()
                 await controller.setMovementTarget('bowStarboard', 0, 'percent')
                 await controller.setMovementTarget(
                     'sternStarboard',
