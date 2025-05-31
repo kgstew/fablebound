@@ -46,7 +46,7 @@ static const std::string MESSAGE_TYPE = "espToServerSystemStateStern";
 constexpr double PROCESS_SENSORS_RATE = 20.0; // Hz
 constexpr double PROCESS_SENSORS_DELTA = 1.0 / PROCESS_SENSORS_RATE; // seconds
 
-constexpr double SEND_STATE_RATE = 20.0; // Hz
+constexpr double SEND_STATE_RATE = 5.0; // Hz
 constexpr double SEND_STATE_DELTA = 1.0 / SEND_STATE_RATE; // seconds
 
 static bool shouldSendState { false };
@@ -98,8 +98,8 @@ void sendState()
         { "sendTime", "notime" },
         { "bigAssMainTank", { { "pressurePsi", 0 }, 
                             { "compressorToTankValve", "closed" } } },
-        { legStarboard.getPositionAsString(), legStarboard.getLastStateAsJson() },
-        { legPort.getPositionAsString(), legPort.getLastStateAsJson() } 
+        { legStarboard.getPositionAsString(), legStarboard.getLastStateWithAverageReadingsAsJson() },
+        { legPort.getPositionAsString(), legPort.getLastStateWithAverageReadingsAsJson() } 
     }; // clang-format on
 
     std::string s = systemState.dump();
@@ -111,9 +111,8 @@ void sendState()
 
 void processStateRequest(json& requestedState)
 {
-    // update each leg
     for (Leg* leg : { &legStarboard, &legPort }) {
-        auto legPositionString = leg->getPositionAsString();
+        std::string legPositionString = leg->getPositionAsString();
 
         if (requestedState.contains(legPositionString)) {
             // update solenoid states
@@ -121,8 +120,8 @@ void processStateRequest(json& requestedState)
                 Solenoid& solenoid = solenoidRef.get();
                 std::string solenoidPositionString = solenoid.getPositionAsString();
 
-                if (requestedState.contains(solenoidPositionString)) {
-                    solenoid.setState(requestedState[solenoidPositionString]);
+                if (requestedState[legPositionString].contains(solenoidPositionString)) {
+                    solenoid.setState(requestedState[legPositionString][solenoidPositionString]);
                 }
             }
         }
