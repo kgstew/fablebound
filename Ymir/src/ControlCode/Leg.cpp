@@ -39,12 +39,19 @@ double DistanceSensor::getReading()
     digitalWrite(triggerPin, LOW);
 
     // Reads the echoPin, returns the sound wave travel time in microseconds
+    // Timeout is 50 ms; assumes max 20 Hz sample rate (50 ms sample delta)
+    constexpr unsigned long timeout = 50000;
     auto timeDelta = pulseIn(echoPin, HIGH, 50000);
-    // Calculate distance
-    double distanceCm = static_cast<double>(timeDelta) * SOUND_SPEED * 0.5;
-    // Convert to inches
-    double distanceIn = distanceCm * CM_TO_INCH;
+    double distanceCm = 0.0;
 
+    if (timeDelta > 0) {
+        distanceCm = static_cast<double>(timeDelta) * SOUND_SPEED * 0.5;
+    } else {
+        distanceCm = reading; // hold if reading timed out
+    }
+
+    // Convert to inches
+    DBG(double distanceIn = distanceCm * CM_TO_INCH;)
     // Prints the distance in the Serial Monitor
     DBG(Serial.print("Distance (cm): "));
     DBG(Serial.println(distanceCm));
@@ -52,10 +59,20 @@ double DistanceSensor::getReading()
     DBG(Serial.println(distanceIn));
 
     reading = distanceCm;
+
+    // Exponential moving average
+    // Impulse response decays by a factor of 1/e (~ 0.3678) after 4 samples
+    // -6 dB around SR / 4; slope about -6 dB / octave
+    // N.B.: assumes getReading is called at a consistent rate
+    constexpr double coeff = std::exp(-1.0 / 4.0);
+    averageReading = averageReading + coeff * (reading - averageReading);
+
     return distanceCm;
 };
 
 double DistanceSensor::getLastReading() const noexcept { return reading; }
+
+double DistanceSensor::getAverageReading() const noexcept { return averageReading; }
 
 int DistanceSensor::getTriggerPin() const noexcept { return triggerPin; }
 
@@ -91,10 +108,18 @@ void PressureSensor::setup() { pinMode(pin, INPUT); }
 double PressureSensor::getReading()
 {
     reading = static_cast<double>(analogRead(pin)) / 28.0;
-    // float voltage = 5.0 * reading / 4095; // voltage = 0..5V;  we do the math in millivolts!!
-    // map(value, fromLow, fromHigh, toLow, toHigh)
-    return reading; // map(voltage, 0.5, 3.0, 0.0, 150.0); // Arduino map() function
+
+    // Exponential moving average
+    // Impulse response decays by a factor of 1/e (~ 0.3678) after 4 samples
+    // -6 dB around SR / 4; slope about -6 dB / octave
+    // N.B.: assumes getReading is called at a consistent rate
+    constexpr double coeff = std::exp(-1.0 / 4.0);
+    averageReading = averageReading + coeff * (reading - averageReading);
+
+    return reading;
 }
+
+double PressureSensor::getAverageReading() const noexcept { return averageReading; }
 
 double PressureSensor::getLastReading() const noexcept { return reading; }
 
@@ -349,6 +374,30 @@ json Leg::getLastStateAsJson() const noexcept
         { ballastPressureSensor.getPositionAsString(), ballastPressureSensor.getLastReading() },
         { pistonPressureSensor.getPositionAsString(), pistonPressureSensor.getLastReading() },
         { distanceSensor.getPositionAsString(), distanceSensor.getLastReading() } 
+    }; // clang-format on
+}
+
+json Leg::getLastStateWithAverageDistanceAsJson() const noexcept
+{
+    return json { // clang-format off
+        { ballastSolenoid.getPositionAsString(), ballastSolenoid.getStateAsString() },
+        { pistonSolenoid.getPositionAsString(), pistonSolenoid.getStateAsString() },
+        { ventSolenoid.getPositionAsString(), ventSolenoid.getStateAsString() },
+        { ballastPressureSensor.getPositionAsString(), ballastPressureSensor.getLastReading() },
+        { pistonPressureSensor.getPositionAsString(), pistonPressureSensor.getLastReading() },
+        { distanceSensor.getPositionAsString(), distanceSensor.getAverageReading() } 
+    }; // clang-format on
+}
+
+json Leg::getLastStateWithAverageReadingsAsJson() const noexcept
+{
+    return json { // clang-format off
+        { ballastSolenoid.getPositionAsString(), ballastSolenoid.getStateAsString() },
+        { pistonSolenoid.getPositionAsString(), pistonSolenoid.getStateAsString() },
+        { ventSolenoid.getPositionAsString(), ventSolenoid.getStateAsString() },
+        { ballastPressureSensor.getPositionAsString(), ballastPressureSensor.getAverageReading() },
+        { pistonPressureSensor.getPositionAsString(), pistonPressureSensor.getAverageReading() },
+        { distanceSensor.getPositionAsString(), distanceSensor.getAverageReading() } 
     }; // clang-format on
 }
 
