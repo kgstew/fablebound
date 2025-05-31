@@ -18,6 +18,7 @@ public:
     void setup();
     double getReading();
     double getLastReading() const noexcept;
+    double getAverageReading() const noexcept;
     int getTriggerPin() const noexcept;
     int getEchoPin() const noexcept;
     DistanceSensor::Position getPosition() const noexcept;
@@ -28,6 +29,7 @@ private:
     const int triggerPin;
     const int echoPin;
     double reading;
+    double averageReading = 0.0;
 };
 
 class PressureSensor {
@@ -38,6 +40,7 @@ public:
     void setup();
     double getReading();
     double getLastReading() const noexcept;
+    double getAverageReading() const noexcept;
     int getPin() const noexcept;
     PressureSensor::Position getPosition() const noexcept;
     std::string getPositionAsString() const noexcept;
@@ -46,6 +49,7 @@ private:
     const PressureSensor::Position position;
     const int pin;
     double reading;
+    double averageReading = 0.0;
 };
 
 class Solenoid {
@@ -96,6 +100,8 @@ public:
 
     json getStateAsJson();
     json getLastStateAsJson() const noexcept;
+    json getLastStateWithAverageDistanceAsJson() const noexcept;
+    json getLastStateWithAverageReadingsAsJson() const noexcept;
 
 protected:
     Solenoid ballastSolenoid;
@@ -104,6 +110,5 @@ protected:
     PressureSensor ballastPressureSensor;
     PressureSensor pistonPressureSensor;
     DistanceSensor distanceSensor;
-
     const Leg::Position position;
 };
