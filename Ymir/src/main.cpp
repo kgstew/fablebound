@@ -1,18 +1,17 @@
+#include "ControlCode/Leg.h"
+#include <Arduino.h>
 #include <Ticker.h>
 #include <WebSocketsClient.h>
 #include <WiFi.h>
 #include <atomic>
 // #include "index.h"
-
 #include <ControlCode/json.hpp>
 // for convenience
 using json = nlohmann::json;
 
-#include "ControlCode/Leg.h"
-#include <Arduino.h>
+// uncomment to enable debug print statements to the serial monitor
+// #define DEBUG
 
-#define LED 5
-#define TESTSOLENOID 15
 #define USE_WIFI
 
 // UNCOMMENT THIS FOR BOW
@@ -20,32 +19,37 @@ using json = nlohmann::json;
 // UNCOMMENT THIS FOR STERN
 // #define STERN
 
+// debug macro
+#ifdef DEBUG
+#define DBG(x) x
+#else
+#define DBG(x)
+#endif
+
+// Replace with your network credentials
+static const char* WIFI_SSID = "VikingRadio";
+static const char* WIFI_PASSWORD = "vikinglongship";
+
+// WebSocket server address and port
+static const char* WEBSOCKET_SERVER = "192.168.0.101";
+
 #ifdef BOW
-constexpr uint16_t websocket_port = 8071;
-static const std::string messageType = "espToServerSystemStateBow";
+constexpr uint16_t WEBSOCKET_PORT = 8071;
+static const std::string MESSAGE_TYPE = "espToServerSystemStateBow";
 #endif
 
 #ifdef STERN
-constexpr uint16_t websocket_port = 8072;
-static const std::string messageType = "espToServerSystemStateStern";
+constexpr uint16_t WEBSOCKET_PORT = 8072;
+static const std::string MESSAGE_TYPE = "espToServerSystemStateStern";
 #endif
 
-constexpr double SEND_STATE_DELTA = 0.2; // seconds
-
-constexpr double PROCESS_SENSORS_RATE = 10.0; // Hz
+constexpr double PROCESS_SENSORS_RATE = 20.0; // Hz
 constexpr double PROCESS_SENSORS_DELTA = 1.0 / PROCESS_SENSORS_RATE; // seconds
 
-// Replace with your network credentials
-static const char* ssid = "VikingRadio";
-static const char* password = "vikinglongship";
+constexpr double SEND_STATE_RATE = 20.0; // Hz
+constexpr double SEND_STATE_DELTA = 1.0 / SEND_STATE_RATE; // seconds
 
-// WebSocket server address and port
-static const char* websocketServer = "192.168.0.101";
-
-constexpr int portTriggerPin = 16; // yellow
-constexpr int portEchoPin = 36; // white
-
-static std::atomic<bool> shouldSendState { false };
+static bool shouldSendState { false };
 
 // Create a WebSocket client instance
 WebSocketsClient webSocket;
@@ -78,24 +82,19 @@ Leg legPort {
 void getSensorReadings()
 {
     // update readings
-    for (Leg* leg : { &legStarboard, &legPort }) {
-        for (auto& pressureSensorRef : leg->getPressureSensors()) {
-            PressureSensor& pressureSensor = pressureSensorRef.get();
-            pressureSensor.getReading();
-        }
-        for (auto& distanceSensorRef : leg->getDistanceSensors()) {
-            DistanceSensor& distanceSensor = distanceSensorRef.get();
-            distanceSensor.getReading();
-        }
-    }
+    legPort.getPressureSensor(PressureSensor::Position::ballast).getReading();
+    legPort.getPressureSensor(PressureSensor::Position::piston).getReading();
+    legPort.getDistanceSensor().getReading();
+
+    legStarboard.getPressureSensor(PressureSensor::Position::ballast).getReading();
+    legStarboard.getPressureSensor(PressureSensor::Position::piston).getReading();
+    legStarboard.getDistanceSensor().getReading();
 }
 
 void sendState()
 {
-    getSensorReadings();
-
     json systemState = { // clang-format off
-        { "type", messageType }, 
+        { "type", MESSAGE_TYPE }, 
         { "sendTime", "notime" },
         { "bigAssMainTank", { { "pressurePsi", 0 }, 
                             { "compressorToTankValve", "closed" } } },
@@ -104,8 +103,10 @@ void sendState()
     }; // clang-format on
 
     std::string s = systemState.dump();
-    Serial.println(s.c_str());
+    DBG(Serial.println(s.c_str()));
+#ifdef USE_WIFI
     webSocket.sendTXT(s.c_str(), s.length());
+#endif
 }
 
 void processStateRequest(json& requestedState)
@@ -136,6 +137,7 @@ void onSendStateTicker()
 
 void onProcessSensorsTicker()
 {
+    DBG(Serial.println("onProcessSensorsTicker"));
     getSensorReadings();
 
     // TODO: set pressure from distance
@@ -156,45 +158,40 @@ void onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length)
 {
     switch (type) {
     case WStype_DISCONNECTED: {
-        Serial.println("Disconnected from WebSocket server");
+        DBG(Serial.println("Disconnected from WebSocket server"));
         shouldSendState = false;
         break;
     }
     case WStype_CONNECTED: {
-        Serial.println("Connected to WebSocket server");
+        DBG(Serial.println("Connected to WebSocket server"));
         shouldSendState = true;
         break;
     }
     case WStype_TEXT: {
-        Serial.printf("Received text: %s\n", payload);
+        DBG(Serial.printf("Received text: %s\n", payload));
         auto requestedState = json::parse(payload);
         processStateRequest(requestedState);
         break;
     }
     case WStype_BIN: {
-        Serial.println("Received binary data");
-        Serial.println("Toggling TESTSOLENOID / LED ");
-
-        digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
-        digitalWrite(LED, !digitalRead(LED));
-        digitalWrite(LED, !digitalRead(LED));
-        digitalWrite(TESTSOLENOID, !digitalRead(TESTSOLENOID));
+        DBG(Serial.println("Received binary data"));
         break;
     }
     case WStype_PING: {
-        Serial.println("Received ping");
+        DBG(Serial.println("Received ping"));
         break;
     }
     case WStype_PONG: {
-        Serial.println("Received pong");
+        DBG(Serial.println("Received pong"));
         break;
     }
     case WStype_ERROR: {
-        Serial.println("Error occurred");
+        DBG(Serial.println("Error occurred"));
         break;
     }
     default: {
-        Serial.println("Unknown event");
+        DBG(Serial.println("Unknown event"));
+        break;
     }
     }
 }
@@ -204,26 +201,35 @@ void setup()
     Serial.begin(115200);
     delay(1000);
 
-#ifdef USE_WIFI
-    // Connect to Wi-Fi
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(1000);
-        Serial.println("Connecting to WiFi...");
-    }
-    Serial.println("Connected to WiFi");
-
     legStarboard.setup();
     legPort.setup();
 
-    // Set up WebSocket client
-    webSocket.begin(websocketServer, websocket_port, "/");
-    webSocket.onEvent(onWebSocketEvent);
+#ifdef BOW
+    DBG(Serial.println("Configured as BOW"));
+#endif
 
-    sendStateTicker.attach(SEND_STATE_DELTA, onSendStateTicker);
+#ifdef STERN
+    DBG(Serial.println("Configured as STERN"));
+#endif
+
+#ifdef USE_WIFI
+    // Connect to Wi-Fi
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        DBG(Serial.println("Connecting to WiFi..."));
+    }
+    DBG(Serial.println("Connected to WiFi"));
+
+    // Set up WebSocket client
+    webSocket.begin(WEBSOCKET_SERVER, WEBSOCKET_PORT, "/");
+    webSocket.onEvent(onWebSocketEvent);
+#else
+    shouldSendState = true;
 #endif // USE_WIFI
 
-    // processSensorsTicker.attach(PROCESS_SENSORS_DELTA, onProcessSensorsTicker);
+    processSensorsTicker.attach(PROCESS_SENSORS_DELTA, onProcessSensorsTicker);
+    sendStateTicker.attach(SEND_STATE_DELTA, onSendStateTicker);
 }
 
 void loop()
@@ -232,6 +238,4 @@ void loop()
 #ifdef USE_WIFI
     webSocket.loop();
 #endif // USE_WIFI
-    // delay(SEND_STATE_DELTA * 1000);
-    // sendState();
 }
