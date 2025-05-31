@@ -34,7 +34,7 @@ export class PneumaticsPatternController {
         this.patterns.set('calibrateDistance', {
             name: 'calibrateDistance',
             pressureSettings: {
-                ballastTankMaxPressure: 34,
+                ballastTankMaxPressure: MAX_SAFE_PISTON_PRESSURE + 5,
                 maxPistonPressure: MAX_SAFE_PISTON_PRESSURE,
                 minPistonPressure: 0,
             },

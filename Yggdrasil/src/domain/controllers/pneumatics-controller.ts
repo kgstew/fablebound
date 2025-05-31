@@ -392,7 +392,7 @@ export class PneumaticsController {
             this.lastCommand !== 'ventAll' &&
             this.lastCommand !== 'closeAllValves'
         ) {
-            this.updatePressureTargets()
+            this.updateMovementTargets()
             this.preventOverfill()
             this.keepPistonsALilFull()
             this.opportunisticBallastFill()
