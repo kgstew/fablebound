@@ -18,6 +18,7 @@ import {
     LegCommandGranular,
     PneumaticsCommandGranularCombined,
     PneumaticsCommandGranularBowOrStern,
+    MAX_SAFE_PISTON_PRESSURE,
 } from './types'
 
 import { Valve } from 'domain/models'
@@ -83,7 +84,7 @@ export class PneumaticsController {
 
     public defaultPressureSettings: PressureSettings = {
         ballastTankMaxPressure: 40,
-        maxPistonPressure: 35,
+        maxPistonPressure: MAX_SAFE_PISTON_PRESSURE,
         minPistonPressure: 10,
     }
 
@@ -140,6 +141,39 @@ export class PneumaticsController {
         if (this.systemState) {
             this.systemState.currentPattern = patternName
         }
+    }
+
+    public setInitialZeroDistance() {
+        const sternPortZero = this.systemState.sternPort.distanceSensorPosition
+        const sternStarboardZero =
+            this.systemState.sternStarboard.distanceSensorPosition
+        const bowPortZero = this.systemState.bowPort.distanceSensorPosition
+        const bowStarboardZero =
+            this.systemState.bowStarboard.distanceSensorPosition
+
+        this.zeroDistance =
+            (sternPortZero +
+                sternStarboardZero +
+                bowPortZero +
+                bowStarboardZero) /
+            4
+
+        console.log('this.zeroDistance', this.zeroDistance)
+    }
+
+    public setInitialMaxDistance() {
+        const sternPortMax = this.systemState.sternPort.distanceSensorPosition
+        const sternStarboardMax =
+            this.systemState.sternStarboard.distanceSensorPosition
+        const bowPortMax = this.systemState.bowPort.distanceSensorPosition
+        const bowStarboardMax =
+            this.systemState.bowStarboard.distanceSensorPosition
+
+        this.maxDistance =
+            (sternPortMax + sternStarboardMax + bowPortMax + bowStarboardMax) /
+            4
+
+        console.log('this.maxDistance', this.maxDistance)
     }
 
     public updatePressureSettings(settings: Partial<PressureSettings>): void {
@@ -247,9 +281,71 @@ export class PneumaticsController {
         //  console.log(`Cleared pressure set point for ${legAssembly}`);
     }
 
+    public clearDistanceTarget(
+        legAssembly: 'bowStarboard' | 'bowPort' | 'sternPort' | 'sternStarboard'
+    ): void {
+        this.distanceTargets.delete(legAssembly)
+        //  console.log(`Cleared distace set point for ${legAssembly}`);
+    }
+
+    public clearAllDistanceTargets(): void {
+        this.distanceTargets.clear()
+        console.log('Cleared all distance set points')
+    }
+
     public clearAllPressureTargets(): void {
         this.pressureTargets.clear()
         console.log('Cleared all pressure set points')
+    }
+
+    public updateMovementTargets(): void {
+        if (this.distanceTargets.size > 0) {
+            this.updateDistanceTargets()
+            return
+        }
+
+        if (this.pressureTargets.size > 0) {
+            this.updatePressureTargets()
+        }
+    }
+
+    public updateDistanceTargets(): void {
+        for (const [
+            legAssembly,
+            targetDistance,
+        ] of this.distanceTargets.entries()) {
+            const distance = this.systemState[legAssembly].distance
+
+            const pistonPressure =
+                this.systemState[legAssembly].pistonPressurePsi
+            const ballastPressure =
+                this.systemState[legAssembly].ballastPressurePsi
+
+            if (Math.abs(distance - targetDistance) <= 0.1) {
+                //   console.log(`Target pressure reached for ${legAssembly}`);
+                this.command[legAssembly] = this.valveCommandsHold
+                this.clearDistanceTarget(legAssembly as any)
+                continue
+            }
+
+            if (pistonPressure >= MAX_SAFE_PISTON_PRESSURE) {
+                // Prevent overpressure
+                //   console.log(`Piston pressure too high for ${legAssembly}`);
+                this.command[legAssembly] = this.valveCommandsHold
+            }
+
+            if (ballastPressure < pistonPressure) {
+                // Can't raise piston pressure due to insufficient ballast pressure
+                //   console.log(`Insufficient ballast pressure for ${legAssembly}`);
+                this.command[legAssembly] = this.valveCommandsHold
+            }
+
+            if (distance < targetDistance) {
+                this.command[legAssembly] = this.valveCommandsRaise
+            } else if (distance > targetDistance) {
+                this.command[legAssembly] = this.valveCommandsLower
+            }
+        }
     }
 
     public updatePressureTargets(): void {
@@ -296,7 +392,7 @@ export class PneumaticsController {
             this.lastCommand !== 'ventAll' &&
             this.lastCommand !== 'closeAllValves'
         ) {
-            this.updatePressureTargets()
+            this.updateMovementTargets()
             this.preventOverfill()
             this.keepPistonsALilFull()
             this.opportunisticBallastFill()
