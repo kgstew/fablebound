@@ -1,48 +1,18 @@
 #include "Leg.h"
 
+// uncomment to enable debug print statements to the serial monitor
+#define DEBUG
+
+// debug macro
+#ifdef DEBUG
+#define DBG(x) x
+#else
+#define DBG(x)
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // DISTANCE SENSOR
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// #include <SoftwareSerial.h>
-
-// SoftwareSerial mySerial(11, 10); // RX, TX
-// unsigned char data[4] = {};
-// float distance;
-
-// void setup()
-// {
-//     Serial.begin(57600);
-//     mySerial.begin(9600);
-// }
-
-// void loop()
-// {
-//     do {
-//         for (int i = 0; i < 4; i++) {
-//             data[i] = mySerial.read();
-//         }
-//     } while (mySerial.read() == 0xff);
-
-//     mySerial.flush();
-
-//     if (data[0] == 0xff) {
-//         int sum;
-//         sum = (data[0] + data[1] + data[2]) & 0x00FF;
-//         if (sum == data[3]) {
-//             distance = (data[1] << 8) + data[2];
-//             if (distance > 30) {
-//                 Serial.print("distance=");
-//                 Serial.print(distance / 10);
-//                 Serial.println("cm");
-//             } else {
-//                 Serial.println("Below the lower limit");
-//             }
-//         } else
-//             Serial.println("ERROR");
-//     }
-//     delay(100);
-// }
 
 DistanceSensor::DistanceSensor(DistanceSensor::Position position, int triggerPin, int echoPin)
     : position(position)
@@ -69,29 +39,40 @@ double DistanceSensor::getReading()
     digitalWrite(triggerPin, LOW);
 
     // Reads the echoPin, returns the sound wave travel time in microseconds
-    double distanceAverageCm = 0.0;
-    double distanceAverageIn = 0.0;
-    constexpr size_t N = 1;
-    for (size_t i = 0; i < N; i++) {
-        auto timeDelta = pulseIn(echoPin, HIGH);
-        distanceAverageCm += static_cast<double>(timeDelta) * SOUND_SPEED * 0.5;
+    // Timeout is 50 ms; assumes max 20 Hz sample rate (50 ms sample delta)
+    constexpr unsigned long timeout = 50000;
+    auto timeDelta = pulseIn(echoPin, HIGH, timeout);
+    double distanceCm = 0.0;
+
+    if (timeDelta > 0) {
+        distanceCm = static_cast<double>(timeDelta) * SOUND_SPEED * 0.5;
+    } else {
+        distanceCm = reading; // hold if reading timed out
     }
-    // Calculate the distance
-    distanceAverageCm /= static_cast<double>(N);
+
     // Convert to inches
-    distanceAverageIn = distanceAverageCm * CM_TO_INCH;
-
+    DBG(double distanceIn = distanceCm * CM_TO_INCH;)
     // Prints the distance in the Serial Monitor
-    Serial.print("Distance (cm): ");
-    Serial.println(distanceAverageCm);
-    Serial.print("Distance (inch): ");
-    Serial.println(distanceAverageIn);
+    DBG(Serial.print("Distance (cm): "));
+    DBG(Serial.println(distanceCm));
+    DBG(Serial.print("Distance (inch): "));
+    DBG(Serial.println(distanceIn));
 
-    reading = distanceAverageCm;
-    return distanceAverageCm;
+    reading = distanceCm;
+
+    // Exponential moving average
+    // Impulse response decays by a factor of 1/e (~ 0.3678) after 4 samples
+    // -6 dB around SR / 4; slope about -6 dB / octave
+    // N.B.: assumes getReading is called at a consistent rate
+    constexpr double coeff = std::exp(-1.0 / 4.0);
+    averageReading = averageReading + coeff * (reading - averageReading);
+
+    return distanceCm;
 };
 
 double DistanceSensor::getLastReading() const noexcept { return reading; }
+
+double DistanceSensor::getAverageReading() const noexcept { return averageReading; }
 
 int DistanceSensor::getTriggerPin() const noexcept { return triggerPin; }
 
@@ -105,8 +86,8 @@ std::string DistanceSensor::getPositionAsString() const noexcept
     case DistanceSensor::Position::none:
         return std::string { "distanceSensorPosition" };
     default: { // This should never happen
-        Serial.println("Invalid distance sensor position");
-        return std::string { "" };
+        DBG(Serial.println("Invalid distance sensor position"));
+        return std::string { "invalid" };
     }
     }
 }
@@ -122,18 +103,23 @@ PressureSensor::PressureSensor(PressureSensor::Position position, int pin)
 {
 }
 
-void PressureSensor::setup()
-{
-    pinMode(pin, INPUT);
-}
+void PressureSensor::setup() { pinMode(pin, INPUT); }
 
 double PressureSensor::getReading()
 {
     reading = static_cast<double>(analogRead(pin)) / 28.0;
-    // float voltage = 5.0 * reading / 4095; // voltage = 0..5V;  we do the math in millivolts!!
-    // map(value, fromLow, fromHigh, toLow, toHigh)
-    return reading; // map(voltage, 0.5, 3.0, 0.0, 150.0); // Arduino map() function
+
+    // Exponential moving average
+    // Impulse response decays by a factor of 1/e (~ 0.3678) after 4 samples
+    // -6 dB around SR / 4; slope about -6 dB / octave
+    // N.B.: assumes getReading is called at a consistent rate
+    constexpr double coeff = std::exp(-1.0 / 4.0);
+    averageReading = averageReading + coeff * (reading - averageReading);
+
+    return reading;
 }
+
+double PressureSensor::getAverageReading() const noexcept { return averageReading; }
 
 double PressureSensor::getLastReading() const noexcept { return reading; }
 
@@ -149,7 +135,7 @@ std::string PressureSensor::getPositionAsString() const noexcept
     case PressureSensor::Position::piston:
         return std::string { "pistonPressurePsi" };
     default: { // This should never happen
-        Serial.println("Invalid pressure sensor position");
+        DBG(Serial.println("Invalid pressure sensor position"));
         return std::string { "invalid" };
     }
     }
@@ -167,7 +153,7 @@ Solenoid::Solenoid(Solenoid::Position position, Solenoid::State defaultState, in
 {
 }
 
-void Solenoid::setup() 
+void Solenoid::setup()
 {
     pinMode(pin, OUTPUT);
     writeState(defaultState);
@@ -189,16 +175,18 @@ void Solenoid::setState(Solenoid::State newState)
 
 void Solenoid::setState(std::string& newState)
 {
-    if (newState == "open") {
+    DBG(Serial.printf("setState (string): %s\n", newState.c_str());)
+
+    if (newState == std::string { "open" }) {
         writeState(Solenoid::State::open);
         state = Solenoid::State::open;
-    } else if (newState == "closed") {
+    } else if (newState == std::string { "closed" }) {
         writeState(Solenoid::State::closed);
         state = Solenoid::State::closed;
     } else {
-        // default to closing the solenoid/valve to prevent 
+        // default to closing the solenoid/valve to prevent
         // overpressurizing the ballast, piston, etc.
-        Serial.println("Invalid solenoid state string");
+        DBG(Serial.println("Invalid solenoid state string"));
         reset();
     }
 }
@@ -234,7 +222,7 @@ std::string Solenoid::getPositionAsString() const noexcept
     case Solenoid::Position::vent:
         return std::string { "pistonReleaseValve" };
     default: { // This should never happen
-        Serial.println("Invalid solenoid position");
+        DBG(Serial.println("Invalid solenoid position"));
         return std::string { "invalid" };
     }
     }
@@ -250,14 +238,15 @@ std::string Solenoid::getStateAsString() const noexcept
         return std::string { "closed" };
     }
     default: { // This should never happen
-        Serial.println("Invalid solenoid state");
+        DBG(Serial.println("Invalid solenoid state"));
         return std::string { "invalid" };
     }
     }
 }
 
-void Solenoid::writeState(Solenoid::State state) 
+void Solenoid::writeState(Solenoid::State state)
 {
+    DBG(Serial.printf("Solenoid::writeState: %i\n", state == defaultState ? "LOW" : "HIGH" ));
     assert((state == Solenoid::State::open) || (state == Solenoid::State::closed));
     digitalWrite(pin, state == defaultState ? LOW : HIGH);
 }
@@ -287,7 +276,7 @@ void Leg::setup()
     ballastPressureSensor.setup();
     pistonPressureSensor.setup();
 
-    distanceSensor.setup(); 
+    distanceSensor.setup();
 }
 
 Solenoid& Leg::getSolenoid(Solenoid::Position position)
@@ -303,7 +292,7 @@ Solenoid& Leg::getSolenoid(Solenoid::Position position)
         return ventSolenoid;
     }
     default: { // This should never be reached
-        Serial.println("Invalid solenoid position");
+        DBG(Serial.println("Invalid solenoid position"));
         throw std::runtime_error("Invalid solenoid position");
     }
     }
@@ -319,7 +308,7 @@ PressureSensor& Leg::getPressureSensor(PressureSensor::Position position)
         return pistonPressureSensor;
     }
     default: {
-        Serial.println("Invalid pressure sensor position");
+        DBG(Serial.println("Invalid pressure sensor position"));
         throw std::runtime_error("Invalid pressure sensor position");
     }
     }
@@ -361,7 +350,7 @@ std::string Leg::getPositionAsString() const noexcept
     case Leg::Position::starboard:
         return std::string { "starboard" };
     default: { // This should never happen
-        Serial.println("Invalid leg position");
+        DBG(Serial.println("Invalid leg position"));
         return std::string { "invalid" };
     }
     }
@@ -388,6 +377,30 @@ json Leg::getLastStateAsJson() const noexcept
         { ballastPressureSensor.getPositionAsString(), ballastPressureSensor.getLastReading() },
         { pistonPressureSensor.getPositionAsString(), pistonPressureSensor.getLastReading() },
         { distanceSensor.getPositionAsString(), distanceSensor.getLastReading() } 
+    }; // clang-format on
+}
+
+json Leg::getLastStateWithAverageDistanceAsJson() const noexcept
+{
+    return json { // clang-format off
+        { ballastSolenoid.getPositionAsString(), ballastSolenoid.getStateAsString() },
+        { pistonSolenoid.getPositionAsString(), pistonSolenoid.getStateAsString() },
+        { ventSolenoid.getPositionAsString(), ventSolenoid.getStateAsString() },
+        { ballastPressureSensor.getPositionAsString(), ballastPressureSensor.getLastReading() },
+        { pistonPressureSensor.getPositionAsString(), pistonPressureSensor.getLastReading() },
+        { distanceSensor.getPositionAsString(), distanceSensor.getAverageReading() } 
+    }; // clang-format on
+}
+
+json Leg::getLastStateWithAverageReadingsAsJson() const noexcept
+{
+    return json { // clang-format off
+        { ballastSolenoid.getPositionAsString(), ballastSolenoid.getStateAsString() },
+        { pistonSolenoid.getPositionAsString(), pistonSolenoid.getStateAsString() },
+        { ventSolenoid.getPositionAsString(), ventSolenoid.getStateAsString() },
+        { ballastPressureSensor.getPositionAsString(), ballastPressureSensor.getAverageReading() },
+        { pistonPressureSensor.getPositionAsString(), pistonPressureSensor.getAverageReading() },
+        { distanceSensor.getPositionAsString(), distanceSensor.getAverageReading() } 
     }; // clang-format on
 }
 
