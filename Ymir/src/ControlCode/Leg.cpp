@@ -52,7 +52,7 @@ double DistanceSensor::getReading()
 
     // Convert to inches
     DBG(double distanceIn = distanceCm * CM_TO_INCH;)
-    Prints the distance in the Serial Monitor
+    // Prints the distance in the Serial Monitor
     DBG(Serial.print("Distance (cm): "));
     DBG(Serial.println(distanceCm));
     DBG(Serial.print("Distance (inch): "));
