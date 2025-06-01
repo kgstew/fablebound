@@ -18,7 +18,7 @@ export class PneumaticsPatternController {
     private currentPatternExecution: Promise<void> | null = null
     private patternStartTime: number = 0
     private inPatternTimeMarker: number = 0
-    private useDistance: boolean = false
+    private useDistance: boolean = true
 
     constructor(pneumaticsController: PneumaticsController) {
         this.pneumaticsController = pneumaticsController
