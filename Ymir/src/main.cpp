@@ -10,7 +10,7 @@
 using json = nlohmann::json;
 
 // uncomment to enable debug print statements to the serial monitor
-// #define DEBUG
+#define DEBUG
 
 #define USE_WIFI
 
@@ -111,8 +111,11 @@ void sendState()
 
 void processStateRequest(json& requestedState)
 {
+    DBG(Serial.println("processStateRequest");)
+
     for (Leg* leg : { &legStarboard, &legPort }) {
         std::string legPositionString = leg->getPositionAsString();
+        DBG(Serial.printf("legPositionString: %s\n", legPositionString.c_str());)
 
         if (requestedState.contains(legPositionString)) {
             // update solenoid states
@@ -121,7 +124,9 @@ void processStateRequest(json& requestedState)
                 std::string solenoidPositionString = solenoid.getPositionAsString();
 
                 if (requestedState[legPositionString].contains(solenoidPositionString)) {
-                    solenoid.setState(requestedState[legPositionString][solenoidPositionString]);
+                    std::string stateString = requestedState[legPositionString][solenoidPositionString];
+                    DBG(Serial.printf("stateString: %s\n", stateString.c_str());)
+                    solenoid.setState(stateString);
                 }
             }
         }

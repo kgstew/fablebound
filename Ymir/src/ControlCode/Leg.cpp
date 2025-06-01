@@ -1,7 +1,7 @@
 #include "Leg.h"
 
 // uncomment to enable debug print statements to the serial monitor
-// #define DEBUG
+#define DEBUG
 
 // debug macro
 #ifdef DEBUG
@@ -41,7 +41,7 @@ double DistanceSensor::getReading()
     // Reads the echoPin, returns the sound wave travel time in microseconds
     // Timeout is 50 ms; assumes max 20 Hz sample rate (50 ms sample delta)
     constexpr unsigned long timeout = 50000;
-    auto timeDelta = pulseIn(echoPin, HIGH, 50000);
+    auto timeDelta = pulseIn(echoPin, HIGH, timeout);
     double distanceCm = 0.0;
 
     if (timeDelta > 0) {
@@ -52,7 +52,7 @@ double DistanceSensor::getReading()
 
     // Convert to inches
     DBG(double distanceIn = distanceCm * CM_TO_INCH;)
-    // Prints the distance in the Serial Monitor
+    Prints the distance in the Serial Monitor
     DBG(Serial.print("Distance (cm): "));
     DBG(Serial.println(distanceCm));
     DBG(Serial.print("Distance (inch): "));
@@ -175,10 +175,12 @@ void Solenoid::setState(Solenoid::State newState)
 
 void Solenoid::setState(std::string& newState)
 {
-    if (newState == "open") {
+    DBG(Serial.printf("setState (string): %s\n", newState.c_str());)
+
+    if (newState == std::string { "open" }) {
         writeState(Solenoid::State::open);
         state = Solenoid::State::open;
-    } else if (newState == "closed") {
+    } else if (newState == std::string { "closed" }) {
         writeState(Solenoid::State::closed);
         state = Solenoid::State::closed;
     } else {
@@ -244,6 +246,7 @@ std::string Solenoid::getStateAsString() const noexcept
 
 void Solenoid::writeState(Solenoid::State state)
 {
+    DBG(Serial.printf("Solenoid::writeState: %i\n", state == defaultState ? "LOW" : "HIGH" ));
     assert((state == Solenoid::State::open) || (state == Solenoid::State::closed));
     digitalWrite(pin, state == defaultState ? LOW : HIGH);
 }
