@@ -592,13 +592,13 @@ export class PneumaticsController {
             this.systemState[legAssembly].pistonPressurePsi >=
             this.maxPistonPressure
         ) {
-            this.command[legAssembly]!.ballastToPistonValve = 'closed'
+            ;(this.command[legAssembly] ??= {}).ballastToPistonValve = 'closed'
         }
         if (
             this.systemState[legAssembly].ballastPressurePsi >=
             this.ballastTankMaxPressure
         ) {
-            this.command[legAssembly]!.ballastIntakeValve = 'closed'
+            ;(this.command[legAssembly] ??= {}).ballastIntakeValve = 'closed'
         }
     }
 
