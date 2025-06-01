@@ -48,8 +48,18 @@ export class PneumaticsPatternController {
                 minPistonPressure: 0,
             },
             main: async (controller, shouldStop) => {
-                this.pneumaticsController.setInitialZeroDistance()
                 if (shouldStop()) return
+
+                await controller.setMovementTarget('bowStarboard', 0, 'percent')
+                await controller.setMovementTarget(
+                    'sternStarboard',
+                    0,
+                    'percent'
+                )
+                await controller.setMovementTarget('bowPort', 0, 'percent')
+                await controller.setMovementTarget('sternPort', 0, 'percent')
+                await this.sleep(randomInt(3000), shouldStop)
+                this.pneumaticsController.setInitialZeroDistance()
                 await controller.setMovementTarget(
                     'bowStarboard',
                     100,
@@ -73,8 +83,9 @@ export class PneumaticsPatternController {
                 )
                 await controller.setMovementTarget('bowPort', 0, 'percent')
                 await controller.setMovementTarget('sternPort', 0, 'percent')
-                await this.sleep(randomInt(2000, 3000), shouldStop)
+                await this.sleep(randomInt(3000), shouldStop)
                 if (shouldStop()) return
+                console.log('Distance calibration complete')
             },
         }),
             this.patterns.set('inPort', {
