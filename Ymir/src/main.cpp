@@ -64,7 +64,7 @@ Leg legStarboard {
     23, // vent pin
     34, // ballast pressure sensor pin
     35, // piston pressure sensor pin
-    5, // ultrasonic trigger pin
+    16, // ultrasonic trigger pin
     39 // ultrasonic echo pin
 };
 
@@ -75,7 +75,7 @@ Leg legPort {
     19, // vent pin
     32, // ballast pressure sensor pin
     33, // piston pressure sensor pin
-    16, // ultrasonic trigger pin
+    5, // ultrasonic trigger pin
     36 // ultrasonic echo pin
 };
 
