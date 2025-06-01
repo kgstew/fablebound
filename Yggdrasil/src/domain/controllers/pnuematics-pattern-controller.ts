@@ -809,8 +809,8 @@ export class PneumaticsPatternController {
                 return
             await this.sleep(randomInt(1200, 2500), shouldStop)
         } else {
-            await controller.setMovementTarget('bowPort', 75, 'percent')
-            await controller.setMovementTarget('bowStarboard', 100, 'percent')
+            await this.setTarget(controller, 'bowPort', 75)
+            await this.setTarget(controller, 'bowStarboard', 100)
             if (shouldStop()) return
             if (Date.now() - this.patternStartTime > this.inPatternTimeMarker)
                 return
@@ -819,15 +819,15 @@ export class PneumaticsPatternController {
 
         //raise the stern
         if (Math.random() < 0.5) {
-            await controller.setMovementTarget('sternPort', 100, 'percent')
-            await controller.setMovementTarget('sternStarboard', 75, 'percent')
+            await this.setTarget(controller, 'sternPort', 100)
+            await this.setTarget(controller, 'sternStarboard', 75)
             if (shouldStop()) return
             if (Date.now() - this.patternStartTime > this.inPatternTimeMarker)
                 return
             await this.sleep(randomInt(1200, 2500), shouldStop)
         } else {
-            await controller.setMovementTarget('sternPort', 75, 'percent')
-            await controller.setMovementTarget('sternStarboard', 100, 'percent')
+            await this.setTarget(controller, 'sternPort', 75)
+            await this.setTarget(controller, 'sternStarboard', 100)
             if (shouldStop()) return
             if (Date.now() - this.patternStartTime > this.inPatternTimeMarker)
                 return
@@ -836,15 +836,15 @@ export class PneumaticsPatternController {
 
         //drop the bow
         if (Math.random() < 0.5) {
-            await controller.setMovementTarget('sternPort', 0, 'percent')
-            await controller.setMovementTarget('sternStarboard', 25, 'percent')
+            await this.setTarget(controller, 'sternPort', 0)
+            await this.setTarget(controller, 'sternStarboard', 25)
             if (shouldStop()) return
             if (Date.now() - this.patternStartTime > this.inPatternTimeMarker)
                 return
             await this.sleep(randomInt(1200, 2500), shouldStop)
         } else {
-            await controller.setMovementTarget('sternPort', 25, 'percent')
-            await controller.setMovementTarget('sternStarboard', 0, 'percent')
+            await this.setTarget(controller, 'sternPort', 25)
+            await this.setTarget(controller, 'sternStarboard', 0)
             if (shouldStop()) return
             if (Date.now() - this.patternStartTime > this.inPatternTimeMarker)
                 return
@@ -867,46 +867,18 @@ export class PneumaticsPatternController {
 
     private async allPistonsToLowestPoint(controller: PneumaticsController) {
         const lowestPressure = 5 // Set all pistons to 5% pressure
-        await controller.setMovementTarget('bowPort', lowestPressure, 'percent')
-        await controller.setMovementTarget(
-            'bowStarboard',
-            lowestPressure,
-            'percent'
-        )
-        await controller.setMovementTarget(
-            'sternPort',
-            lowestPressure,
-            'percent'
-        )
-        await controller.setMovementTarget(
-            'sternStarboard',
-            lowestPressure,
-            'percent'
-        )
+        await this.setTarget(controller, 'bowPort', lowestPressure)
+        await this.setTarget(controller, 'bowStarboard', lowestPressure)
+        await this.setTarget(controller, 'sternPort', lowestPressure)
+        await this.setTarget(controller, 'sternStarboard', lowestPressure)
     }
 
     private async allPistonsToHighestPoint(controller: PneumaticsController) {
-        const highestPressure = 95 // Set all pistons to 5% pressure
-        await controller.setMovementTarget(
-            'bowPort',
-            highestPressure,
-            'percent'
-        )
-        await controller.setMovementTarget(
-            'bowStarboard',
-            highestPressure,
-            'percent'
-        )
-        await controller.setMovementTarget(
-            'sternPort',
-            highestPressure,
-            'percent'
-        )
-        await controller.setMovementTarget(
-            'sternStarboard',
-            highestPressure,
-            'percent'
-        )
+        const highestPressure = 95 // Set all pistons to 95% pressure
+        await this.setTarget(controller, 'bowPort', highestPressure)
+        await this.setTarget(controller, 'bowStarboard', highestPressure)
+        await this.setTarget(controller, 'sternPort', highestPressure)
+        await this.setTarget(controller, 'sternStarboard', highestPressure)
     }
 
     public async setPattern(patternName: PneumaticsCommandPatternName) {
