@@ -388,6 +388,7 @@ export class PneumaticsController {
         } else {
             this.updateSystemStateFromReadings()
         }
+        //Check if this still runs after ventAll or closeAllValves commands
         if (
             this.lastCommand !== 'ventAll' &&
             this.lastCommand !== 'closeAllValves'
