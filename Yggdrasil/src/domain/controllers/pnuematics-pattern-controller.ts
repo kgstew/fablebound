@@ -87,30 +87,31 @@ export class PneumaticsPatternController {
                 if (shouldStop()) return
                 console.log('Distance calibration complete')
             },
-        }),
-            this.patterns.set('inPort', {
-                name: 'inPort',
-                pressureSettings: {
-                    ballastTankMaxPressure: 34,
-                    maxPistonPressure: 25,
-                    minPistonPressure: 22,
-                },
-                main: async (controller, shouldStop) => {
-                    if (shouldStop()) return
-                    await this.setTarget(controller, 'bowStarboard', 100)
-                    await this.setTarget(controller, 'sternStarboard', 100)
-                    await this.setTarget(controller, 'bowPort', 0)
-                    await this.setTarget(controller, 'sternPort', 0)
-                    await this.sleep(randomInt(2000, 3000), shouldStop)
-                    if (shouldStop()) return
-                    await this.setTarget(controller, 'bowStarboard', 0)
-                    await this.setTarget(controller, 'sternStarboard', 0)
-                    await this.setTarget(controller, 'bowPort', 100)
-                    await this.setTarget(controller, 'sternPort', 100)
-                    await this.sleep(randomInt(2000, 3000), shouldStop)
-                    if (shouldStop()) return
-                },
-            })
+        })
+
+        this.patterns.set('inPort', {
+            name: 'inPort',
+            pressureSettings: {
+                ballastTankMaxPressure: 34,
+                maxPistonPressure: 25,
+                minPistonPressure: 22,
+            },
+            main: async (controller, shouldStop) => {
+                if (shouldStop()) return
+                await this.setTarget(controller, 'bowStarboard', 100)
+                await this.setTarget(controller, 'sternStarboard', 100)
+                await this.setTarget(controller, 'bowPort', 0)
+                await this.setTarget(controller, 'sternPort', 0)
+                await this.sleep(randomInt(2000, 3000), shouldStop)
+                if (shouldStop()) return
+                await this.setTarget(controller, 'bowStarboard', 0)
+                await this.setTarget(controller, 'sternStarboard', 0)
+                await this.setTarget(controller, 'bowPort', 100)
+                await this.setTarget(controller, 'sternPort', 100)
+                await this.sleep(randomInt(2000, 3000), shouldStop)
+                if (shouldStop()) return
+            },
+        })
         this.patterns.set('setOutOnAdventure', {
             name: 'setOutOnAdventure',
             pressureSettings: {

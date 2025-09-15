@@ -388,6 +388,7 @@ export class PneumaticsController {
         } else {
             this.updateSystemStateFromReadings()
         }
+        //Check if this still runs after ventAll or closeAllValves commands
         if (
             this.lastCommand !== 'ventAll' &&
             this.lastCommand !== 'closeAllValves'
@@ -399,12 +400,12 @@ export class PneumaticsController {
             // Discharge the command if any changes were made
             if (this.command && Object.keys(this.command).length > 2) {
                 // Check if command has more than just type and sendTime
-                this.dischargeCommand()
+                this.executeCommand()
             }
         }
     }
 
-    public dischargeCommand(): PneumaticsCommandGranularCombined {
+    public executeCommand(): PneumaticsCommandGranularCombined {
         const outgoingCommand = this.splitOutgoingCommand()
         if ('esp32bow' in webSocketConnections) {
             // @ts-expect-error Websocket type mismatch
@@ -602,6 +603,26 @@ export class PneumaticsController {
         }
     }
 
+    // We should probably use this syntax instead of the one above test first
+    //     private preventOverfillForLegAssembly(
+    //     legAssembly: 'bowStarboard' | 'bowPort' | 'sternPort' | 'sternStarboard'
+    // ) {
+    //     // Ensure the command object exists for this leg assembly
+    //     if (!this.command[legAssembly]) {
+    //         this.command[legAssembly] = {};
+    //     }
+
+    //     // Close piston valve if pressure is too high
+    //     if (this.systemState[legAssembly].pistonPressurePsi >= this.maxPistonPressure) {
+    //         this.command[legAssembly].ballastToPistonValve = 'closed';
+    //     }
+
+    //     // Close intake valve if ballast pressure is too high
+    //     if (this.systemState[legAssembly].ballastPressurePsi >= this.ballastTankMaxPressure) {
+    //         this.command[legAssembly].ballastIntakeValve = 'closed';
+    //     }
+    // }
+
     public handleCommandGranular(
         commandMessage: FrontendCommandGranularMessage
     ): PneumaticsCommandGranular | PneumaticsCommandGranularCombined {
@@ -609,7 +630,7 @@ export class PneumaticsController {
         this.buildCommandGranular(commandMessage)
         this.opportunisticBallastFill()
         this.preventOverfill()
-        return this.dischargeCommand()
+        return this.executeCommand()
     }
 
     public handleCommand(
@@ -625,7 +646,7 @@ export class PneumaticsController {
             // this.keepPistonsALilFull()
         }
         this.preventOverfill()
-        return this.dischargeCommand()
+        return this.executeCommand()
     }
 
     public buildCommandGranular(
